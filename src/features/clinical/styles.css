@@ -1,0 +1,62 @@
+/* Admin clinical surfaces share the established theme and remain usable without animation. */
+.clinical-layout { display: grid; gap: 1.5rem; }
+.clinical-panel { background: var(--color-background); border: 1px solid var(--color-border); border-radius: 1rem; padding: clamp(1rem, 3vw, 1.75rem); min-width: 0; }
+.clinical-panel h2 { font-size: 1.25rem; font-weight: 700; margin-bottom: .75rem; }
+.clinical-panel p { color: var(--color-textSecondary); margin-bottom: .75rem; }
+.clinical-fields { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
+.clinical-field { display: flex; flex-direction: column; gap: .4rem; margin-block: .65rem; font-size: .875rem; font-weight: 600; min-width: 0; }
+.clinical-field :is(input, textarea, select), .clinical-select { width: 100%; min-height: 44px; border: 1px solid var(--color-border); border-radius: .5rem; padding: .65rem; background: var(--color-background); color: var(--color-text); font: inherit; font-size: 1rem; }
+.clinical-field textarea { resize: vertical; }
+.clinical-actions { display: flex; flex-wrap: wrap; gap: .65rem; margin-block: 1rem; align-items: center; }
+.clinical-button, .clinical-actions button, .clinical-panel > button { min-height: 44px; border: 1px solid var(--color-border); border-radius: .5rem; padding: .65rem 1rem; background: var(--color-primary); color: var(--color-background); cursor: pointer; font-weight: 600; }
+.clinical-actions button:disabled { opacity: .6; cursor: wait; }
+.clinical-panel :is(input, textarea, select, button, a):focus-visible { outline: 3px solid var(--color-primary); outline-offset: 3px; }
+.clinical-list { display: grid; gap: 1rem; list-style: none; padding: 0; }
+.clinical-list > li { padding: 1rem; border: 1px solid var(--color-border); border-radius: .75rem; overflow-wrap: anywhere; }
+.clinical-list h3 { font-weight: 700; }
+.clinical-details { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
+.clinical-details dt { color: var(--color-textSecondary); font-size: .85rem; }
+.clinical-details dd { overflow-wrap: anywhere; white-space: pre-wrap; }
+.clinical-error { color: var(--color-error); margin-block: .75rem; }
+.clinical-check { display: flex; align-items: flex-start; gap: .75rem; padding-block: .75rem; min-height: 44px; }
+.clinical-check input { width: 1.25rem; height: 1.25rem; flex-shrink: 0; margin-top: .15rem; }
+.clinical-booking { max-width: 58rem; margin-inline: auto; padding: 2rem 1rem 4rem; }
+.clinical-booking h1 { font-size: clamp(2rem, 6vw, 3.5rem); font-weight: 700; }
+.clinical-profile-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); }
+
+/* Grouped admin forms keep labels and guidance readable at every viewport size. */
+.physician-editor { max-width: 76rem; }
+.clinical-form-header { padding-bottom: 1.25rem; border-bottom: 1px solid var(--color-border); }
+.clinical-form-header p, .clinical-form-section > p { max-width: 65ch; font-size: .9rem; line-height: 1.6; }
+.clinical-form-section { padding-block: 1.5rem; border-bottom: 1px solid var(--color-border); }
+.clinical-form-section h3, .physician-photo h4 { font-weight: 700; margin-bottom: .35rem; }
+.physician-editor .clinical-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem 1.5rem; }
+.clinical-field-wide { grid-column: 1 / -1; }
+.clinical-field-tag { color: var(--color-textSecondary); font-size: .75rem; font-weight: 400; margin-inline-start: .35rem; }
+.clinical-field small, .clinical-setting small { display: block; color: var(--color-textSecondary); font-size: .8rem; line-height: 1.5; font-weight: 400; }
+.clinical-field :is(input, textarea)::placeholder { color: var(--color-textSecondary); opacity: .85; font-weight: 400; }
+.clinical-field :is(input, textarea, select) { transition: border-color .15s ease, box-shadow .15s ease; }
+.clinical-field :is(input, textarea, select):hover { border-color: var(--color-primary); }
+.clinical-field [aria-invalid="true"] { border-color: var(--color-error); }
+.clinical-field:has([aria-invalid="true"]) small { color: var(--color-error); }
+.clinical-field input[type="file"] { padding: .5rem; font-size: .85rem; }
+.clinical-field input[type="file"]::file-selector-button { min-height: 36px; margin-inline-end: .75rem; border: 0; border-radius: .35rem; padding: .4rem .75rem; background: var(--color-surfaceTint); color: var(--color-primary); cursor: pointer; font-weight: 600; }
+.physician-photo { display: flex; gap: 1.5rem; padding: 1.25rem; margin-top: 1rem; background: var(--color-surfaceTint); border: 1px solid var(--color-border); border-radius: .75rem; align-items: flex-start; }
+.physician-photo-preview { width: 9rem; height: 9rem; flex: 0 0 9rem; border: 1px dashed var(--color-border); border-radius: .75rem; overflow: hidden; background: var(--color-background); display: grid; place-items: center; text-align: center; padding: .25rem; color: var(--color-textSecondary); font-size: .8rem; }
+.physician-photo-preview img { width: 100%; height: 100%; object-fit: cover; border-radius: .5rem; }
+.physician-photo-controls { flex: 1; min-width: 0; }
+.clinical-segments { display: inline-flex; flex-wrap: wrap; gap: .25rem; padding: .25rem; border: 1px solid var(--color-border); background: var(--color-background); border-radius: .6rem; }
+.clinical-segments button { min-height: 44px; padding: .5rem .9rem; border-radius: .4rem; font-weight: 600; font-size: .85rem; cursor: pointer; }
+.clinical-segments button[aria-pressed="true"] { background: var(--color-primary); color: var(--color-background); }
+.clinical-text-button { color: var(--color-primary); text-decoration: underline; text-underline-offset: .2em; min-height: 44px; cursor: pointer; font-size: .85rem; }
+.clinical-setting { padding: 1.25rem; margin-block: 1.5rem; border: 1px solid var(--color-border); border-radius: .75rem; background: var(--color-surfaceTint); }
+.clinical-save-help { font-size: .85rem; }
+.clinical-form-actions { padding-top: 1rem; border-top: 1px solid var(--color-border); }
+.clinical-actions button.clinical-secondary { background: var(--color-background); color: var(--color-primary); }
+@media (max-width: 640px) {
+  .physician-editor .clinical-fields { grid-template-columns: minmax(0, 1fr); }
+  .physician-photo { flex-direction: column; padding: 1rem; }
+  .physician-photo-controls { width: 100%; }
+  .clinical-form-actions button { flex: 1 1 10rem; }
+}
+@media (prefers-reduced-motion: reduce) { .clinical-field :is(input, textarea, select) { transition: none; } }

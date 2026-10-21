@@ -1,0 +1,1 @@
+ALTER TABLE "emcrown_admin"."sessions" ADD CONSTRAINT "session_membership" FOREIGN KEY ("organisation_id","user_id") REFERENCES "emcrown_admin"."memberships"("organisation_id","user_id") ON DELETE no action ON UPDATE no action;

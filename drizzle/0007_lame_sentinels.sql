@@ -1,0 +1,1 @@
+ALTER TABLE "emcrown_admin"."cms_media" ADD COLUMN "storage_path" text;

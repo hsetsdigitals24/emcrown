@@ -1,0 +1,31 @@
+// Shared editable interface copy: all demo, consent, validation and result text lives here.
+export const BOOKING_COPY = {
+  title: "Book appointment", headline: "Your next step.", highlightedPhrase: "At your pace.",
+  introduction: "Explore the appointment flow with fictional details and mock availability.",
+  demoTitle: "Demo booking only", demoNotice: "No appointment will be created. Use fictional contact details. Nothing is sent, saved or shared, and no emails or SMS messages are delivered.",
+  noScript: "This interactive demo needs JavaScript. You can call the practice instead; contact details are provisional.",
+  progressLabel: "Booking steps", stepLabel: "Step", ofLabel: "of", back: "Back", next: "Continue", review: "Review demo booking",
+  confirm: "Confirm demo booking", confirming: "Completing demo…", edit: "Edit details", editAppointment: "Change visit or time", reset: "Start a new demo", retry: "Try again",
+  steps: [
+    { label: "Visit", headline: "What brings you", highlightedPhrase: "to us?", body: "Choose an appointment type. These are demonstration options, not confirmed practice services." },
+    { label: "Physician", headline: "Who would you like", highlightedPhrase: "to see?", body: "Choose a placeholder physician or let the demo show the first available option." },
+    { label: "Date & time", headline: "Find a time", highlightedPhrase: "that fits.", body: "Select a date and a mock time. This is not live availability." },
+    { label: "Details & review", headline: "A few details.", highlightedPhrase: "Then a review.", body: "Enter fictional details, review your choices, and complete the demo within this step." },
+  ],
+  firstAvailable: "First available", firstAvailableDescription: "Show mock times across eligible placeholder physicians.",
+  location: "Practice location [provisional]", dates: "Choose a demo date", times: "Choose a demo time", timeZone: "All times shown in", mockAvailability: "Mock availability",
+  chooseDate: "Choose a date to view demo times.", loading: "Loading mock times…", unavailable: "No demo times are available for this selection. Choose another date or physician.",
+  loadError: "The demo availability could not be displayed. Try again or choose another date.", unavailableBadge: "No demo times", errorBadge: "Demo error state",
+  name: "Your name", phone: "Phone number", email: "Email address", dateOfBirth: "Date of birth", reason: "Brief reason for visit",
+  reasonHint: "Use fictional, general wording only. Do not enter diagnoses, insurance IDs or medical history.",
+  smsConsent: "I opt in to SMS appointment reminders in this demo. No messages will be sent.",
+  emailConsent: "I opt in to email appointment reminders in this demo. No messages will be sent.",
+  consentHint: "Optional. Both choices start unchecked. Declining does not stop the demo.", yes: "Opted in [demo only]", no: "Not opted in",
+  errorSummary: "Please check the highlighted fields.",
+  errors: { typeRequired: "Choose an appointment type.", providerRequired: "Choose an eligible physician or First available.", dateRequired: "Choose a demo date.", slotRequired: "Choose an available demo time.", nameRequired: "Enter a fictional name within the allowed length.", phoneInvalid: "Enter a valid fictional phone number with 10–15 digits.", emailInvalid: "Enter a valid fictional email address.", birthInvalid: "Enter a valid date of birth that is not in the future.", reasonRequired: "Enter a short fictional reason within the allowed length.", consentInvalid: "Check your notification choices." },
+  reviewTitle: "Review your", reviewHighlight: "demo choices.", reviewBody: "Check the fictional details below. Confirming completes this preview only; it does not reserve a time.",
+  selectionType: "Visit type", selectionProvider: "Physician", selectionDate: "Date", selectionTime: "Time", selectionLocation: "Location [provisional]", selectionSms: "SMS choice", selectionEmail: "Email choice",
+  completionTitle: "Demo complete.", completionHighlight: "No appointment booked.", completionBody: "Your preview is complete. No appointment was created, no time was reserved, and no notifications were sent. Your fictional contact details have been cleared from this form.",
+  confirmationError: "The demo could not be completed. No appointment was created. Try again or edit your choices.",
+};
+export type BookingCopy = typeof BOOKING_COPY;

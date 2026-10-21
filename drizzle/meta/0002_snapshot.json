@@ -1,0 +1,686 @@
+{
+  "id": "1f2bac39-0d4c-4c15-80e4-5776fe4a3bee",
+  "prevId": "45cbdfcd-7dd6-4307-acb1-39eca5ecfabe",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "emcrown_admin.audit_events": {
+      "name": "audit_events",
+      "schema": "emcrown_admin",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "organisation_id": {
+          "name": "organisation_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "actor_id": {
+          "name": "actor_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "actor_role": {
+          "name": "actor_role",
+          "type": "role",
+          "typeSchema": "emcrown_admin",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "action": {
+          "name": "action",
+          "type": "audit_action",
+          "typeSchema": "emcrown_admin",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "outcome": {
+          "name": "outcome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "audit_organisation_time": {
+          "name": "audit_organisation_time",
+          "columns": [
+            {
+              "expression": "organisation_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "audit_events_organisation_id_organisations_id_fk": {
+          "name": "audit_events_organisation_id_organisations_id_fk",
+          "tableFrom": "audit_events",
+          "columnsFrom": [
+            "organisation_id"
+          ],
+          "tableTo": "organisations",
+          "schemaTo": "emcrown_admin",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "audit_events_actor_id_users_id_fk": {
+          "name": "audit_events_actor_id_users_id_fk",
+          "tableFrom": "audit_events",
+          "columnsFrom": [
+            "actor_id"
+          ],
+          "tableTo": "users",
+          "schemaTo": "emcrown_admin",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "audit_outcome": {
+          "name": "audit_outcome",
+          "value": "\"emcrown_admin\".\"audit_events\".\"outcome\" in ('success', 'failure', 'denied')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "emcrown_admin.mail_outbox": {
+      "name": "mail_outbox",
+      "schema": "emcrown_admin",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "payload": {
+          "name": "payload",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "attempts": {
+          "name": "attempts",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "available_at": {
+          "name": "available_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "mail_outbox_user_id_users_id_fk": {
+          "name": "mail_outbox_user_id_users_id_fk",
+          "tableFrom": "mail_outbox",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "tableTo": "users",
+          "schemaTo": "emcrown_admin",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "one_reset_mail_per_user": {
+          "name": "one_reset_mail_per_user",
+          "columns": [
+            "user_id"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "mail_attempts": {
+          "name": "mail_attempts",
+          "value": "\"emcrown_admin\".\"mail_outbox\".\"attempts\" between 0 and 5"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "emcrown_admin.memberships": {
+      "name": "memberships",
+      "schema": "emcrown_admin",
+      "columns": {
+        "organisation_id": {
+          "name": "organisation_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "role",
+          "typeSchema": "emcrown_admin",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "active": {
+          "name": "active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "memberships_organisation_id_organisations_id_fk": {
+          "name": "memberships_organisation_id_organisations_id_fk",
+          "tableFrom": "memberships",
+          "columnsFrom": [
+            "organisation_id"
+          ],
+          "tableTo": "organisations",
+          "schemaTo": "emcrown_admin",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        },
+        "memberships_user_id_users_id_fk": {
+          "name": "memberships_user_id_users_id_fk",
+          "tableFrom": "memberships",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "tableTo": "users",
+          "schemaTo": "emcrown_admin",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "memberships_organisation_id_user_id_pk": {
+          "name": "memberships_organisation_id_user_id_pk",
+          "columns": [
+            "organisation_id",
+            "user_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "emcrown_admin.organisations": {
+      "name": "organisations",
+      "schema": "emcrown_admin",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "organisations_key_unique": {
+          "name": "organisations_key_unique",
+          "columns": [
+            "key"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "organisation_name_length": {
+          "name": "organisation_name_length",
+          "value": "length(\"emcrown_admin\".\"organisations\".\"name\") between 1 and 120"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "emcrown_admin.rate_limits": {
+      "name": "rate_limits",
+      "schema": "emcrown_admin",
+      "columns": {
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "attempts": {
+          "name": "attempts",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "positive_attempts": {
+          "name": "positive_attempts",
+          "value": "\"emcrown_admin\".\"rate_limits\".\"attempts\" > 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "emcrown_admin.reset_tokens": {
+      "name": "reset_tokens",
+      "schema": "emcrown_admin",
+      "columns": {
+        "token_hash": {
+          "name": "token_hash",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "reset_user": {
+          "name": "reset_user",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "reset_tokens_user_id_users_id_fk": {
+          "name": "reset_tokens_user_id_users_id_fk",
+          "tableFrom": "reset_tokens",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "tableTo": "users",
+          "schemaTo": "emcrown_admin",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "reset_hash_format": {
+          "name": "reset_hash_format",
+          "value": "\"emcrown_admin\".\"reset_tokens\".\"token_hash\" ~ '^[a-f0-9]{64}$'"
+        },
+        "reset_expiry": {
+          "name": "reset_expiry",
+          "value": "\"emcrown_admin\".\"reset_tokens\".\"expires_at\" > \"emcrown_admin\".\"reset_tokens\".\"created_at\""
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "emcrown_admin.sessions": {
+      "name": "sessions",
+      "schema": "emcrown_admin",
+      "columns": {
+        "token_hash": {
+          "name": "token_hash",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "organisation_id": {
+          "name": "organisation_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "stage": {
+          "name": "stage",
+          "type": "session_stage",
+          "typeSchema": "emcrown_admin",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "enrollment_secret": {
+          "name": "enrollment_secret",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "last_seen_at": {
+          "name": "last_seen_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "session_user": {
+          "name": "session_user",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "session_membership": {
+          "name": "session_membership",
+          "tableFrom": "sessions",
+          "columnsFrom": [
+            "organisation_id",
+            "user_id"
+          ],
+          "tableTo": "memberships",
+          "schemaTo": "emcrown_admin",
+          "columnsTo": [
+            "organisation_id",
+            "user_id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "session_hash_format": {
+          "name": "session_hash_format",
+          "value": "\"emcrown_admin\".\"sessions\".\"token_hash\" ~ '^[a-f0-9]{64}$'"
+        },
+        "session_expiry": {
+          "name": "session_expiry",
+          "value": "\"emcrown_admin\".\"sessions\".\"expires_at\" > \"emcrown_admin\".\"sessions\".\"created_at\""
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "emcrown_admin.users": {
+      "name": "users",
+      "schema": "emcrown_admin",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "password_hash": {
+          "name": "password_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "active": {
+          "name": "active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "must_change_password": {
+          "name": "must_change_password",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "mfa_secret": {
+          "name": "mfa_secret",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_mfa_step": {
+          "name": "last_mfa_step",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": -1
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "users_email_unique": {
+          "name": "users_email_unique",
+          "columns": [
+            "email"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "email_normalised": {
+          "name": "email_normalised",
+          "value": "\"emcrown_admin\".\"users\".\"email\" = lower(trim(\"emcrown_admin\".\"users\".\"email\")) and length(\"emcrown_admin\".\"users\".\"email\") <= 254 and \"emcrown_admin\".\"users\".\"email\" ~ '^[^[:space:]@]+@[^[:space:]@]+[.][^[:space:]@]+$'"
+        },
+        "password_hash_format": {
+          "name": "password_hash_format",
+          "value": "\"emcrown_admin\".\"users\".\"password_hash\" ~ '^scrypt:[a-f0-9]{32}:[a-f0-9]{128}$'"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "emcrown_admin.audit_action": {
+      "name": "audit_action",
+      "schema": "emcrown_admin",
+      "values": [
+        "organisation.seeded",
+        "auth.login",
+        "auth.logout",
+        "auth.password_changed",
+        "auth.reset_requested",
+        "auth.reset_completed",
+        "auth.reset_email",
+        "auth.mfa_enrolled",
+        "auth.mfa_verified",
+        "auth.rate_limited",
+        "portal.viewed",
+        "audit.viewed",
+        "access.denied"
+      ]
+    },
+    "emcrown_admin.role": {
+      "name": "role",
+      "schema": "emcrown_admin",
+      "values": [
+        "super_admin",
+        "admin",
+        "staff"
+      ]
+    },
+    "emcrown_admin.session_stage": {
+      "name": "session_stage",
+      "schema": "emcrown_admin",
+      "values": [
+        "password",
+        "enroll",
+        "mfa",
+        "full"
+      ]
+    }
+  },
+  "schemas": {
+    "emcrown_admin": "emcrown_admin"
+  },
+  "views": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

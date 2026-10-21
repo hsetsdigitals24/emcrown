@@ -1,0 +1,112 @@
+// Isolated local database integration: concurrency, encryption, permissions and notification lifecycle.
+/* eslint-disable @typescript-eslint/no-require-imports -- Existing server test harness. */
+const { assert, testUrl, db, migrate, sql, eq, tables, seedOrganisation, createSession, setSessionCookie, fs } = require("./auth-setup.cjs");
+const postgres = require("postgres"); const { randomBytes, randomUUID } = require("node:crypto");
+const { generateSecret } = require("otplib");
+const clinical = require("../src/lib/db/clinical.ts");
+Object.assign(process.env, { CLINICAL_ACTIVE_KEY:"test", CLINICAL_ENCRYPTION_KEYS:JSON.stringify({test:randomBytes(32).toString("hex")}), CLINICAL_TOKEN_KEY:randomBytes(32).toString("hex"), CLINICAL_STAFF_EMAIL:"staff@example.test" });
+const { unseal } = require("../src/features/clinical/encryption.ts");
+const { listPhysicians, writePhysician, publicPhysicians } = require("../src/features/physicians/repository.ts");
+const { writeSchedule } = require("../src/features/appointments/schedules.ts");
+const { availableSlots } = require("../src/features/appointments/availability.ts");
+const { reserveAppointment } = require("../src/features/appointments/booking.ts");
+const { listAppointments, changeAppointment } = require("../src/features/appointments/repository.ts");
+const { manageAppointment } = require("../src/features/appointments/manage.ts");
+const { practiceDate } = require("../src/features/booking/time.ts");
+const { clearSessionCookie } = require("../src/features/auth/session.ts");
+async function session(userId, organisationId) { const token=await db().transaction(tx=>createSession(tx,userId,organisationId,"full")); await setSessionCookie(token); return token; }
+async function prepare() {
+  const admin=postgres(testUrl,{ssl:{rejectUnauthorized:true,ca:process.env.DATABASE_CA_CERT},max:1});
+  const name=`emcrown_auth_test_clinical_${Date.now()}`;
+  await admin`create database ${admin(name)}`; await admin.end();
+  const url=new URL(testUrl);url.pathname=`/${name}`;process.env.DATABASE_URL=url.toString();
+  await migrate(db(),{migrationsFolder:"drizzle"});await seedOrganisation();
+  const [owner]=await db().select().from(tables.users);const [membership]=await db().select().from(tables.memberships);
+  await db().update(tables.users).set({mustChangePassword:false,mfaSecret:require("../src/features/auth/crypto.ts").encrypt(generateSecret())}).where(eq(tables.users.id,owner.id));
+  return {owner,org:membership.organisationId};
+}
+async function run() {
+  const {owner,org}=await prepare(); let cookie=await session(owner.id,org);
+  await assert.rejects(require("../src/features/clinical/runtime.ts").assertClinicalRuntime(), /least-privilege/, "Owner credentials cannot enable live delivery");
+  const profile={fullName:"Example Test Physician",title:"[TEST TITLE]",email:"physician@example.test",phone:"2025550101",bio:"Fictional biography.",credentials:"[TEST CREDENTIAL]",specialties:"[TEST SPECIALTY]",languages:"English",photo:"",slug:"example-test-physician",active:true};
+  const added=await writePhysician({version:0,profile,operation:"save"});assert.ok(added.ok);const physicianId=added.data.id;
+  assert.equal((await publicPhysicians()).length,0);
+  let [stored]=await db().select().from(clinical.physicians);assert.ok(!stored.profile.includes(profile.email));assert.ok(!stored.profile.includes(profile.fullName));
+  assert.ok((await writePhysician({id:physicianId,version:1,profile,operation:"publish"})).ok);
+  const publicRecord=(await publicPhysicians())[0];assert.equal(publicRecord.fullName,profile.fullName);assert.equal(publicRecord.email,undefined);assert.equal(publicRecord.phone,undefined);
+  assert.equal((await writePhysician({id:physicianId,version:1,profile,operation:"save"})).code,"conflict");
+  const future=new Date(Date.now()+3*86400000);const day=practiceDate(future.toISOString(),"America/New_York");
+  const definition={physicianId,locationId:"stuart",typeId:"new-patient",weekday:new Date(`${day}T12:00:00Z`).getUTCDay(),opens:"09:00",closes:"17:00",intervalMinutes:15,durationMinutes:30,bufferMinutes:10,leadHours:0,blockedDates:[],enabled:true};
+  assert.ok((await writeSchedule({version:0,definition})).ok);
+  const slots=await db().transaction(tx=>availableSlots(tx,org,day,1));assert.ok(slots.length>3);
+  const slot=(({physicianId,locationId,typeId,startUtc})=>({physicianId,locationId,typeId,startUtc}))(slots[0]);
+  const patient={name:"Fictional Visitor",email:"visitor@example.test",phone:"2025550110",dateOfBirth:"2000-01-15",reason:"Fictional test visit",smsConsent:false,emailConsent:true,privacyConsent:true,consentVersion:"2026-10-20"};
+  const input={slot,patient,idempotencyKey:randomUUID(),captcha:"test-only-not-a-real-token"};
+  const competing={...input,idempotencyKey:randomUUID()};
+  const raced=await Promise.all([reserveAppointment(input),reserveAppointment(competing)]);
+  assert.equal(raced.filter(value=>value.ok).length,1,"Only one concurrent slot reservation can succeed");
+  assert.ok((await reserveAppointment(raced[0].ok?input:competing)).ok,"Same submission is idempotent");
+  const winner = raced[0].ok ? input : competing;
+  assert.equal((await reserveAppointment({...winner,slot:{...winner.slot,startUtc:slots[1].startUtc}})).code,"conflict","Idempotency cannot silently change the requested time");
+  let rows=await db().select().from(clinical.appointments);assert.equal(rows.length,1);let appointment=rows[0];
+  assert.ok(!appointment.patient.includes(patient.name));assert.ok(!appointment.patient.includes(patient.reason));
+  assert.ok((await listAppointments({})).data.appointments.some(item=>item.patient.name===patient.name));
+  await assert.rejects(db().insert(clinical.appointments).values({...appointment,id:randomUUID(),idempotencyKey:randomUUID(),startAt:new Date(appointment.startAt.getTime()+15*60000),endAt:new Date(appointment.endAt.getTime()+15*60000),occupiedUntil:new Date(appointment.occupiedUntil.getTime()+15*60000)}),"Database itself must reject overlapping ranges");
+  const documents = require("../src/features/physicians/documents.ts");
+  const cvStore = require("../src/features/physicians/cv-storage.ts"); const objects = new Map();
+  cvStore.cvObject = async (path, method, bytes) => {
+    if (method === "POST") { objects.set(path, bytes); return new Response(null); }
+    if (method === "DELETE") { objects.delete(path); return new Response(null); }
+    return new Response(objects.get(path));
+  };
+  const source = fs.readFileSync("/tmp/emcrown-clinical-cv.docx");
+  const uploaded = await documents.saveDocument(physicianId, new File([source], "fictional-cv.docx"), "Fictional extracted text");
+  assert.ok(uploaded.ok);
+  const [storedDocument] = await db().select().from(clinical.physicianDocuments);
+  assert.ok(!storedDocument.metadata.includes("fictional-cv.docx"));
+  assert.ok(!objects.get(storedDocument.objectPath).toString().includes("Fictional extracted text"));
+  assert.deepEqual((await documents.downloadDocument(uploaded.data.id)).bytes, source);
+  const events=await db().select().from(clinical.appointmentEvents);assert.ok(events.some(event=>event.action==="appointments.viewed"&&event.actorId===owner.id&&event.appointmentId===appointment.id));
+  await assert.rejects(db().execute(sql`update emcrown_admin.appointment_events set action = 'changed'`));
+  const [other]=await db().insert(tables.organisations).values({name:"Other fictional organisation",key:"clinical-other"}).returning();
+  await db().insert(tables.memberships).values({userId:owner.id,organisationId:other.id,role:"staff"});await session(owner.id,other.id);
+  assert.equal((await listAppointments({})).data.appointments.length,0);
+  assert.equal(await documents.downloadDocument(uploaded.data.id),null,"Cross-tenant CV access is rejected");
+  assert.equal((await changeAppointment({id:appointment.id,version:1,operation:"cancel"})).code,"conflict");
+  assert.equal((await writePhysician({version:0,profile:{...profile,slug:"other"},operation:"save"})).code,"denied");
+  await clearSessionCookie();assert.equal((await listAppointments({})).code,"denied");
+  assert.equal(await documents.downloadDocument(uploaded.data.id),null);
+  cookie=await session(owner.id,org);
+  assert.equal((await changeAppointment({id:appointment.id,version:1,operation:"complete"})).code,"invalid");
+  const [message]=await db().select().from(clinical.appointmentMessages).where(eq(clinical.appointmentMessages.channel,"email"));
+  const payload=JSON.parse(unseal(message.payload,org,message.id,"message"));assert.ok(!payload.text.includes(patient.name));assert.ok(!payload.text.includes(patient.reason));
+  const token=payload.text.split("#").at(-1).trim();assert.ok((await manageAppointment({token,operation:"view"})).ok);
+  assert.ok((await changeAppointment({id:appointment.id,version:1,operation:"confirm"})).ok);
+  assert.equal((await manageAppointment({token,operation:"cancel"})).code,"denied","Confirm rotates manage links");
+  assert.equal((await changeAppointment({id:appointment.id,version:1,operation:"cancel"})).code,"conflict");
+  let current=(await db().select().from(clinical.appointments))[0];
+  const newSlots=await db().transaction(tx=>availableSlots(tx,org,day,1,appointment.id));
+  const target=newSlots.find(item=>new Date(item.startUtc)>current.occupiedUntil);assert.ok(target);
+  assert.ok((await changeAppointment({id:current.id,version:current.version,operation:"rebook",slot:{physicianId,locationId:target.locationId,typeId:target.typeId,startUtc:target.startUtc}})).ok);
+  current=(await db().select().from(clinical.appointments))[0];assert.equal(current.startAt.toISOString(),target.startUtc);
+  const oldMessages=await db().select().from(clinical.appointmentMessages);assert.ok(oldMessages.filter(item=>item.appointmentVersion<current.version).every(item=>item.state==="cancelled"));
+  const latest=oldMessages.find(item=>item.appointmentVersion===current.version&&item.channel==="email");
+  const newToken=JSON.parse(unseal(latest.payload,org,latest.id,"message")).text.split("#").at(-1).trim();
+  assert.ok((await manageAppointment({token:newToken,operation:"cancel"})).ok);
+  assert.equal((await manageAppointment({token:newToken,operation:"cancel"})).code,"denied","Consumed token cannot replay");
+  assert.ok((await db().transaction(tx=>availableSlots(tx,org,day,1))).some(item=>item.startUtc===target.startUtc),"Cancellation frees time");
+  const cancelled=(await db().select().from(clinical.appointments))[0];
+  assert.ok((await changeAppointment({id:cancelled.id,version:cancelled.version,operation:"rebook",slot})).ok,"Staff can rebook a cancelled appointment");
+  const deliveries=[];const delivery=require("../src/features/appointments/delivery.ts");delivery.deliverMessage=async(id,channel)=>{deliveries.push({id,channel});return id;};
+  Object.assign(process.env,{CLINICAL_SMTP_HOST:"localhost",CLINICAL_SMTP_PORT:"587",CLINICAL_SMTP_USER:"test",CLINICAL_SMTP_PASSWORD:"test",CLINICAL_SMTP_FROM:"staff@example.test",CLINICAL_RETENTION_DAYS:"365",CLINICAL_INTEGRATIONS_APPROVED:"true"});
+  const {deliverAppointments}=require("../src/features/appointments/worker.ts");await deliverAppointments();const count=deliveries.length;assert.ok(count);await deliverAppointments();assert.equal(deliveries.length,count,"Outbox does not resend accepted messages");
+  process.env.CLINICAL_INTEGRATIONS_APPROVED="false";
+  const { POST } = require("../src/app/api/booking/route.ts");
+  const disabled = await POST(new Request("http://localhost:3000/api/booking", {method:"POST",body:JSON.stringify(input)}));
+  assert.equal(disabled.status,503,"Public submissions fail closed while configuration is incomplete");
+  assert.equal((await db().transaction(tx=>availableSlots(tx,org,"2099-01-01",1))).length,0,"Forged dates cannot bypass the booking horizon");
+  assert.ok((await listPhysicians()).ok);
+  fs.writeFileSync('/tmp/emcrown-clinical-browser.json',JSON.stringify({DATABASE_URL:process.env.DATABASE_URL,DATABASE_CA_CERT:process.env.DATABASE_CA_CERT,AUTH_ORIGIN:"http://localhost:3109",AUTH_SECRET:process.env.AUTH_SECRET,SUPER_ADMIN_EMAIL:process.env.SUPER_ADMIN_EMAIL,ORGANISATION_NAME:process.env.ORGANISATION_NAME,SMTP_HOST:"localhost",SMTP_PORT:"587",SMTP_USER:"test",SMTP_PASSWORD:"test",SMTP_FROM:"staff@example.test",CLINICAL_ACTIVE_KEY:process.env.CLINICAL_ACTIVE_KEY,CLINICAL_ENCRYPTION_KEYS:process.env.CLINICAL_ENCRYPTION_KEYS,CLINICAL_TOKEN_KEY:process.env.CLINICAL_TOKEN_KEY,CLINICAL_BOOKING_ENABLED:"false",CLINICAL_INTEGRATIONS_APPROVED:"false",COOKIE:cookie,COOKIE_NAME:"emcrown_admin",PHYSICIAN_ID:physicianId,DAY:day,EMCROWN_CMS_TEST:"1"}),{mode:0o600});
+  console.log("Clinical database checks passed: private/public profiles, encrypted records, tenant/MFA/role checks, audited reads, immutable events, concurrent/overlapping bookings, idempotency, confirmation/rebooking/cancellation, token rotation/replay and outbox idempotency.");
+}
+run().then(()=>process.exit(0)).catch(error=>{console.error(error);process.exit(1);});

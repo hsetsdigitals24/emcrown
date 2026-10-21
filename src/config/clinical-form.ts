@@ -1,0 +1,21 @@
+// Shared admin form labels, examples and guidance; examples never populate records.
+export const PHYSICIAN_FORM = {
+  intro: "Build the profile below or import a CV. Save privately, then publish when it is ready.",
+  identity: "Profile essentials", identityHelp: "Start with the physician’s name and how they appear on the website.",
+  contact: "Private contact details", contactHelp: "Visible only to authorised staff. These details are never published.",
+  biography: "Public biography", biographyHelp: "Only publish information that has been reviewed and approved.",
+  required: "Required", optional: "Optional", invalid: "Review the highlighted fields before saving.",
+  fieldError: "Check this field and try again.", nameError: "Enter at least two characters.", slugError: "Use lowercase letters, numbers and single hyphens between words.",
+  saveHelp: "Save record keeps your changes private. Publish profile updates the website.",
+  activeHelp: "Allow this physician to appear in scheduling. Availability still needs a weekly rule.",
+  slugHelp: "Website address: /physicians/", photo: "Profile photo", upload: "Upload image", link: "Image link", remove: "Remove photo",
+  photoHelp: "Choose an approved portrait. JPEG, PNG or WebP, up to 3 MB.",
+  linkHelp: "Paste a public HTTPS image URL or an existing /media/ path. Linked images remain hosted at their source.",
+  photoEmpty: "No photo selected", photoAlt: "Selected physician portrait", imageError: "This image could not be loaded. Check the link or upload a file.",
+  uploading: "Uploading image…", uploadDone: "Photo uploaded. Save the record to keep it.",
+  uploadError: "Upload failed. Check image size and Storage configuration, then try again.",
+  placeholders: { fullName: "Enter the physician’s full name", title: "e.g. Internal Medicine Physician", email: "name@practice.com", phone: "+1 (555) 000-0000", slug: "physician-name", bio: "Introduce the physician’s approach to care, experience and interests…", credentials: "List verified qualifications and certifications…", specialties: "e.g. Internal medicine, preventive care", languages: "e.g. English, Spanish", photo: "https://example.com/portrait.jpg" },
+  hints: { bio: "A short introduction for patients. Avoid private contact details.", credentials: "Use only verified professional qualifications.", specialties: "Separate areas of care with commas or new lines.", languages: "List languages available for patient consultations." },
+  scheduleHelp: "Set weekly hours in the practice time zone. Blocked dates and periods override availability.",
+  blockedPlaceholder: "2026-12-25\n2027-01-01", blockedTimePlaceholder: "2026-12-24 12:00 17:00",
+};

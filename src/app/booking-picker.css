@@ -1,0 +1,37 @@
+/* Shared booking calendar, time tiles and transform-only ambient background. */
+.booking-hours { margin-bottom: 1.5rem; color: var(--color-primary); font-size: .875rem; font-weight: 500; }
+.booking-hours > span { display: block; margin-top: .375rem; color: var(--color-textSecondary); font-size: .75rem; font-weight: 400; }
+.booking-date-time { display: grid; align-items: start; gap: 1.5rem; min-width: 0; }
+.booking-calendar, .booking-times { min-width: 0; margin: 0; padding: 0; border: 0; }
+.booking-calendar > legend, .booking-times > legend { margin-bottom: .75rem; font-size: .875rem; color: var(--color-textSecondary); }
+.calendar-heading { display: flex; justify-content: space-between; align-items: center; gap: .5rem; padding-bottom: .75rem; }
+.calendar-heading p { color: var(--color-primary); font-family: var(--font-heading); font-size: 1.125rem; font-weight: 500; }
+.calendar-heading button { display: grid; place-items: center; width: 44px; min-height: 44px; border: 1px solid var(--color-border); border-radius: var(--radius-pill); color: var(--color-primary); font-size: 1.5rem; cursor: pointer; }
+.calendar-heading button:disabled { opacity: .3; cursor: default; }
+.calendar-weekdays, .calendar-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .125rem; }
+.calendar-weekdays { margin-bottom: .5rem; color: var(--color-textSecondary); text-align: center; font-size: .6875rem; }
+.calendar-day { position: relative; display: grid; place-items: center; min-height: 44px; border-radius: var(--radius-control); color: var(--color-primary); cursor: pointer; }
+.calendar-day:not([data-unavailable="true"])::after { content: ""; position: absolute; bottom: 5px; width: 3px; height: 3px; border-radius: 50%; background: currentColor; }
+.calendar-day:hover:not([data-unavailable="true"]) { background: var(--color-surfaceTint); }
+.calendar-day[data-unavailable="true"] { color: var(--color-textSecondary); opacity: .4; cursor: default; }
+.calendar-day:has(input:checked) { background: var(--color-primary); color: var(--color-background); animation: calendar-select 250ms ease-out; }
+.calendar-day:has(input:focus-visible), .booking-time:has(input:focus-visible) { outline: 2px solid var(--color-primary); outline-offset: 3px; }
+.calendar-selected { margin-top: .75rem; padding-top: .75rem; border-top: 1px solid var(--color-border); color: var(--color-textSecondary); font-size: .75rem; }
+.booking-time-panel { min-width: 0; }
+.booking-time-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .625rem; }
+.booking-time { display: grid; place-content: center; gap: .25rem; min-height: 56px; padding: .625rem .375rem; border: 1px solid var(--color-border); border-radius: var(--radius-control); text-align: center; color: var(--color-primary); background: var(--color-background); cursor: pointer; transition: transform 180ms ease; }
+.booking-time > span { font-size: .875rem; font-weight: 500; }
+.booking-time small { font-size: .6875rem; color: var(--color-textSecondary); overflow-wrap: anywhere; }
+.booking-time:hover { background: var(--color-surfaceTint); transform: translateY(-2px); }
+.booking-time:has(input:checked) { background: var(--color-primary); color: var(--color-background); border-color: var(--color-primary); }
+.booking-time:has(input:checked) small { color: var(--color-background); }
+.booking-page, .clinical-booking { position: relative; isolation: isolate; overflow: clip; background: var(--color-sectionAlt); }
+.booking-page::before, .clinical-booking::before { content: ""; position: absolute; inset: -10% -25%; z-index: -1; pointer-events: none; background: radial-gradient(ellipse at 25% 40%, var(--color-surfaceTint), transparent 65%), radial-gradient(ellipse at 75% 65%, var(--color-surfaceSoft), transparent 65%); opacity: .85; animation: booking-ambient-wave 32s ease-in-out infinite alternate; }
+@media (min-width: 640px) { .booking-date-time { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 1.5rem; } }
+@keyframes calendar-select { from { transform: scale(.92); } to { transform: scale(1); } }
+@keyframes booking-ambient-wave { from { transform: translate(-3%, -2%) rotate(-3deg) scale(1.03); } to { transform: translate(3%, 2%) rotate(3deg) scale(1.08); } }
+@media (prefers-reduced-motion: reduce) {
+  .booking-page::before, .clinical-booking::before, .calendar-day:has(input:checked) { animation: none; }
+  .booking-time { transition: none; }
+  .booking-time:hover { transform: none; }
+}

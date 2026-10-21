@@ -1,0 +1,25 @@
+// Shared editorial interface copy and limits, independent of editor implementation.
+export const CMS_POLICY = { autosaveDelay: 2000, autosaveRetry: 15000, maxText: 20000, maxDocumentBytes: 512000, maxImageBytes: 3 * 1024 * 1024, maxImagePixels: 40000000, imageWidth: 1600, revisionLimit: 30 };
+export const CMS_COPY = {
+  devices: "Preview device", responsive: "Fit panel", mobile: "Mobile", tablet: "Tablet", desktop: "Desktop", width: "Width (px)", resize: "Adjust preview width", scaled: "Scale",
+  title: "Website CMS", intro: "Edit privately. Preview your changes, then publish when ready.",
+  page: "Page", settings: "Edit content", preview: "Preview", browse: "Browse site", select: "Select content",
+  browseHelp: "Follow website links to switch pages. Forms and external links stay disabled in preview.",
+  editHelp: "Select a heading, image or text in the preview to open its field. You can also choose a section below.",
+  save: "Save draft", publish: "Publish", unpublish: "Unpublish", history: "Revision history · latest 30", restore: "Restore as draft",
+  autosaving: "Saving draft…", autosaved: "Draft saved automatically", offline: "Offline. Keep this tab open; your draft will save when you reconnect.",
+  dirty: "Unsaved changes", saved: "Draft saved", published: "Published", unpublished: "Unpublished", seed: "Starter content · not published through CMS",
+  undo: "Undo", redo: "Redo", busy: "Please wait…", error: "We could not complete this request. Try again.",
+  denied: "Your session or editing permission is unavailable. Keep this tab open and sign in again before saving.",
+  conflict: "Someone changed this page. Your edits are still here. Reload to review the latest version before saving.",
+  invalid: "Check your content. Use local image paths and safe links; some fields may be too long.",
+  leave: "You have unsaved changes. Leave this page and discard them?", loading: "Loading editor…",
+  imageSaved: "Image uploaded. Its reference will save with your draft.",
+  upload: "Replace image", imageHelp: "JPEG, PNG or WebP, up to 3 MB. Use approved practice imagery.",
+  uploadError: "Image upload failed. Choose a JPEG, PNG or WebP under 3 MB and try again.",
+  publishConfirm: "Publish this draft to the public website?", unpublishConfirm: "Unpublish this page? Visitors will see an unavailable page until it is published again.",
+  restoreConfirm: "Restore this revision as a draft? This replaces the current draft, while the live page stays unchanged.",
+  noHistory: "Saved revisions will appear here.", section: "Section", search: "Find a field", retry: "Reload latest version",
+  revisionHelp: "Restoring creates a draft for review. Publish separately to change the live site.",
+  imageAlt: "Image preview", selected: "Selected field", empty: "No matching fields.",
+};
