@@ -1,4 +1,4 @@
-// Server scheduled job: bearer-secret authentication and a least-privilege DB role precede delivery.
+// Server scheduler endpoint: external GET/POST jobs share bearer auth, rate limits and runtime checks.
 import { constantEqual } from "@/features/clinical/encryption";
 import { assertClinicalRuntime } from "@/features/clinical/runtime";
 import { deliverAppointments } from "@/features/appointments/worker";
@@ -14,3 +14,6 @@ export async function GET(request: Request) {
     return clinicalJson({ ok: true, processed: await deliverAppointments(5) });
   } catch { return clinicalJson({ ok: false }, 503); }
 }
+
+// External schedulers can use POST; GET remains compatible with Vercel Cron.
+export const POST = GET;

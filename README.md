@@ -200,9 +200,71 @@ configuration. Staff authentication SMTP does not substitute for patient mail.
 | `npm run appointments:deliver` | Processes clinical notification delivery; can send patient messages |
 
 Schedule the staff mail worker every minute in a trusted environment when email
-flows are needed. `vercel.json` defines a once-per-minute clinical worker route;
-configure `CRON_SECRET` and approved live integrations before enabling delivery.
+flows are needed. Automatic Vercel Cron is **not configured**, so its minutely
+schedule does not block deployment on Hobby. Removing the schedule does not drain
+the notification queue: live confirmations/reminders need a worker before launch.
 Do not run delivery workers against a shared/live database as a casual test.
+
+### Enable appointment delivery later with an external scheduler
+
+The existing endpoint works with cron-job.org or another scheduler that supports
+custom HTTP headers. No scheduler account or job is created by this repository.
+
+1. Complete the approved clinical delivery configuration and least-privilege
+   runtime database setup described above.
+2. Set a server-only `CRON_SECRET` of at least 32 random characters in the deployed
+   environment, then redeploy. Leaving it blank disables HTTP worker access;
+   clearing it later disables access without deleting worker code. Existing live
+   integration/encryption settings are still required; this secret only grants
+   access to the worker endpoint.
+3. Create an external job using these settings:
+
+   | Setting | Value |
+   | --- | --- |
+   | URL | `https://YOUR_DOMAIN/api/internal/appointments` |
+   | Method | `POST` (recommended); `GET` is also supported |
+   | Schedule | Every minute, all days, including outside office hours |
+   | Header name | `Authorization` |
+   | Header value | `Bearer YOUR_CRON_SECRET` |
+   | Request body | Empty |
+
+   Use the final HTTPS production domain with no redirect. Do not put the secret
+   or patient details in query parameters. This is the app's secret, not the
+   scheduler provider's API key. See [cron-job.org custom-header support](https://cron-job.org/en/faq/).
+4. Verify successful runs in the scheduler. A test run can deliver due messages;
+   use an isolated test environment for delivery testing. Set the scheduler's
+   timeout high enough for a delivery batch (the route allows up to 120 seconds);
+   monitor timeout/errors and queue backlog. Do not enable response-body logging
+   unless needed: the endpoint returns only status and aggregate counts.
+
+The endpoint has no request parameters/body. Its response contract is:
+
+| HTTP status | Body | Meaning |
+| --- | --- | --- |
+| `200` | `{ "ok": true, "processed": 0 }` | Worker completed; count is claimed entries handled, not a guarantee every message was sent |
+| `401` | `{ "ok": false }` | Missing/short configured secret, or missing/incorrect bearer header |
+| `429` | `{ "ok": false }` | Worker request rate limit exceeded |
+| `503` | `{ "ok": false }` | Runtime/database/delivery configuration or worker service unavailable |
+
+Responses are not cached and never include recipients, appointment details, or
+manage tokens. Both methods use the same authentication, throttling and runtime
+checks, processing at most five queued entries per HTTP call. Failed or ambiguous
+deliveries require staff review; a successful HTTP run can include failed entries.
+
+For Vercel Cron on a plan supporting minutely jobs, add the following property
+back to `vercel.json` and redeploy; it uses the same `CRON_SECRET` bearer header:
+
+```json
+{
+  "crons": [
+    { "path": "/api/internal/appointments", "schedule": "* * * * *" }
+  ]
+}
+```
+
+Choose one scheduler to avoid unnecessary duplicate invocations. Setting an
+environment variable alone does not create a scheduled job. An approved server
+can instead schedule `npm run appointments:deliver` without the HTTP endpoint.
 
 ## Project structure
 
@@ -244,6 +306,7 @@ npm run lint
 npm run typecheck
 node tests/booking.cjs
 node --conditions=react-server tests/booking-calendar.cjs
+node --conditions=react-server tests/appointment-scheduler.cjs
 npm run test:clinical-unit
 ```
 
