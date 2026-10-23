@@ -1,18 +1,18 @@
 // Shared editable interface copy: all demo, consent, validation and result text lives here.
 export const BOOKING_COPY = {
   title: "Book appointment", headline: "Your next step.", highlightedPhrase: "At your pace.",
-  introduction: "Explore the appointment flow with fictional details and mock availability.",
+  introduction: "Take a look at how appointment selection works. This is a demonstration with sample times; call the practice to arrange a real visit.",
   demoTitle: "Demo booking only", demoNotice: "No appointment will be created. Use fictional contact details. Nothing is sent, saved or shared, and no emails or SMS messages are delivered.",
   noScript: "This interactive demo needs JavaScript. You can call the practice instead; contact details are provisional.",
   progressLabel: "Booking steps", stepLabel: "Step", ofLabel: "of", back: "Back", next: "Continue", review: "Review demo booking",
   confirm: "Confirm demo booking", confirming: "Completing demo…", edit: "Edit details", editAppointment: "Change visit or time", reset: "Start a new demo", retry: "Try again",
   steps: [
     { label: "Visit", headline: "What brings you", highlightedPhrase: "to us?", body: "Choose an appointment type. These are demonstration options, not confirmed practice services." },
-    { label: "Physician", headline: "Who would you like", highlightedPhrase: "to see?", body: "Choose a placeholder physician or let the demo show the first available option." },
+    { label: "Physician", headline: "Who would you like", highlightedPhrase: "to see?", body: "Choose a published physician or view the first available demo option. Times shown are samples, not the physician’s actual schedule." },
     { label: "Date & time", headline: "Find a time", highlightedPhrase: "that fits.", body: "Select a date and a mock time. This is not live availability." },
     { label: "Details & review", headline: "A few details.", highlightedPhrase: "Then a review.", body: "Enter fictional details, review your choices, and complete the demo within this step." },
   ],
-  firstAvailable: "First available", firstAvailableDescription: "Show mock times across eligible placeholder physicians.",
+  firstAvailable: "First available", firstAvailableDescription: "Show sample times across the demo’s eligible physicians.",
   location: "Practice location [provisional]", dates: "Choose a demo date", times: "Choose a demo time", timeZone: "All times shown in", mockAvailability: "Mock availability",
   chooseDate: "Choose a date to view demo times.", loading: "Loading mock times…", unavailable: "No demo times are available for this selection. Choose another date or physician.",
   loadError: "The demo availability could not be displayed. Try again or choose another date.", unavailableBadge: "No demo times", errorBadge: "Demo error state",

@@ -8,8 +8,8 @@ import { ADMIN_COPY } from "@/config/admin";
 import type { AdminRole } from "@/types/auth";
 import WorkspaceFrame from "@/features/auth/WorkspaceFrame";
 import WorkspaceSidebarToggle from "@/features/auth/WorkspaceSidebarToggle";
-export default function WorkspaceShell({ actor, title, overview = false, children }: {
-  actor: { role: AdminRole; organisationName: string }; title: string; overview?: boolean; children: ReactNode;
+export default function WorkspaceShell({ actor, children }: {
+  actor: { role: AdminRole; organisationName: string }; children: ReactNode;
 }) {
   const sidebar = <aside className="workspace-sidebar"><div className="workspace-sidebar-brand"><div className="workspace-monogram"><BrandLogo /></div><WorkspaceSidebarToggle /></div>
     <div id="workspace-navigation-sidebar" className="workspace-sidebar-content">
@@ -17,8 +17,8 @@ export default function WorkspaceShell({ actor, title, overview = false, childre
       <WorkspaceNav role={actor.role} /><div className="workspace-role"><span className="workspace-role-dot" />{actor.role.replaceAll("_", " ")}</div>
     </div>
     </aside>;
-  return <WorkspaceFrame sidebar={sidebar}><div className="workspace-main"><WorkspaceHeader title={title} organisationName={actor.organisationName} role={actor.role} overview={overview} />
-      <div className="workspace-content"><div className="workspace-page-heading"><p className="workspace-eyebrow">{ADMIN_COPY.workspace}</p><h1>{title}</h1></div>{children}</div>
+  return <WorkspaceFrame sidebar={sidebar}><div className="workspace-main"><WorkspaceHeader organisationName={actor.organisationName} role={actor.role} />
+      <div className="workspace-content">{children}</div>
     </div>
   </WorkspaceFrame>;
 }

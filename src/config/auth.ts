@@ -39,7 +39,7 @@ export const AUTH_COPY = {
   unavailable: "Staff sign-in is awaiting secure configuration. Please contact your administrator.",
   dashboard: "Organisation overview", dashboardIntro: "Authentication and access controls are ready. Clinical and staff management features will be added here.",
   audit: "Activity log", auditIntro: "Recent activity for this organisation, recorded in UTC. Credentials and patient details are excluded.",
-  auditColumns: ["Time (UTC)", "Action", "Actor ID", "Role", "Result"],
+  auditColumns: ["Time (UTC)", "What happened", "Actor ID", "Role", "Result"],
   emptyAudit: "No activity recorded.", logout: "Sign out", role: "Your role",
   denied: "You do not have permission to access this area.", home: "Organisation home",
   errorTitle: "Workspace unavailable", retry: "Try again", notFound: "Workspace page not found",

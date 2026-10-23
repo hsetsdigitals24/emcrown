@@ -1,4 +1,5 @@
 // Server component: native disclosure navigation works with keyboard and without JS.
+import "@/components/layout/navigation.css";
 import BrandLogo from "@/components/ui/BrandLogo";
 import Image from "next/image";
 import { NAVIGATION_COPY } from "@/config/site-shell";

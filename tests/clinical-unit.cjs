@@ -28,6 +28,8 @@ const { cvSuggestions } = require("../src/features/physicians/cv-suggestions.ts"
   assert.equal(wallToUtc("2026-03-08", "02:30"), null, "Spring gap cannot create a fake slot");
   assert.equal(wallToUtc("2026-11-01", "01:30"), null, "Ambiguous fall-back times are not silently picked");
   assert.equal(wallToUtc("2026-10-26", "09:00").toISOString(), "2026-10-26T13:00:00.000Z");
+  assert.equal(wallToUtc("2026-10-26", "00:00").toISOString(), "2026-10-26T04:00:00.000Z", "Inbox starts at Eastern midnight during DST");
+  assert.equal(wallToUtc("2026-11-02", "00:00").toISOString(), "2026-11-02T05:00:00.000Z", "Inbox starts at Eastern midnight after DST");
   assert.equal(wallToUtc("2026-11-02", "09:00").toISOString(), "2026-11-02T14:00:00.000Z");
   const schedule = { physicianId: id, locationId: "stuart", typeId: "new-patient", weekday:1, opens:"09:00",closes:"11:00",intervalMinutes:15,durationMinutes:30,bufferMinutes:10,leadHours:0,blockedDates:[],enabled:true };
   assert.ok(scheduleSchema.safeParse(schedule).success);

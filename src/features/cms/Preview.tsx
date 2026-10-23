@@ -11,11 +11,12 @@ import { fieldAtElement } from "@/features/cms/preview-selection";
 import { isPreviewNavigationControl } from "@/features/cms/preview-interaction";
 import { pathSchema, valuesSchema, validateValues } from "@/features/cms/validation";
 import { CMS_COPY } from "@/config/cms/copy";
+import type { PublicPhysician } from "@/types/clinical";
 import type { MockSchedule } from "@/types/booking";
 const renderSchema = z.object({ type: z.literal("cms:render"), path: pathSchema, values: valuesSchema, siteValues: valuesSchema,
   context: z.record(z.string().max(200), valuesSchema), browse: z.boolean() });
 type PreviewState = z.infer<typeof renderSchema>;
-export default function Preview({ schedule }: { schedule: MockSchedule }) {
+export default function Preview({ schedule, physicianRecords }: { schedule: MockSchedule; physicianRecords: PublicPhysician[] }) {
   const [state, setState] = useState<PreviewState>();
   const root = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -60,6 +61,6 @@ export default function Preview({ schedule }: { schedule: MockSchedule }) {
   }, [state]);
   const site = applyContent(SITE_SEED, state?.siteValues ?? {});
   return <div ref={root} className="cms-preview-root" data-cms-mode={state?.browse ? "browse" : "edit"}>{state ? <SiteLayout navigation={site.navigation} footer={site.footer} embedded>
-    <PageContent path={state.path} values={state.values} siteValues={state.siteValues} context={state.context} schedule={schedule} preview />
+    <PageContent path={state.path} values={state.values} siteValues={state.siteValues} context={state.context} schedule={schedule} physicianRecords={physicianRecords} preview />
   </SiteLayout> : <p role="status">{CMS_COPY.loading}</p>}</div>;
 }

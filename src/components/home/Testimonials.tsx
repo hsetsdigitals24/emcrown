@@ -4,8 +4,10 @@ import Container from "@/components/layout/Container";
 import BlockHeading from "@/components/home/BlockHeading";
 import type { TestimonialsContent } from "@/types/home";
 export default function Testimonials({ content }: { content: TestimonialsContent }) {
+  const testimonials = content.testimonials.filter(item => item.quote.trim() && item.attribution.trim());
+  if (!testimonials.length) return null;
   return <section id={content.id} aria-labelledby={`${content.id}-heading`} className="home-section testimonials-section" data-mock={content.isMock}>
-    <Container><BlockHeading content={content} centered /><TestimonialSlideshow controls={content.controls}>{content.testimonials.map((item) => <figure className="testimonial-card" key={item.id} data-cms-id={item.id}>
+    <Container><BlockHeading content={content} centered /><TestimonialSlideshow controls={content.controls}>{testimonials.map((item) => <figure className="testimonial-card" key={item.id} data-cms-id={item.id}>
       <span className="quote-mark" aria-hidden="true">“</span><p className="text-eyebrow uppercase tracking-eyebrow text-textSecondary">{item.label}</p>
       <blockquote className="font-heading font-light text-primary">{item.quote}</blockquote><figcaption>{item.attribution}</figcaption>
     </figure>)}</TestimonialSlideshow></Container>

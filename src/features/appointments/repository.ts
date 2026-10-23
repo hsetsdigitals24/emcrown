@@ -9,6 +9,7 @@ import { unseal } from "@/features/clinical/encryption";
 import { appointmentWriteSchema, dateSchema, patientSchema } from "@/features/clinical/validation";
 import { availableSlots } from "@/features/appointments/availability";
 import { queueAppointmentMessages } from "@/features/appointments/notifications";
+import { localTimeToUtc } from "@/features/booking/zoned-time";
 import { practiceDate } from "@/features/booking/time";
 import { BOOKING_SETTINGS } from "@/config/booking";
 import { CLINICAL_POLICY } from "@/config/clinical";
@@ -22,7 +23,9 @@ export async function listAppointments(input: unknown): Promise<ClinicalResult<{
   const filters = filterSchema.safeParse(input); if (!filters.success) return { ok: false, code: "invalid" };
   return db().transaction(async tx => {
     const actor = await clinicalActor(tx, "appointments:read"); if (!actor) return { ok: false, code: "denied" };
-    const from = filters.data.from ? new Date(`${filters.data.from}T00:00:00Z`) : undefined;
+    // Inbox day boundaries must match the practice dates shown beside each visit.
+    const from = filters.data.from ? localTimeToUtc(filters.data.from, "00:00", BOOKING_SETTINGS.timeZone) : undefined;
+    if (filters.data.from && !from) return { ok: false, code: "invalid" };
     const found = await tx.select().from(appointments).where(and(eq(appointments.organisationId, actor.organisationId),
       from ? gte(appointments.startAt, from) : undefined, filters.data.status ? eq(appointments.status, filters.data.status) : undefined,
       filters.data.physicianId ? eq(appointments.physicianId, filters.data.physicianId) : undefined)).orderBy(desc(appointments.startAt)).limit(CLINICAL_POLICY.pageSize + 1).offset(filters.data.page * CLINICAL_POLICY.pageSize);

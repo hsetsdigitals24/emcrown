@@ -88,7 +88,7 @@
 .workspace-activity-intro { color: var(--color-textSecondary); margin-bottom: 1.5rem; }
 .workspace-events { display: grid; gap: .75rem; }
 .workspace-event { padding: 1.25rem; border: 1px solid var(--color-border); border-radius: 1rem; background: var(--color-background); }
-.workspace-event dl { display: grid; grid-template-columns: 1fr 1.2fr 1.5fr .8fr .6fr; gap: 1rem; }
+.workspace-event dl { display: grid; grid-template-columns: 1fr 2fr 1.3fr .65fr .65fr; gap: 1rem; }
 .workspace-event dt { color: var(--color-textSecondary); font-size: .7rem; margin-bottom: .35rem; }
 .workspace-event dd { font-size: .8rem; overflow-wrap: anywhere; }
 .result-success { color: var(--color-success); }
@@ -196,3 +196,16 @@
 @media (prefers-reduced-motion: reduce) {
   .workspace-mobile-drawer[open], .workspace-mobile-drawer::backdrop { animation: none; }
 }
+
+/* Audit descriptions lead with meaning while keeping the stored event code available. */
+.workspace-event-description dd { line-height: 1.6; }
+.workspace-event-description code { display: block; margin-top: .35rem; color: var(--color-textSecondary); font-size: .7rem; overflow-wrap: anywhere; }
+@media (max-width: 1000px) { .workspace-event-description { grid-column: 1 / -1; grid-row: 1; } }
+
+/* Shared workspace chrome stays mounted; navigation feedback belongs to the content slot. */
+.workspace-route-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.25rem; min-height: max(18rem, calc(100dvh - 11rem)); text-align: center; color: var(--color-textSecondary); font-size: .95rem; }
+.workspace-loading-logo { display: grid; place-items: center; width: 4.5rem; height: 4.5rem; animation: workspace-logo-loading 1600ms ease-in-out infinite; }
+.workspace-loading-logo .brand-logo { width: 4.5rem; height: auto; object-fit: contain; }
+.workspace-error-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; margin-top: 1.25rem; }
+@keyframes workspace-logo-loading { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .workspace-loading-logo { animation: none; } }

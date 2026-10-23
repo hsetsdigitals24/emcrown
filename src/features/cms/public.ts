@@ -9,13 +9,14 @@ import { cmsDocuments, organisations } from "@/lib/db/schema";
 import { authConfigured } from "@/lib/auth-env";
 import { applyContent } from "@/features/cms/fields";
 import { storedValues } from "@/features/cms/validation";
+// Version the cache when editorial field shapes change; old snapshots must not linger.
 // Cache only published snapshots. Nonce CSP requires Cache Components to remain disabled.
 const cachedPublication = unstable_cache(async (path: string) => {
   const [row] = await db().select({ published: cmsDocuments.published, withdrawn: cmsDocuments.withdrawn }).from(cmsDocuments)
     .innerJoin(organisations, eq(organisations.id, cmsDocuments.organisationId))
     .where(and(eq(organisations.key, "emcrown"), eq(cmsDocuments.path, path))).limit(1);
   return row ?? null;
-}, ["cms-public-v1"], { tags: ["cms:public"], revalidate: 3600 });
+}, ["cms-public-v2"], { tags: ["cms:public"], revalidate: 3600 });
 export const publicValues = cache(async (path: string) => {
   if (!authConfigured()) return undefined;
   const row = await cachedPublication(path);

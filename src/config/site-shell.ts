@@ -14,11 +14,11 @@ export const SITE_NAVIGATION: NavigationContent = {
 };
 export const SITE_FOOTER: FooterContent = {
   panels: { eyebrow: "EMCROWN PHYSICIAN SERVICES", headline: "Your next chapter starts here.", contactTitle: "Get in touch", linksTitle: "Explore", hoursTitle: "Practice hours", cta: { label: "Find your physician", href: "/physicians" } },
-  practiceName: "Emcrown Physician Services", description: "[PRACTICE DESCRIPTION: approved copy to follow]",
+  practiceName: "Emcrown Physician Services", description: "Get to know your physician, prepare for your visit and take the next step with Emcrown Physician Services.",
   navigationLabel: "Footer navigation", links: [...SITE_NAVIGATION.items, { label: "FAQ", href: "/faq" }, { label: "Legal", href: "/legal" }],
   legalLinks: [{ label: "Privacy", href: "/privacy" }, { label: "Terms", href: "/terms" }, { label: "Accessibility", href: "/accessibility" }, { label: "Notice of Privacy Practices", href: "/notice-of-privacy-practices" }],
   locations: PRACTICE.locations.map(({ label, address }) => ({ label, address })),
-  address: `[PROVISIONAL] ${PRACTICE.locations[0].address}`, phone: PRACTICE.phone,
-  faxLabel: "Fax", fax: `[PROVISIONAL] ${PRACTICE.fax}`, hoursLabel: "Hours [provisional]", hours: [PRACTICE.locations[0].hours],
-  copyright: "© Emcrown Physician Services. Preview — legal policies awaiting approval.",
+  address: `Reference address: ${PRACTICE.locations[0].address}`, phone: PRACTICE.phone,
+  faxLabel: "Fax", fax: PRACTICE.fax, hoursLabel: "Practice hours", hours: [PRACTICE.locations[0].hours],
+  copyright: "© Emcrown Physician Services.",
 };

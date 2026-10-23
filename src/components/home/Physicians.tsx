@@ -6,6 +6,7 @@ import PhotoPlaceholder from "@/components/home/PhotoPlaceholder";
 import Link from "next/link";
 import type { PhysicianContent } from "@/types/home";
 export default function Physicians({ content }: { content: PhysicianContent }) {
+  if (!content.physicians.length) return null;
   return <section id={content.id} aria-labelledby={`${content.id}-heading`} className="home-section" data-mock={content.isMock}>
     <Container><BlockHeading content={content} /><div className="physicians-grid">{content.physicians.map((physician) => <article className="physician-card" key={physician.id} data-cms-id={physician.id}>
       {physician.photo ? <Image src={physician.photo} alt={physician.name} width={360} height={360} unoptimized referrerPolicy="no-referrer" /> : <PhotoPlaceholder label={physician.photoLabel} />}<h3 className="font-heading text-2xl font-light text-primary">{physician.name}</h3><p>{physician.specialty}</p>

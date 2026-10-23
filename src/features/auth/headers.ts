@@ -12,7 +12,7 @@ export function adminResponse(request: NextRequest) {
     "default-src 'self'", `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${development ? " 'unsafe-eval'" : ""}`,
     `style-src 'self'${development ? " 'unsafe-inline'" : ` 'nonce-${nonce}'`}`,
     `img-src 'self' data:${physicians ? " https:" : ""}`, "font-src 'self'", "object-src 'none'", "base-uri 'none'",
-    ...(challenge ? ["frame-src https://challenges.cloudflare.com"] : []),
+    ...(preview ? ["frame-src 'self' https://www.google.com"] : challenge ? ["frame-src https://challenges.cloudflare.com"] : []),
     "form-action 'self'", preview ? "frame-ancestors 'self'" : "frame-ancestors 'none'", `connect-src 'self'${development ? " ws: wss:" : ""}`,
     ...(physicians ? ["worker-src 'self'"] : []),
     ...(cms ? ["style-src-attr 'unsafe-inline'"] : []),

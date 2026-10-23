@@ -19,6 +19,8 @@ for (const extension of ['.ts', '.tsx']) {
     module._compile(outputText, filename);
   };
 }
+// CSS is exercised in browser checks; Node contract rendering only needs module resolution.
+require.extensions['.css'] = () => {};
 const { MOCK_NAVIGATION, MOCK_FOOTER } = require('../src/config/mock-content.ts');
 const Navigation = require('../src/components/layout/Navigation.tsx').default;
 const Footer = require('../src/components/layout/Footer.tsx').default;
@@ -49,19 +51,21 @@ const SiteLayout = require('../src/components/layout/SiteLayout.tsx').default;
 const { SITE_NAVIGATION, SITE_FOOTER } = require('../src/config/site-shell.ts');
 const home = renderToStaticMarkup(React.createElement(SiteLayout, { navigation: SITE_NAVIGATION, footer: SITE_FOOTER }, React.createElement(Home, {content:HOME_SEED})));
 const sections = [...home.matchAll(/<section id="([^"]+)"/g)].map((match) => match[1]);
-assert.deepEqual(sections, ['home','about','services','booking','physicians','testimonials','contact','faq','next-step']);
+assert.deepEqual(sections, ['home','about','services','booking','contact','faq','next-step']);
 assert.equal((home.match(/<h1 /g) || []).length, 1);
 assert.equal((home.match(/class="faq-item"/g) || []).length, 5);
 assert.equal((home.match(/class="service-card"/g) || []).length, 6);
-assert.equal((home.match(/class="physician-card"/g) || []).length, 3);
-assert.equal((home.match(/class="testimonial-card"/g) || []).length, 3);
+assert.equal((home.match(/class="physician-card"/g) || []).length, 0);
+assert.equal((home.match(/class="testimonial-card"/g) || []).length, 0);
 assert.match(home, /id="legal-notice"/);
-assert.doesNotMatch(home, /<form|<iframe/);
-assert.match(home, /TESTIMONIAL PLACEHOLDER/);
-assert.match(home, /\[PHYSICIAN NAME\]/);
-assert.match(home, /Practice address, contact details and hours below are provisional/);
+assert.doesNotMatch(home, /<form/);
+assert.match(home, /<iframe[^>]+src="https:\/\/www\.google\.com\/maps\?/);
+assert.match(home, /loading="lazy" referrerPolicy="no-referrer"/);
+assert.doesNotMatch(home, /TESTIMONIAL PLACEHOLDER/);
+assert.doesNotMatch(home, /\[PHYSICIAN NAME\]/);
+assert.match(home, /reference details pending final verification/);
 assert.match(home, /href="\/book"/);
-console.log('Passed: homepage section order, single h1, six services, three physicians/testimonials, native FAQs, provisional facts and no backend form.');
+console.log('Passed: homepage section order, single h1, six visit guides, omitted empty physician/testimonial slots, native FAQs, provisional facts and no backend form.');
 
 function luminance(hex) {
   const channels = hex.match(/[a-f\d]{2}/gi).map((value) => parseInt(value, 16) / 255);

@@ -4,15 +4,30 @@ import Button from "@/components/ui/Button";
 import { physicianName } from "@/lib/physician-name";
 import Image from "next/image";
 import Link from "next/link";
+import PageFrame from "@/components/pages/PageFrame";
+import type { PageContent } from "@/types/public";
+import type { SITE_SEED } from "@/config/cms/content";
 import Container from "@/components/layout/Container";
 import type { PublicPhysician } from "@/types/clinical";
 import { CLINICAL_COPY as c } from "@/config/clinical";
-export function PublicPhysicianList({ records }: { records: PublicPhysician[] }) {
-  return <section className="home-section"><Container><h1 className="text-4xl text-primary">{c.physicians}</h1><p>{c.publicPhysicianIntro}</p>
-    <div className="clinical-profile-grid">{records.map(record => <article key={record.id} className="clinical-panel">
-      {record.photo && <Image src={record.photo} alt={record.fullName} width={320} height={320} unoptimized referrerPolicy="no-referrer" />}
-      <h2>{physicianName(record)}</h2><p>{record.specialties}</p><Link className="clinical-button" href={`/physicians/${record.slug}`}>{c.profile}</Link>
-    </article>)}</div></Container></section>;
+export function PublicPhysicianList({ records, content, site }: { records: PublicPhysician[]; content: PageContent; site: typeof SITE_SEED }) {
+  return <PageFrame content={content} closing={site.closing}>
+    <section className="physician-directory"><Container>
+      <div className="physician-directory-grid">{records.map(record => {
+        const name = physicianName(record);
+        return <article key={record.id} className="physician-directory-card">
+          <Link href={`/physicians/${record.slug}`} className="physician-directory-frame" aria-label={name}>
+            {record.photo ? <Image src={record.photo} alt={name} width={480} height={560} unoptimized referrerPolicy="no-referrer" /> : <div className="physician-portrait-placeholder">{c.photoPlaceholder}</div>}
+          </Link>
+          <div className="physician-directory-copy">
+            <h2><Link href={`/physicians/${record.slug}`}>{name}</Link></h2>
+            {record.specialties && <p className="physician-specialties">{record.specialties}</p>}
+            <Link className="physician-directory-link" href={`/physicians/${record.slug}`}>{site.catalog.physicianLink}<span aria-hidden="true">↗</span></Link>
+          </div>
+        </article>;
+      })}</div>
+    </Container></section>
+  </PageFrame>;
 }
 export function PublicPhysicianDetail({ record }: { record: PublicPhysician }) {
   const name = physicianName(record);

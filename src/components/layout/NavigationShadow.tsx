@@ -13,7 +13,13 @@ export default function NavigationShadow({ children }: { children: ReactNode }) 
   useEffect(() => {
     const update = () => { if (ref.current) ref.current.dataset.scrolled = String(window.scrollY > 40); };
     const dismiss = (event: PointerEvent) => {
-      if (ref.current && event.target instanceof Node && !ref.current.contains(event.target)) closeDisclosures(ref.current);
+      const shell = ref.current;
+      if (!shell || !(event.target instanceof Element)) return;
+      const mobile = shell.querySelector<HTMLDetailsElement>(".navigation-mobile");
+      // The backdrop belongs to the shell, so containment alone misses outside taps.
+      if (mobile?.open && !event.target.closest(".navigation-mobile-panel, .hamburger-toggle")) {
+        closeDisclosures(shell);
+      } else if (!shell.contains(event.target)) closeDisclosures(shell);
     };
     const mobile = ref.current?.querySelector<HTMLDetailsElement>(".navigation-mobile");
     // Embedded CMS previews have an outer admin main; never inert the menu's own ancestor.
@@ -29,8 +35,8 @@ export default function NavigationShadow({ children }: { children: ReactNode }) 
     window.addEventListener("resize", resize);
     update();
     window.addEventListener("scroll", update, { passive: true });
-    document.addEventListener("pointerdown", dismiss);
-    return () => { window.removeEventListener("scroll", update); document.removeEventListener("pointerdown", dismiss); mobile?.removeEventListener("toggle", syncMenu); window.removeEventListener("resize", resize); targets.forEach((element) => { element.inert = false; }); };
+    document.addEventListener("pointerdown", dismiss, true);
+    return () => { window.removeEventListener("scroll", update); document.removeEventListener("pointerdown", dismiss, true); mobile?.removeEventListener("toggle", syncMenu); window.removeEventListener("resize", resize); targets.forEach((element) => { element.inert = false; }); };
   }, []);
   return <div ref={ref} className="navigation-shell" onKeyDown={(event) => {
     if (event.key === "Tab" && ref.current?.querySelector<HTMLDetailsElement>(".navigation-mobile")?.open) {

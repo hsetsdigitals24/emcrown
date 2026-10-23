@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
   // Isolated browser tests use a local database and separate dev output/lock.
   distDir: process.env.NODE_ENV === "development" && process.env.EMCROWN_CMS_TEST === "1" ? ".next-cms-test" : ".next",
   // Use the documented compiler API: the CLI wrapper returns empty output here.
-  experimental: { useTypeScriptCli: false },
+  experimental: { useTypeScriptCli: false, agentUpgrade: "security" },
   cacheComponents: CACHE_COMPONENTS_ENABLED,
   partialPrefetching: false,
   async headers() {

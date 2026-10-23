@@ -11,10 +11,9 @@ export function PhysicianDetails({ entry, copy = CATALOG_COPY }: { entry: Physic
   </dl><Button purpose="primary" href={copy.biographyBookingLink}>{copy.biographyBooking}</Button></div></Container>;
 }
 export function ArticleDetails({ entry }: { entry: ArticleEntry }) {
-  return <Container><dl className="entry-details metadata-grid">
-    <div><dt>{entry.labels.category}</dt><dd>{entry.category}</dd></div>
-    <div><dt>{entry.labels.author}</dt><dd>{entry.author}</dd></div>
-    <div><dt>{entry.labels.publishedDate}</dt><dd>{entry.publishedDate}</dd></div>
-    <div><dt>{entry.labels.reviewDate}</dt><dd>{entry.reviewDate}</dd></div>
+  const fields = [[entry.labels.category, entry.category], [entry.labels.author, entry.author],
+    [entry.labels.publishedDate, entry.publishedDate], [entry.labels.reviewDate, entry.reviewDate]].filter(([, value]) => value.trim());
+  return <Container><dl className="entry-details metadata-grid">{fields.map(([label, value]) =>
+    <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
   </dl></Container>;
 }

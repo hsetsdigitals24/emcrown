@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { z } from "zod";
 import type { Appointment, AvailabilitySlot, Physician } from "@/types/clinical";
+import { APPOINTMENT_WORKSPACE as copy } from "@/config/appointment-workspace";
 import { CLINICAL_COPY as c } from "@/config/clinical";
 import { BOOKING_SETTINGS } from "@/config/booking";
 import { PRACTICE } from "@/config/practice";
@@ -38,20 +39,22 @@ export default function AppointmentCard({ appointment: a, providers, canManage, 
     } finally { setBusy(false); }
   }
   const finished = ["completed", "no_show"].includes(a.status);
-  return <li><h3>{a.patient.name} · {c[a.status === "requested" ? "pending" : a.status]}</h3><p>{slotLabel(a, providers)}</p>
+  return <li className="appointment-card"><div className="appointment-card-heading"><h3>{a.patient.name}</h3><span className="schedule-state" data-status={a.status}>{c[a.status === "requested" ? "pending" : a.status]}</span></div><p className="appointment-card-time">{slotLabel(a, providers)}</p>
+    <p>{BOOKING_SETTINGS.types.find(type => type.id === a.typeId)?.label} · {PRACTICE.locations.find(location => location.id === a.locationId)?.label}</p>
     <details><summary>{c.review}</summary><dl className="clinical-details">
       {[[c.type, BOOKING_SETTINGS.types.find(type => type.id === a.typeId)?.label], [c.location, PRACTICE.locations.find(location => location.id === a.locationId)?.label],
         [c.birth, a.patient.dateOfBirth], [c.contact, `${a.patient.email}\n${a.patient.phone}`], [c.reason, a.patient.reason],
         [c.consent, `${c.email}: ${a.patient.emailConsent ? "✓" : "—"} · SMS: ${a.patient.smsConsent ? "✓" : "—"}`]].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
-    </dl><h4>{c.notifications}</h4><ul>{messages.map((message, index) => <li key={index}>{message.channel} · {message.kind} · {message.state}</li>)}</ul></details>
+    </dl><h4>{c.notifications}</h4>{!messages.length && <p>{copy.noMessages}</p>}<ul>{messages.map((message, index) => <li key={index}>{message.channel} · {message.kind} · {message.state}</li>)}</ul></details>
     {canManage && !finished && <fieldset disabled={busy}><div className="clinical-actions">
       {a.status === "requested" && <button onClick={() => void mutate("confirm")}>{c.confirm}</button>}
-      {a.status !== "cancelled" && <button onClick={() => void mutate("cancel")}>{c.cancelVisit}</button>}<button onClick={() => void loadSlots()}>{c.rebook}</button>
-      {new Date(a.endUtc) <= new Date() && <><button onClick={() => void mutate("complete")}>{c.completed}</button><button onClick={() => void mutate("no_show")}>{c.no_show}</button></>}
+      <button className="clinical-secondary" onClick={() => void loadSlots()}>{copy.reschedule}</button>
+      {a.status !== "cancelled" && new Date(a.endUtc) <= new Date() && <><button className="clinical-secondary" onClick={() => void mutate("complete")}>{copy.complete}</button><button className="clinical-secondary" onClick={() => void mutate("no_show")}>{copy.missed}</button></>}
+      {a.status !== "cancelled" && <button className="appointment-cancel" onClick={() => void mutate("cancel")}>{c.cancelVisit}</button>}
     </div>{rebooking && <div><label className="clinical-field">{c.date}<input type="date" value={from} onChange={event => setFrom(event.target.value)} /></label>
       <div className="clinical-actions"><button onClick={() => void loadSlots()}>{c.refresh}</button></div><label className="clinical-field">{c.start}<select value={selected} onChange={event => setSelected(event.target.value)}><option value="">{c.select}</option>
         {slots.map((slot, index) => <option key={index} value={index}>{slotLabel(slot, providers)} · {slot.typeId} · {slot.locationId}</option>)}</select></label>
-      {!slots.length && <p>{c.noResults}</p>}<div className="clinical-actions"><button disabled={!selected} onClick={() => void mutate("rebook")}>{c.rebook}</button></div></div>}
+      {!slots.length && <p>{c.noResults}</p>}<div className="clinical-actions"><button disabled={!selected} onClick={() => void mutate("rebook")}>{copy.reschedule}</button><button className="clinical-secondary" onClick={() => setRebooking(false)}>{copy.closeReschedule}</button></div></div>}
     </fieldset>}
   </li>;
 }

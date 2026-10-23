@@ -60,3 +60,74 @@
   .clinical-form-actions button { flex: 1 1 10rem; }
 }
 @media (prefers-reduced-motion: reduce) { .clinical-field :is(input, textarea, select) { transition: none; } }
+
+/* Appointment tasks stay distinct; guided availability forms avoid a wall of settings. */
+.appointment-workspace [hidden] { display: none; }
+.appointment-booking-state { padding: 1.1rem 1.4rem; border: 1px solid var(--color-border); border-left: 4px solid var(--color-primary); border-radius: .75rem; background: var(--color-surfaceTint); }
+.appointment-booking-state strong { display: block; color: var(--color-primary); }
+.appointment-booking-state p { margin-block: .35rem; max-width: 85ch; color: var(--color-textSecondary); font-size: .9rem; line-height: 1.6; }
+.appointment-booking-state small { color: var(--color-textSecondary); font-size: .8rem; }
+.appointment-booking-state.is-live { border-left-color: var(--color-success); }
+.appointment-task-switch { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; }
+.appointment-task-switch button { display: grid; gap: .35rem; padding: 1.1rem 1.35rem; border: 1px solid var(--color-border); border-radius: .8rem; background: var(--color-background); text-align: left; cursor: pointer; min-height: 84px; }
+.appointment-task-switch button strong { color: var(--color-primary); }
+.appointment-task-switch button span { font-size: .85rem; color: var(--color-textSecondary); }
+.appointment-task-switch button[aria-pressed="true"] { border-color: var(--color-primary); background: var(--color-surfaceTint); box-shadow: inset 0 0 0 1px var(--color-primary); }
+.appointment-task-switch button:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 3px; }
+.appointment-section-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem; margin-bottom: 1.25rem; }
+.appointment-section-heading > div { min-width: 0; }
+.appointment-section-heading > :is(button,a) { flex-shrink: 0; }
+.appointment-section-heading h2 { margin-bottom: .35rem; }
+.appointment-section-heading p { max-width: 70ch; font-size: .95rem; line-height: 1.65; }
+.appointment-inbox .clinical-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; }
+.appointment-result-heading { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1rem; padding-block: 1rem; border-top: 1px solid var(--color-border); font-size: .85rem; color: var(--color-textSecondary); }
+.appointment-result-heading p { margin: 0; }
+.appointment-empty { padding: 2.5rem 1.5rem; border: 1px dashed var(--color-border); border-radius: .75rem; background: var(--color-surfaceSoft); text-align: center; }
+.appointment-empty h3 { font-weight: 600; margin-bottom: .5rem; }
+.appointment-empty p { max-width: 60ch; margin-inline: auto; font-size: .95rem; line-height: 1.65; }
+.schedule-list { display: grid; gap: 1rem; list-style: none; padding: 0; }
+.schedule-list > li { display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; border: 1px solid var(--color-border); border-radius: .75rem; padding: 1.25rem; }
+.schedule-list h3 { font-weight: 700; color: var(--color-primary); margin-bottom: .35rem; }
+.schedule-list p { margin-bottom: .25rem; font-size: .9rem; overflow-wrap: anywhere; }
+.schedule-list .schedule-hours { font-size: 1.05rem; font-weight: 600; color: var(--color-text); }
+.schedule-list small { color: var(--color-textSecondary); }
+.schedule-row-actions { display: grid; justify-items: end; gap: .75rem; flex-shrink: 0; }
+.schedule-state { display: inline-flex; padding: .3rem .65rem; border-radius: var(--radius-pill); background: var(--color-surfaceSoft); color: var(--color-textSecondary); font-size: .75rem; font-weight: 600; }
+.schedule-state.is-enabled { background: var(--color-surfaceTint); color: var(--color-primary); }
+.schedule-editor-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 1rem; border-block: 1px solid var(--color-border); }
+.schedule-editor-heading h3 { font-size: 1.15rem; font-weight: 700; }
+.schedule-form-section { padding-block: 1.5rem; border-bottom: 1px solid var(--color-border); }
+.schedule-form-section h3 { font-weight: 700; margin-bottom: .35rem; }
+.schedule-form-section > p { max-width: 85ch; font-size: .9rem; line-height: 1.65; }
+.schedule-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem 1.5rem; }
+.schedule-advanced { margin-top: 1rem; border: 1px solid var(--color-border); border-radius: .65rem; padding: .65rem 1rem; }
+.schedule-advanced > summary { min-height: 44px; cursor: pointer; font-weight: 600; color: var(--color-primary); align-content: center; }
+.schedule-advanced > p { margin-top: .5rem; font-size: .85rem; }
+.schedule-time-off-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; margin-top: 1rem; }
+.schedule-time-off { padding: 1rem; border: 1px solid var(--color-border); border-radius: .75rem; min-width: 0; }
+.schedule-time-off h4 { font-weight: 600; margin-bottom: .35rem; }
+.schedule-time-off p { font-size: .85rem; }
+.schedule-time-off ul { list-style: none; padding: 0; }
+.schedule-time-off li { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .5rem; border-top: 1px solid var(--color-border); padding-top: .35rem; font-size: .85rem; }
+.schedule-inline { display: flex; gap: .75rem; align-items: flex-end; margin-bottom: 1rem; }
+.schedule-inline label { flex: 1; margin-bottom: 0; }
+.schedule-inline button { flex-shrink: 0; }
+.schedule-save-reminder { margin-top: 1rem; font-size: .85rem; }
+.appointment-workspace button:disabled { cursor: not-allowed; }
+@media (max-width: 1000px) {
+  .schedule-time-off-grid, .appointment-inbox .clinical-fields { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .appointment-task-switch, .schedule-fields { grid-template-columns: minmax(0, 1fr); }
+  .appointment-section-heading, .schedule-editor-heading, .schedule-list > li { flex-direction: column; align-items: stretch; }
+  .schedule-row-actions { justify-items: start; }
+  .schedule-inline { flex-wrap: wrap; }
+  .schedule-inline label { flex-basis: 100%; }
+}
+.appointment-card-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; margin-bottom: .5rem; }
+.appointment-card-heading [data-status="requested"] { background: var(--color-surfaceTint); color: var(--color-primary); }
+.appointment-card-time { color: var(--color-primary); font-weight: 600; }
+.appointment-card > details { border-top: 1px solid var(--color-border); margin-top: 1rem; padding-top: .5rem; }
+.appointment-card > details > summary { min-height: 44px; align-content: center; cursor: pointer; color: var(--color-primary); font-weight: 600; }
+.appointment-card .clinical-actions .appointment-cancel { background: var(--color-background); color: var(--color-error); margin-inline-start: auto; }
+@media (max-width: 640px) { .appointment-card .clinical-actions .appointment-cancel { margin-inline-start: 0; } }

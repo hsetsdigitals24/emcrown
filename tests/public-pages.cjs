@@ -49,13 +49,28 @@ assert.match(locations, /Jensen Beach/);
 const single = renderToStaticMarkup(React.createElement(PracticeLocations, { practice:{...PRACTICE,locationSelectorEnabled:false} }));
 assert.doesNotMatch(single, /Jensen Beach|name="practice-location"/);
 async function checkRoutes() {
+  const { CMS_DEFINITIONS } = require('../src/config/cms/registry.ts');
+  const { validateValues, storedValues } = require('../src/features/cms/validation.ts');
+  const { applyContent } = require('../src/features/cms/fields.ts');
+  const { PAGE_SEEDS } = require('../src/config/cms/content.ts');
+  for (const definition of CMS_DEFINITIONS) {
+    assert.ok(validateValues(definition.path, definition.initial), `Invalid CMS seed: ${definition.path}`);
+    assert.deepEqual(storedValues(definition.path, definition.initial), definition.initial);
+  }
+  const about = CMS_DEFINITIONS.find(entry => entry.path === '/about');
+  const edited = { ...about.initial, 'content.hero.body': 'Staff-edited introduction', 'content.sections.0.body': 'Staff-edited paragraph' };
+  assert.ok(validateValues('/about', edited));
+  const updated = applyContent(PAGE_SEEDS['/about'], edited);
+  assert.equal(updated.content.hero.body, 'Staff-edited introduction');
+  assert.equal(updated.content.sections[0].body, 'Staff-edited paragraph');
+
   const paths = ['about','services','physicians','resources','insurance','contact','faq','legal','privacy','terms','accessibility','notice-of-privacy-practices'];
   for (const path of paths) {
     const route = require(`../src/app/(public)/${path}/page.tsx`);
     const html = renderToStaticMarkup(React.createElement(SiteLayout, {navigation:SITE_NAVIGATION,footer:SITE_FOOTER}, await PublishedPage((await route.default()).props)));
     assert.equal((html.match(/<h1 /g)||[]).length,1,path);
     assert.equal((html.match(/<main /g)||[]).length,1,path);
-    assert.match(html,/Preview/);
+    assert.doesNotMatch(html,/\[(?:SERVICE NAME|ARTICLE TITLE|APPROVED PRIVACY|PRACTICE INTRODUCTION)/);
     const metadata = await route.generateMetadata();
     assert.equal(metadata.robots.index,false,path);
     assert.match(metadata.alternates.canonical, new RegExp(`/${path}$`));
@@ -69,9 +84,9 @@ async function checkRoutes() {
       const page = await route.default({params:Promise.resolve({slug:entry.slug})});
       const html = renderToStaticMarkup(await PublishedPage(page.props));
       assert.equal((html.match(/<h1 /g)||[]).length,1);
-      assert.match(html,/\[/);
+      assert.doesNotMatch(html,/\[(?:SERVICE NAME|ARTICLE TITLE|ARTICLE BODY|MEDICAL REVIEW DATE)/);
       if (family==='physicians') { assert.match(html,/APPROVED CREDENTIALS/); assert.doesNotMatch(html,/licence|license/i); }
-      if (family==='resources') assert.match(html,/MEDICAL REVIEW DATE/);
+      if (family==='resources') { assert.doesNotMatch(html,/Medically reviewed<\/dt>/); assert.match(html,/Further reading/); }
       const metadata = await route.generateMetadata({params:Promise.resolve({slug:entry.slug})});
       assert.equal(metadata.robots.index,false);
       assert.ok(metadata.alternates.canonical.endsWith(entry.path));
@@ -88,6 +103,6 @@ async function checkRoutes() {
   assert.match(errorHtml,/Try again/);
   assert.match(errorHtml,/page-search-input/);
   assert.doesNotMatch(errorHtml,/stack|digest/i);
-  console.log('Passed: 24 page templates, metadata, invalid slugs, insurance states, location configuration, private local search and retry callback.');
+  console.log('Passed: public editorial pages, metadata, invalid slugs, insurance states, location configuration, private local search and retry callback.');
 }
 checkRoutes().catch(error=>{console.error(error);process.exitCode=1;});

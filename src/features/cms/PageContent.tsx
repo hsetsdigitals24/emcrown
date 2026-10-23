@@ -1,6 +1,7 @@
 // Shared renderer: public server pages and preview use the same seeds and components.
 import type { PublicPhysician } from "@/types/clinical";
-import { HOME_SEED, SITE_SEED, BOOKING_SEED } from "@/config/cms/content";
+import { PublicPhysicianList } from "@/features/physicians/PublicPhysicians";
+import { HOME_SEED, SITE_SEED, BOOKING_SEED, PAGE_SEEDS } from "@/config/cms/content";
 import BookingContent from "@/features/cms/BookingContent";
 import type { MockSchedule } from "@/types/booking";
 import { applyContent } from "@/features/cms/fields";
@@ -10,6 +11,7 @@ import type { CmsValues } from "@/types/cms";
 export default function PageContent({ path, values, siteValues, context = {}, preview = false, schedule, physicianRecords }: {
   path: string; values: CmsValues; siteValues: CmsValues; context?: CmsContext; preview?: boolean; schedule?: MockSchedule; physicianRecords?: PublicPhysician[];
 }) {
+  if (path === "/physicians" && physicianRecords?.length) return <PublicPhysicianList records={physicianRecords} content={applyContent(PAGE_SEEDS["/physicians"], values).content} site={applyContent(SITE_SEED, siteValues)} />;
   if (path === "/book" && schedule) return <BookingContent content={applyContent(BOOKING_SEED, values)} site={applyContent(SITE_SEED, siteValues)} schedule={schedule} />;
   if (path === "/" || path === "/_site") return <HomeContent content={applyContent(HOME_SEED, path === "/" ? values : context["/"] ?? {})} preview={preview} records={physicianRecords} />;
   return <InformationContent path={path} values={values} site={applyContent(SITE_SEED, siteValues)} context={context} />;

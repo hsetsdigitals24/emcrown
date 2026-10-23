@@ -1,0 +1,3 @@
+/* Decorative backdrop: outside taps are handled by NavigationShadow's document listener.
+   Excluding this fixed layer from hit testing prevents a renderer stall in scaled CMS iframes. */
+.menu-backdrop { pointer-events: none; }

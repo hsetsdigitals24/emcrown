@@ -2,7 +2,8 @@
 export const HANDOVER_POLICY = { invitationSeconds: 48 * 60 * 60, recoveryCodeCount: 10 } as const;
 export const HANDOVER_COPY = {
   inviteTitle: "Invite a team member", inviteIntro: "Invite a new account using their work email. They choose their password and set up their own authenticator. Invitations expire after 48 hours.",
-  invite: "Send invitation", email: "Work email", code: "Fresh authenticator code", pending: "Please wait…",
+  invite: "Send invitation", email: "Work email", code: "Your authenticator code", codePlaceholder: "Enter your 6-digit code",
+  codeHint: "Use the current code from the authenticator app you use to sign in.", pending: "Please wait…",
   sent: "Invitation queued. The scheduled mail worker must run to send it.",
   failed: "We could not complete this request. Check your details and use a fresh authenticator code.",
   transferTitle: "One-time ownership handover", transferIntro: "Select an active team member who has completed password and MFA setup. Confirm with your authenticator. Your organisation access will be disabled and this handover cannot be repeated.",

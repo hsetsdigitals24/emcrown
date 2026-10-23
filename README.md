@@ -285,6 +285,13 @@ tests/                     Frontend, booking, security and integration checks
 public/media/              Public brand and approved/demo image assets
 ```
 
+Signed-in admin pages live in `src/app/emcrown-admin/(workspace)/`. Their shared
+layout retains the sidebar, header and collapse state during client navigation;
+loading and error boundaries update only the content area. Each page and action
+still checks authentication and permissions independently. Sign-in/recovery routes,
+API handlers and the CMS preview stay outside this group. Add future signed-in
+pages to the group and their navigation labels to `src/config/admin.ts`.
+
 Useful configuration entrypoints:
 
 - `src/config/business-hours.ts`: confirmed opening hours and demo slot interval.
@@ -304,6 +311,7 @@ changing a Next.js convention, read the installed guides under
 ```bash
 npm run lint
 npm run typecheck
+node tests/workspace-shell.cjs
 node tests/booking.cjs
 node --conditions=react-server tests/booking-calendar.cjs
 node --conditions=react-server tests/appointment-scheduler.cjs
