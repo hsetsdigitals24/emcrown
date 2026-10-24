@@ -1,4 +1,5 @@
 // Server layout: marketing chrome stays outside the private organisation workspace.
+import { practiceFooter } from "@/lib/practice";
 import { physicianName } from "@/lib/physician-name";
 import { publicPhysicians } from "@/features/physicians/repository";
 import SiteLayout from "@/components/layout/SiteLayout";
@@ -12,7 +13,8 @@ export default async function PublicLayout({ children }: { children: React.React
   const path = (await headers()).get("x-emcrown-content-path");
   if (path && findDefinition(path) && await publicValues(path) === null) notFound();
   const site = await publishedContent("/_site", SITE_SEED);
+  const footer = practiceFooter(site.footer, site.practice);
   const physicians = await publicPhysicians();
   const navigation = physicians.length ? { ...site.navigation, items: site.navigation.items.map(item => item.href === "/physicians" ? { ...item, previews: physicians.map(record => ({ label: physicianName(record), photo: record.photo, href: `/physicians/${record.slug}`, description: record.specialties })) } : item) } : site.navigation;
-  return <SiteLayout navigation={navigation} footer={site.footer}>{children}</SiteLayout>;
+  return <SiteLayout navigation={navigation} footer={footer}>{children}</SiteLayout>;
 }

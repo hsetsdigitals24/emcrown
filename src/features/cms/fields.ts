@@ -12,6 +12,9 @@ export function defineContent(path: string, label: string, seed: unknown): CmsDe
       const name = segments.at(-1) ?? "";
       if (IMMUTABLE.has(name)) return;
       const key = segments.join(".");
+      // These displayed details come from the single practice record, not duplicate text slots.
+      if (path === "/" && ["location.address", "location.hours", "location.mapLabel", "location.phone.label", "location.phone.href", "location.directions.label", "location.directions.href"].includes(key)) return;
+      if (path === "/_site" && (key === "footer.address" || key.startsWith("footer.locations.") || key.startsWith("footer.hours."))) return;
       const group = segments[0] === "content" ? segments.slice(0, segments[1] === "sections" ? 3 : 2).join(".") : segments[0];
       fields.push({ key, path: segments, label: segments.map(humanize).join(" / "), group, owners,
         media: /^(photo|poster|image|src)$/.test(name) || segments.includes("images"),

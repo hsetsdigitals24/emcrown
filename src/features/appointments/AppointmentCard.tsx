@@ -6,16 +6,19 @@ import type { Appointment, AvailabilitySlot, Physician } from "@/types/clinical"
 import { APPOINTMENT_WORKSPACE as copy } from "@/config/appointment-workspace";
 import { CLINICAL_COPY as c } from "@/config/clinical";
 import { BOOKING_SETTINGS } from "@/config/booking";
+import type { PracticeLocation } from "@/types/public";
 import { PRACTICE } from "@/config/practice";
 import { formatDay, formatTime, practiceDate } from "@/features/booking/time";
 import { clinicalRequest } from "@/features/clinical/client";
 import { availabilitySchema } from "@/features/clinical/contracts";
+import MessageStatusList from "@/features/notifications/MessageStatusList";
+import type { NotificationMessage } from "@/features/notifications/contracts";
 import { useToast } from "@/components/ui/ToastProvider";
 export function slotLabel(slot: { startUtc: string; physicianId: string }, providers: Array<{ id: string; fullName: string }>) {
   return `${formatDay(practiceDate(slot.startUtc, BOOKING_SETTINGS.timeZone), BOOKING_SETTINGS.timeZone, "en-US")} · ${formatTime(slot.startUtc, BOOKING_SETTINGS.timeZone, "en-US")} · ${providers.find(provider => provider.id === slot.physicianId)?.fullName ?? ""}`;
 }
-export default function AppointmentCard({ appointment: a, providers, canManage, messages, onSaved }: {
-  appointment: Appointment; providers: Physician[]; canManage: boolean; messages: Array<{ channel: string; kind: string; state: string }>; onSaved: () => Promise<void>;
+export default function AppointmentCard({ appointment: a, providers, canManage, messages, onSaved, locations = PRACTICE.locations }: {
+  locations?: PracticeLocation[]; appointment: Appointment; providers: Physician[]; canManage: boolean; messages: NotificationMessage[]; onSaved: () => Promise<void>;
 }) {
   const [busy, setBusy] = useState(false); const [rebooking, setRebooking] = useState(false);
   const [slots, setSlots] = useState<AvailabilitySlot[]>([]); const [selected, setSelected] = useState("");
@@ -40,12 +43,12 @@ export default function AppointmentCard({ appointment: a, providers, canManage, 
   }
   const finished = ["completed", "no_show"].includes(a.status);
   return <li className="appointment-card"><div className="appointment-card-heading"><h3>{a.patient.name}</h3><span className="schedule-state" data-status={a.status}>{c[a.status === "requested" ? "pending" : a.status]}</span></div><p className="appointment-card-time">{slotLabel(a, providers)}</p>
-    <p>{BOOKING_SETTINGS.types.find(type => type.id === a.typeId)?.label} · {PRACTICE.locations.find(location => location.id === a.locationId)?.label}</p>
+    <p>{BOOKING_SETTINGS.types.find(type => type.id === a.typeId)?.label} · {locations.find(location => location.id === a.locationId)?.label}</p>
     <details><summary>{c.review}</summary><dl className="clinical-details">
-      {[[c.type, BOOKING_SETTINGS.types.find(type => type.id === a.typeId)?.label], [c.location, PRACTICE.locations.find(location => location.id === a.locationId)?.label],
+      {[[c.type, BOOKING_SETTINGS.types.find(type => type.id === a.typeId)?.label], [c.location, locations.find(location => location.id === a.locationId)?.label],
         [c.birth, a.patient.dateOfBirth], [c.contact, `${a.patient.email}\n${a.patient.phone}`], [c.reason, a.patient.reason],
         [c.consent, `${c.email}: ${a.patient.emailConsent ? "✓" : "—"} · SMS: ${a.patient.smsConsent ? "✓" : "—"}`]].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
-    </dl><h4>{c.notifications}</h4>{!messages.length && <p>{copy.noMessages}</p>}<ul>{messages.map((message, index) => <li key={index}>{message.channel} · {message.kind} · {message.state}</li>)}</ul></details>
+    </dl><h4>{c.notifications}</h4><MessageStatusList messages={messages} /></details>
     {canManage && !finished && <fieldset disabled={busy}><div className="clinical-actions">
       {a.status === "requested" && <button onClick={() => void mutate("confirm")}>{c.confirm}</button>}
       <button className="clinical-secondary" onClick={() => void loadSlots()}>{copy.reschedule}</button>

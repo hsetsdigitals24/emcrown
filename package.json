@@ -22,9 +22,13 @@
     "appointments:deliver": "node --conditions=react-server scripts/appointments.cjs",
     "test:clinical": "node --conditions=react-server tests/clinical.cjs",
     "test:clinical-unit": "node --conditions=react-server tests/clinical-unit.cjs",
-    "test:clinical-ocr": "node tests/clinical-ocr.cjs"
+    "test:clinical-ocr": "node tests/clinical-ocr.cjs",
+    "test:messaging": "node --conditions=react-server tests/messaging.cjs",
+    "messaging:dry-run": "node --conditions=react-server scripts/messaging-check.cjs",
+    "test:notifications": "node --conditions=react-server tests/notifications.cjs"
   },
   "dependencies": {
+    "@aws-sdk/client-pinpoint-sms-voice-v2": "3.1156.0",
     "@gsap/react": "^2.1.2",
     "@puckeditor/core": "0.23.0",
     "drizzle-orm": "^0.45.4",

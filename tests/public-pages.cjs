@@ -45,7 +45,10 @@ assert.doesNotMatch(comingSoon, /MUST NOT RENDER/);
 const available = renderToStaticMarkup(React.createElement(InsurancePlans, { settings: { ...INSURANCE_SETTINGS, state:'available', plans:[{id:'mock',name:'[APPROVED PLAN]',description:'[APPROVED DESCRIPTION]'}] } }));
 assert.match(available, /\[APPROVED PLAN\]/);
 const locations = renderToStaticMarkup(React.createElement(PracticeLocations, { practice:PRACTICE }));
-assert.match(locations, /Jensen Beach/);
+assert.doesNotMatch(locations, /Jensen Beach/);
+assert.match(locations, /www.google.com\/maps/);
+assert.equal(PRACTICE.locations.length, 1);
+assert.equal(PRACTICE.locationSelectorEnabled, false);
 const single = renderToStaticMarkup(React.createElement(PracticeLocations, { practice:{...PRACTICE,locationSelectorEnabled:false} }));
 assert.doesNotMatch(single, /Jensen Beach|name="practice-location"/);
 async function checkRoutes() {
@@ -74,7 +77,11 @@ async function checkRoutes() {
     const metadata = await route.generateMetadata();
     assert.equal(metadata.robots.index,false,path);
     assert.match(metadata.alternates.canonical, new RegExp(`/${path}$`));
-    assert.doesNotMatch(html,/dangerouslySetInnerHTML|<iframe/);
+    assert.doesNotMatch(html,/dangerouslySetInnerHTML/);
+    if (path === "contact") {
+      assert.equal((html.match(/<iframe/g) ?? []).length, 1);
+      assert.match(html, /src="https:\/\/www.google.com\/maps\?/);
+    } else assert.doesNotMatch(html, /<iframe/);
     if (path==='contact') { assert.match(html,/<fieldset disabled=""/); assert.doesNotMatch(html,/href="mailto:/); }
   }
   for (const [family, entries] of [['services',SERVICE_ENTRIES],['physicians',PHYSICIAN_ENTRIES],['resources',ARTICLE_ENTRIES]]) {

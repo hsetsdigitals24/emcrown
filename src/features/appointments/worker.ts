@@ -6,6 +6,7 @@ import { appointments, appointmentMessages, smsSuppressions } from "@/lib/db/cli
 import { unseal, privateHash } from "@/features/clinical/encryption";
 import { deliverMessage, messagePayloadSchema, normalizePhone } from "@/features/appointments/delivery";
 import { deliveryEnv } from "@/features/clinical/env";
+import { physicianAlertRecipient } from "@/features/appointments/physician-alerts";
 import { clinicalEvent } from "@/features/clinical/access";
 async function claimMessage() {
   return db().transaction(async tx => {
@@ -23,6 +24,9 @@ async function sendClaimed(row: typeof appointmentMessages.$inferSelect) {
       await tx.update(appointmentMessages).set({ state: "cancelled", updatedAt: new Date() }).where(eq(appointmentMessages.id, row.id)); return;
     }
     const payload = messagePayloadSchema.parse(JSON.parse(unseal(row.payload, row.organisationId, row.id, "message")));
+    if (row.channel === "physician" && await physicianAlertRecipient(tx, row.organisationId, appointment.physicianId) !== payload.to) {
+      await tx.update(appointmentMessages).set({ state: "cancelled", updatedAt: new Date() }).where(eq(appointmentMessages.id, row.id)); return;
+    }
     if (row.channel === "sms") {
       const [suppressed] = await tx.select().from(smsSuppressions).where(and(eq(smsSuppressions.organisationId, row.organisationId), eq(smsSuppressions.phoneHash, privateHash(normalizePhone(payload.to)))));
       if (suppressed) { await tx.update(appointmentMessages).set({ state: "cancelled", updatedAt: new Date() }).where(eq(appointmentMessages.id, row.id)); return; }

@@ -68,7 +68,7 @@
 .appointment-booking-state p { margin-block: .35rem; max-width: 85ch; color: var(--color-textSecondary); font-size: .9rem; line-height: 1.6; }
 .appointment-booking-state small { color: var(--color-textSecondary); font-size: .8rem; }
 .appointment-booking-state.is-live { border-left-color: var(--color-success); }
-.appointment-task-switch { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; }
+.appointment-task-switch { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8rem; }
 .appointment-task-switch button { display: grid; gap: .35rem; padding: 1.1rem 1.35rem; border: 1px solid var(--color-border); border-radius: .8rem; background: var(--color-background); text-align: left; cursor: pointer; min-height: 84px; }
 .appointment-task-switch button strong { color: var(--color-primary); }
 .appointment-task-switch button span { font-size: .85rem; color: var(--color-textSecondary); }
@@ -131,3 +131,26 @@
 .appointment-card > details > summary { min-height: 44px; align-content: center; cursor: pointer; color: var(--color-primary); font-weight: 600; }
 .appointment-card .clinical-actions .appointment-cancel { background: var(--color-background); color: var(--color-error); margin-inline-start: auto; }
 @media (max-width: 640px) { .appointment-card .clinical-actions .appointment-cancel { margin-inline-start: 0; } }
+
+/* Message management shares safe projections with appointment details. */
+.notification-message-list { list-style: none; padding: 0; display: grid; gap: .75rem; margin-block: 1rem; }
+.notification-message-list > li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .5rem 1rem; padding: 1rem; border: 1px solid var(--color-border); border-radius: .75rem; }
+.notification-message-list strong { font-size: .9rem; }
+.notification-message-list p { margin: .25rem 0 0; font-size: .8rem; }
+.notification-message-list dl { grid-column: 1 / -1; display: flex; gap: 1rem 2rem; flex-wrap: wrap; font-size: .75rem; }
+.notification-message-list dt { color: var(--color-textSecondary); }
+.notification-status { align-self: start; padding: .3rem .6rem; border-radius: .5rem; background: var(--color-surfaceTint); color: var(--color-primary); font-size: .75rem; font-weight: 600; }
+.notification-status[data-state=delivered] { color: var(--color-success); }
+.notification-status:is([data-state=failed], [data-state=bounced], [data-state=complained]) { color: var(--color-error); }
+.notification-totals { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; margin-block: 1.25rem; }
+.notification-totals > div { padding: 1rem; border-radius: .75rem; background: var(--color-sectionAlt); }
+.notification-totals strong { display: block; font-size: 1.75rem; line-height: 1.2; }
+.notification-totals span { font-size: .75rem; color: var(--color-textSecondary); }
+.notification-appointment { border-top: 1px solid var(--color-border); padding-block: 1rem; }
+.notification-appointment summary { display: flex; flex-direction: column; gap: .35rem; cursor: pointer; min-height: 44px; }
+.notification-appointment summary span { font-size: .8rem; color: var(--color-textSecondary); }
+.physician-alert-list { list-style: none; }
+.physician-alert-list li { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; border-top: 1px solid var(--color-border); padding-block: 1rem; }
+.physician-alert-list p { margin-bottom: 0; font-size: .875rem; overflow-wrap: anywhere; }
+.notification-tracking { border-left: 3px solid var(--color-primary); background: var(--color-surfaceTint); padding: 1rem; border-radius: .5rem; }
+@media (max-width: 720px) { .notification-totals { grid-template-columns: repeat(2, minmax(0, 1fr)); } .notification-message-list > li { grid-template-columns: minmax(0, 1fr); } }

@@ -6,7 +6,7 @@ Object.assign(process.env,{DATABASE_URL:"postgresql://test@localhost/test",AUTH_
  CLINICAL_ACTIVE_KEY:"test",CLINICAL_ENCRYPTION_KEYS:JSON.stringify({test:randomBytes(32).toString("hex")}),CLINICAL_TOKEN_KEY:randomBytes(32).toString("hex"),
  CLINICAL_BOOKING_ENABLED:"true",CLINICAL_INTEGRATIONS_APPROVED:"true",CLINICAL_RETENTION_DAYS:"365",CLINICAL_SMTP_HOST:"localhost",CLINICAL_SMTP_PORT:"587",CLINICAL_SMTP_USER:"test",CLINICAL_SMTP_PASSWORD:"test",CLINICAL_SMTP_FROM:"staff@example.test",CLINICAL_STAFF_EMAIL:"staff@example.test",TURNSTILE_SITE_KEY:"fake-site-key-for-tests",TURNSTILE_SECRET_KEY:"fake-secret-key-for-tests",CLINICAL_SMS_ENABLED:"false",
  SUPABASE_URL:"https://storage.example.test",SUPABASE_SERVICE_ROLE_KEY:"fake-server-key-for-tests-only",SUPABASE_STORAGE_BUCKET:"cms-images",SUPABASE_CV_BUCKET:"physician-cvs",
- TWILIO_ACCOUNT_SID:"AC"+"a".repeat(32),TWILIO_AUTH_TOKEN:"fake-provider-token-for-tests-only",TWILIO_MESSAGING_SERVICE_SID:"MG"+"a".repeat(32),CLINICAL_SMS_APPROVED:"true"});
+ CLINICAL_SMS_PROVIDER:"twilio",TWILIO_ACCOUNT_SID:"AC"+"a".repeat(32),TWILIO_AUTH_TOKEN:"fake-provider-token-for-tests-only",TWILIO_MESSAGING_SERVICE_SID:"MG"+"a".repeat(32),CLINICAL_SMS_APPROVED:"true"});
 (async()=>{
  const {liveBookingConfigured}=require("../src/features/clinical/env.ts");assert.equal(liveBookingConfigured(),true);
  process.env.CLINICAL_INTEGRATIONS_APPROVED="false";assert.equal(liveBookingConfigured(),false);process.env.CLINICAL_INTEGRATIONS_APPROVED="true";

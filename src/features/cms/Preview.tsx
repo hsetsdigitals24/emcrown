@@ -6,6 +6,7 @@ import PageContent from "@/features/cms/PageContent";
 import SiteLayout from "@/components/layout/SiteLayout";
 import { SITE_SEED } from "@/config/cms/content";
 import { findDefinition } from "@/config/cms/registry";
+import { practiceFooter } from "@/lib/practice";
 import { applyContent } from "@/features/cms/fields";
 import { fieldAtElement } from "@/features/cms/preview-selection";
 import { isPreviewNavigationControl } from "@/features/cms/preview-interaction";
@@ -60,7 +61,7 @@ export default function Preview({ schedule, physicianRecords }: { schedule: Mock
     return () => { container.removeEventListener("click", click, true); container.removeEventListener("submit", submit, true); container.removeEventListener("pointerover", hover); };
   }, [state]);
   const site = applyContent(SITE_SEED, state?.siteValues ?? {});
-  return <div ref={root} className="cms-preview-root" data-cms-mode={state?.browse ? "browse" : "edit"}>{state ? <SiteLayout navigation={site.navigation} footer={site.footer} embedded>
+  return <div ref={root} className="cms-preview-root" data-cms-mode={state?.browse ? "browse" : "edit"}>{state ? <SiteLayout navigation={site.navigation} footer={practiceFooter(site.footer, site.practice)} embedded>
     <PageContent path={state.path} values={state.values} siteValues={state.siteValues} context={state.context} schedule={schedule} physicianRecords={physicianRecords} preview />
   </SiteLayout> : <p role="status">{CMS_COPY.loading}</p>}</div>;
 }

@@ -8,12 +8,12 @@ import { organisations } from "@/lib/db/schema";
 import { appointmentMessages, smsSuppressions } from "@/lib/db/clinical";
 import { allowAttempt } from "@/features/auth/rate-limit";
 import { boundedBody } from "@/features/cms/http";
-import { smsEnv } from "@/features/clinical/env";
+import { twilioSmsEnv } from "@/features/clinical/env";
 import { constantEqual, privateHash } from "@/features/clinical/encryption";
 import { authEnv } from "@/lib/auth-env";
 import { normalizePhone } from "@/features/appointments/delivery";
 export async function signedSmsForm(request: Request, pathname: string) {
-  const env = smsEnv();
+  const env = twilioSmsEnv();
   if (!await allowAttempt("clinical:sms-webhook", "provider", 5000)) return null;
   if (!request.headers.get("content-type")?.startsWith("application/x-www-form-urlencoded")) return null;
   const form = new URLSearchParams((await boundedBody(request, 16000)).toString("utf8"));

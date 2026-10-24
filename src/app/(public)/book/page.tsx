@@ -11,6 +11,7 @@ import { publicPhysicians } from "@/features/physicians/repository";
 import { availableSlots } from "@/features/appointments/availability";
 import { practiceDate } from "@/features/booking/time";
 import { BOOKING_SETTINGS } from "@/config/booking";
+import { publishedPractice } from "@/features/clinical/practice";
 import LiveBooking from "@/features/appointments/LiveBooking";
 import "@/features/clinical/styles.css";
 import BookingContent from "@/features/cms/BookingContent";
@@ -27,11 +28,12 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
   const selectionUnavailable = query.physician !== undefined && !preferred;
   if (liveBookingConfigured()) {
     const env = liveBookingEnv();
+    const practice = await publishedPractice();
     const slots = await db().transaction(async tx => {
       const [org] = await tx.select({ id: organisations.id }).from(organisations).where(eq(organisations.key, "emcrown"));
       return org ? availableSlots(tx, org.id, practiceDate(new Date().toISOString(), BOOKING_SETTINGS.timeZone)) : [];
     });
-    return <LiveBooking key={preferred?.id ?? "default"} initialPhysicianId={preferred?.id} selectionUnavailable={selectionUnavailable} providers={providers} initialSlots={slots} siteKey={env.TURNSTILE_SITE_KEY} smsEnabled={env.smsEnabled} nonce={(await headers()).get("x-nonce") ?? undefined} />;
+    return <LiveBooking key={preferred?.id ?? "default"} initialPhysicianId={preferred?.id} selectionUnavailable={selectionUnavailable} providers={providers} initialSlots={slots} location={practice.locations[0]} siteKey={env.TURNSTILE_SITE_KEY} smsEnabled={env.smsEnabled} nonce={(await headers()).get("x-nonce") ?? undefined} />;
   }
   const [content, site, schedule] = await Promise.all([publishedContent("/book", BOOKING_SEED), publishedContent("/_site", SITE_SEED), getDemoSchedule()]);
   // Only this explicitly labelled demo invents sample slots; live availability stays database-backed.

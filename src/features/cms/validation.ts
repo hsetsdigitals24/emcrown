@@ -21,6 +21,7 @@ export function validateValues(path: string, input: unknown): CmsValues | null {
   const parsed = valuesSchema.safeParse(input);
   if (!definition || !parsed.success || JSON.stringify(parsed.data).length > CMS_POLICY.maxDocumentBytes) return null;
   const values = parsed.data;
+  if (path === "/_site" && ["practice.locations.0.address", "practice.locations.0.label"].some(key => !values[key]?.trim() || values[key].length > 500)) return null;
   if (Object.keys(values).length !== definition.fields.length) return null;
   for (const field of definition.fields) {
     const value = values[field.key];

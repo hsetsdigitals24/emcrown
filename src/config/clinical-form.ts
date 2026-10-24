@@ -1,6 +1,7 @@
 // Shared admin form labels, examples and guidance; examples never populate records.
 export const PHYSICIAN_FORM = {
   intro: "Build the profile below or import a CV. Save privately, then publish when it is ready.",
+  alertLabel: "Email this physician about appointment changes", alertHelp: "Send a minimal alert for requests, confirmations, reschedules and cancellations. No patient details or patient manage link are included. Viewing appointments requires a staff account. Delivery must be configured first.", alertEmailRequired: "Add an email address to enable appointment alerts.",
   identity: "Profile essentials", identityHelp: "Start with the physician’s name and how they appear on the website.",
   contact: "Private contact details", contactHelp: "Visible only to authorised staff. These details are never published.",
   biography: "Public biography", biographyHelp: "Only publish information that has been reviewed and approved.",

@@ -5,6 +5,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { physicians, providerSchedules } from "@/lib/db/clinical";
 import { clinicalActor, clinicalEvent } from "@/features/clinical/access";
+import { BOOKING_SETTINGS } from "@/config/booking";
 import { scheduleSchema } from "@/features/clinical/validation";
 export const scheduleWriteSchema = z.object({ id: z.uuid().optional(), version: z.number().int().nonnegative(), definition: scheduleSchema }).strict();
 export async function listSchedules() {
@@ -19,6 +20,7 @@ export async function writeSchedule(input: unknown) {
   return db().transaction(async tx => {
     const actor = await clinicalActor(tx, "physicians:manage"); if (!actor) return { ok: false as const, code: "denied" as const };
     const { id, version, definition } = parsed.data;
+    if (definition.enabled && !BOOKING_SETTINGS.locationIds.includes(definition.locationId)) return { ok: false as const, code: "invalid" as const };
     await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${actor.organisationId}), hashtext(${definition.physicianId}))`);
     const [provider] = await tx.select({ id: physicians.id }).from(physicians).where(and(eq(physicians.id, definition.physicianId), eq(physicians.organisationId, actor.organisationId)));
     if (!provider) return { ok: false as const, code: "invalid" as const };

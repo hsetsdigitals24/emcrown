@@ -13,6 +13,9 @@ export async function register() {
       const { assertClinicalRuntime } = await import("@/features/clinical/runtime");
       await assertClinicalRuntime();
     }
+    if (process.env.CLINICAL_EMAIL_EVENTS_ENABLED === "true") {
+      const { emailEventEnv } = await import("@/features/notifications/env"); emailEventEnv();
+    }
     if (process.env.SUPABASE_URL || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_STORAGE_BUCKET) {
       const { storageEnv } = await import("@/lib/storage");
       storageEnv();

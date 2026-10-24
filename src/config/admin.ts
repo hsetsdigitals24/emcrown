@@ -19,12 +19,33 @@ export const ADMIN_COPY = {
 } as const;
 export const ADMIN_NAV = [
   { href: "/emcrown-admin", label: ADMIN_COPY.overview, icon: "◫" },
+  { href: "/emcrown-admin/practice", label: "Practice details", icon: "⌖", permission: "content:edit" as const },
   { href: "/emcrown-admin/cms", label: "Website CMS", icon: "▤", permission: "content:edit" as const },
   { href: "/emcrown-admin/physicians", label: "Physicians", icon: "♧", permission: "physicians:read" as const },
   { href: "/emcrown-admin/appointments", label: "Appointments", icon: "▦", permission: "appointments:read" as const },
+  { href: "/emcrown-admin/notifications", label: "Notifications", icon: "◉", permission: "appointments:read" as const },
   { href: "/emcrown-admin/activity", label: ADMIN_COPY.activity, icon: "↗", permission: "audit:read" as const },
   { href: "/emcrown-admin/security", label: ADMIN_COPY.security, icon: "◇" },
 ];
 
 // Timed notices leave enough time to read errors; hover/focus pauses dismissal.
 export const TOAST_POLICY = { successMs: 5000, errorMs: 8000, exitMs: 220 };
+
+// Overview summaries describe available tools without implying live booking activation.
+export const OVERVIEW_COPY = {
+  eyebrow: "Your practice, connected",
+  title: "Everything you manage. One workspace.",
+  intro: "Keep your website current, organise your physician team and manage appointments from one place.",
+  quick: "Quick access", quickBody: "Choose a workspace to pick up where you need to.",
+  open: "Open workspace", account: "Your session", accountBody: "Signed in with password and authenticator verification.",
+  websiteBody: "See how your published content appears to visitors.",
+} as const;
+export const OVERVIEW_TOOLS = [
+  { href: "/emcrown-admin/notifications", icon: "↗", label: "Notifications", eyebrow: "Updates & follow-up", description: "See new booking requests, appointment changes and messages that need attention.", highlights: ["Booking alerts", "Message failures"], action: "View notifications", permission: "appointments:read" },
+  { href: "/emcrown-admin/practice", icon: "⌖", label: "Practice details", eyebrow: "Address & visitor information", description: "Update the shared practice address, hours and location map used across the website.", highlights: ["Practice address", "Live location map"], action: "Edit practice details", permission: "content:edit" },
+  { href: "/emcrown-admin/appointments", icon: "▦", label: "Appointments", eyebrow: "Visits & availability", description: "Review appointment requests, manage visits and maintain physician availability.", highlights: ["Appointment inbox", "Weekly hours & time off"], action: "Manage appointments", permission: "appointments:read" },
+  { href: "/emcrown-admin/cms", icon: "▤", label: "Website CMS", eyebrow: "Content & publishing", description: "Update website pages, review your changes and publish content for your visitors.", highlights: ["Page content & images", "Preview & publishing"], action: "Edit website content", permission: "content:edit" },
+  { href: "/emcrown-admin/physicians", icon: "♧", label: "Physicians", eyebrow: "Your physician team", description: "Maintain physician profiles, review biographies and manage public profile visibility.", highlights: ["Profiles & portraits", "Public biographies"], action: "View physicians", permission: "physicians:read" },
+  { href: "/emcrown-admin/activity", icon: "↗", label: "Activity log", eyebrow: "Workspace history", description: "Review recorded sign-in, access and account events with their outcomes and timestamps.", highlights: ["Recorded events", "Action outcomes"], action: "Review activity", permission: "audit:read" },
+  { href: "/emcrown-admin/security", icon: "◇", label: "Security & access", eyebrow: "Account protection", description: "Find password and authenticator recovery options and review account access tools.", highlights: ["Password assistance", "Authenticator recovery"], action: "Review security", permission: "portal:read" },
+] as const;

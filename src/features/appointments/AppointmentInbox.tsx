@@ -2,14 +2,16 @@
 "use client";
 import { useState } from "react";
 import type { Physician } from "@/types/clinical";
+import type { PracticeLocation } from "@/types/public";
+import { PRACTICE } from "@/config/practice";
 import { inboxSchema, type InboxData } from "@/features/clinical/contracts";
 import { clinicalRequest } from "@/features/clinical/client";
 import { CLINICAL_COPY as c } from "@/config/clinical";
 import AppointmentCard from "@/features/appointments/AppointmentCard";
 import { APPOINTMENT_WORKSPACE as copy } from "@/config/appointment-workspace";
 import { useToast } from "@/components/ui/ToastProvider";
-export default function AppointmentInbox({ initial, providers, canManage }: {
-  initial: InboxData; providers: Physician[]; canManage: boolean;
+export default function AppointmentInbox({ initial, providers, canManage, locations = PRACTICE.locations }: {
+  locations?: PracticeLocation[]; initial: InboxData; providers: Physician[]; canManage: boolean;
 }) {
   const [data, setData] = useState(initial); const [from, setFrom] = useState(""); const [status, setStatus] = useState("");
   const [physicianId, setPhysicianId] = useState(""); const [busy, setBusy] = useState(false); const notify = useToast();
@@ -31,7 +33,7 @@ export default function AppointmentInbox({ initial, providers, canManage }: {
     </div><div className="clinical-actions"><button type="submit">{busy ? c.working : c.filter}</button><button type="button" className="clinical-secondary" onClick={() => { setFrom(""); setStatus(""); setPhysicianId(""); void load(0, { from: "", status: "", physicianId: "" }); }}>{copy.reset}</button></div></fieldset></form>
     <div className="appointment-result-heading" role="status"><p>{changed ? copy.unsavedFilters : Object.values(applied).some(Boolean) ? copy.filtered : copy.unfiltered}</p><span>{copy.results}: {data.appointments.length}</span></div>
     {!data.appointments.length ? <div className="appointment-empty"><h3>{copy.emptyTitle}</h3><p>{copy.emptyHelp}</p></div> : <ul className="clinical-list">{data.appointments.map(appointment => <AppointmentCard key={`${appointment.id}:${appointment.version}`} appointment={appointment}
-      providers={providers} canManage={canManage} messages={data.messages.filter(message => message.appointmentId === appointment.id)} onSaved={() => load()} />)}</ul>}
+      locations={locations} providers={providers} canManage={canManage} messages={data.messages.filter(message => message.appointmentId === appointment.id)} onSaved={() => load()} />)}</ul>}
     {(data.page > 0 || data.hasMore) && <div className="clinical-actions"><span>{copy.page} {data.page + 1}</span><button disabled={busy || data.page === 0} onClick={() => void load(data.page - 1)}>{c.previous}</button><button disabled={busy || !data.hasMore} onClick={() => void load(data.page + 1)}>{c.next}</button></div>}
   </section>;
 }

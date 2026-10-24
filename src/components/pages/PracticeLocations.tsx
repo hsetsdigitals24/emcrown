@@ -1,8 +1,10 @@
 // Server component: native location disclosure selector works without JavaScript.
+import PracticeMap from "@/components/ui/PracticeMap";
+import { singlePractice } from "@/lib/practice";
 import type { PracticeConfig, PracticeLocation } from "@/types/public";
 import { CONTACT_COPY as DEFAULT_COPY } from "@/config/pages/contact";
 function LocationDetails({ location, copy: CONTACT_COPY }: { location: PracticeLocation; copy: typeof DEFAULT_COPY }) {
-  return <div className="public-location-layout"><div className="map-placeholder"><div className="map-streets" aria-hidden="true" /><span className="map-pin" aria-hidden="true">+</span><p>{location.mapLabel}</p></div>
+  return <div className="public-location-layout"><PracticeMap address={location.address} label={location.mapLabel} />
     <div className="location-details"><address>{location.address}</address><dl className="space-y-4">
       <div><dt>{CONTACT_COPY.hours}</dt><dd>{location.hours}</dd></div>
       <div><dt>{CONTACT_COPY.parking}</dt><dd>{location.parking}</dd></div>
@@ -11,8 +13,8 @@ function LocationDetails({ location, copy: CONTACT_COPY }: { location: PracticeL
   </div>;
 }
 export default function PracticeLocations({ practice, copy: CONTACT_COPY = DEFAULT_COPY }: { practice: PracticeConfig; copy?: typeof DEFAULT_COPY }) {
-  const locations = practice.locationSelectorEnabled ? practice.locations : practice.locations.slice(0, 1);
-  return <section aria-labelledby="locations-heading"><h2 id="locations-heading" className="font-heading text-heading font-light text-primary">{CONTACT_COPY.locations}</h2>
+  const locations = singlePractice(practice).locations;
+  return <section aria-labelledby="locations-heading"><h2 id="locations-heading" className="font-heading text-heading font-light text-primary">{CONTACT_COPY.location}</h2>
     {practice.locationSelectorEnabled && <p className="mt-4 text-textSecondary">{CONTACT_COPY.locationSelector}</p>}
     <div className="mt-6 space-y-4">{locations.map((location, index) => practice.locationSelectorEnabled ?
       <details className="location-disclosure" key={location.id} name="practice-location" open={index === 0}>

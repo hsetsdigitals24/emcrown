@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { BOOKING_SETTINGS } from "@/config/booking";
+import type { PracticeLocation } from "@/types/public";
 import { PRACTICE } from "@/config/practice";
 import { CLINICAL_COPY as c, CLINICAL_SCHEDULE_DEFAULTS } from "@/config/clinical";
 import { APPOINTMENT_WORKSPACE as copy } from "@/config/appointment-workspace";
@@ -15,7 +16,7 @@ import ScheduleFields from "@/features/appointments/ScheduleFields";
 import ScheduleClosures from "@/features/appointments/ScheduleClosures";
 export type ScheduleRecord = { id: string; version: number; definition: ProviderSchedule };
 const responseSchema = z.array(z.object({ id: z.uuid(), version: z.number(), definition: scheduleSchema }));
-export default function ScheduleEditor({ providers, initial }: { providers: Physician[]; initial: ScheduleRecord[] }) {
+export default function ScheduleEditor({ providers, initial, locations = PRACTICE.locations }: { locations?: PracticeLocation[]; providers: Physician[]; initial: ScheduleRecord[] }) {
   const [rows, setRows] = useState(initial);
   const [selected, setSelected] = useState<ScheduleRecord>();
   const [editing, setEditing] = useState(false);
@@ -71,7 +72,7 @@ export default function ScheduleEditor({ providers, initial }: { providers: Phys
       <ul className="schedule-list">{rows.map(row => <li key={row.id}>
         <div><h3>{providers.find(provider => provider.id === row.definition.physicianId)?.fullName}</h3>
           <p className="schedule-hours">{c.weekDays[row.definition.weekday]} · {row.definition.opens}–{row.definition.closes}</p>
-          <p>{BOOKING_SETTINGS.types.find(type => type.id === row.definition.typeId)?.label ?? row.definition.typeId} · {PRACTICE.locations.find(location => location.id === row.definition.locationId)?.label}</p>
+          <p>{BOOKING_SETTINGS.types.find(type => type.id === row.definition.typeId)?.label ?? row.definition.typeId} · {locations.find(location => location.id === row.definition.locationId)?.label}</p>
           <small>{copy.exclusions}: {row.definition.blockedDates.length + row.definition.blockedTimes.length}</small>
         </div>
         <div className="schedule-row-actions"><span className={`schedule-state ${row.definition.enabled ? "is-enabled" : ""}`}>{row.definition.enabled ? copy.enabled : copy.disabled}</span>
@@ -83,7 +84,7 @@ export default function ScheduleEditor({ providers, initial }: { providers: Phys
     </> : <form noValidate onSubmit={event => { event.preventDefault(); void submit(); }}>
       <fieldset disabled={busy || !providers.length}><div className="schedule-editor-heading"><h3 ref={heading} tabIndex={-1}>{selected ? copy.editTitle : copy.createTitle}</h3><button type="button" className="clinical-text-button" onClick={close}>{copy.close}</button></div>
         {error && <p ref={errorMessage} tabIndex={-1} className="clinical-error" role="alert">{error}</p>}
-        <ScheduleFields value={definition} onChange={updateDefinition} providers={providers} editing={Boolean(selected)} />
+        <ScheduleFields locations={locations} value={definition} onChange={updateDefinition} providers={providers} editing={Boolean(selected)} />
         <ScheduleClosures key={selected?.id ?? "new"} value={definition} onChange={updateDefinition} onPendingChange={setPending} />
         <div className="clinical-setting"><label className="clinical-check"><input type="checkbox" checked={definition.enabled} onChange={event => updateDefinition({ ...definition, enabled: event.target.checked })} /><strong>{copy.active}</strong></label><small>{copy.activeHelp}</small></div>
         <div className="clinical-actions clinical-form-actions"><button type="submit">{busy ? c.working : copy.save}</button><button type="button" className="clinical-secondary" onClick={close}>{c.cancel}</button></div>

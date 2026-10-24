@@ -6,13 +6,14 @@ export function adminResponse(request: NextRequest) {
   const booking = request.nextUrl.pathname === "/book" || request.nextUrl.pathname.startsWith("/book/");
   const challenge = booking && process.env.CLINICAL_INTEGRATIONS_APPROVED === "true";
   const preview = request.nextUrl.pathname === "/emcrown-admin/cms/preview";
+  const practice = request.nextUrl.pathname === "/emcrown-admin/practice";
   const physicians = request.nextUrl.pathname.startsWith("/emcrown-admin/physicians");
   const cms = request.nextUrl.pathname.startsWith("/emcrown-admin/cms");
   const policy = [
     "default-src 'self'", `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${development ? " 'unsafe-eval'" : ""}`,
     `style-src 'self'${development ? " 'unsafe-inline'" : ` 'nonce-${nonce}'`}`,
     `img-src 'self' data:${physicians ? " https:" : ""}`, "font-src 'self'", "object-src 'none'", "base-uri 'none'",
-    ...(preview ? ["frame-src 'self' https://www.google.com"] : challenge ? ["frame-src https://challenges.cloudflare.com"] : []),
+    ...(preview || practice ? ["frame-src 'self' https://www.google.com"] : challenge ? ["frame-src https://challenges.cloudflare.com"] : []),
     "form-action 'self'", preview ? "frame-ancestors 'self'" : "frame-ancestors 'none'", `connect-src 'self'${development ? " ws: wss:" : ""}`,
     ...(physicians ? ["worker-src 'self'"] : []),
     ...(cms ? ["style-src-attr 'unsafe-inline'"] : []),

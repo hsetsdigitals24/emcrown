@@ -64,6 +64,13 @@
       "when": 1792471899528,
       "tag": "0008_lucky_beast",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792879369159,
+      "tag": "0009_nebulous_eternals",
+      "breakpoints": true
     }
   ]
 }

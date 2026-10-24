@@ -4,9 +4,13 @@ require('./public-pages.cjs');
 const assert = require('node:assert/strict');
 const React = require('react');
 const { renderToStaticMarkup } = require('react-dom/server');
-const { BOOKING_SETTINGS } = require('../src/config/booking.ts');
+const { BOOKING_SETTINGS: BASE_SETTINGS } = require('../src/config/booking.ts');
 const { BOOKING_COPY } = require('../src/config/booking-copy.ts');
 const { PRACTICE } = require('../src/config/practice.ts');
+// Scheduling tests must not depend on whether real public physician content is supplied.
+const testProviders = [1, 2].map(index => ({ id: `test-physician-${index}`, label: `[TEST PHYSICIAN ${index}]`, specialty: "[TEST SPECIALTY]" }));
+const BOOKING_SETTINGS = { ...BASE_SETTINGS, providers: testProviders, types: BASE_SETTINGS.types.map(type => ({ ...type, providerIds: testProviders.map(provider => provider.id) })) };
+
 const { makeMockSchedule, availableMockSlots } = require('../src/features/booking/schedule.ts');
 const { initialBookingState, bookingReducer, emptyDetails } = require('../src/features/booking/state.ts');
 const { validateDetails, validateSelection } = require('../src/features/booking/validation.ts');

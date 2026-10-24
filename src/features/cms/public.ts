@@ -16,7 +16,7 @@ const cachedPublication = unstable_cache(async (path: string) => {
     .innerJoin(organisations, eq(organisations.id, cmsDocuments.organisationId))
     .where(and(eq(organisations.key, "emcrown"), eq(cmsDocuments.path, path))).limit(1);
   return row ?? null;
-}, ["cms-public-v2"], { tags: ["cms:public"], revalidate: 3600 });
+}, ["cms-public-v3"], { tags: ["cms:public"], revalidate: 3600 });
 export const publicValues = cache(async (path: string) => {
   if (!authConfigured()) return undefined;
   const row = await cachedPublication(path);

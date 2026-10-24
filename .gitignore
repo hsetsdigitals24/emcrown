@@ -43,7 +43,12 @@ next-env.d.ts
 
 # Keep the value-free frontend setup example, while real environment files stay ignored.
 !.env.example
-docs
+# Keep existing local project notes private; version the production messaging runbook.
+/docs/*
+!/docs/MESSAGING.md
 
 # Generated same-origin OCR worker/WASM/model assets; run npm run cv:assets.
 /public/ocr/
+
+postman
+docs

@@ -28,6 +28,7 @@ Module._load = function(name, ...args) {
     permissions.push(permission);
     return { actor, events: [] };
   } };
+  if (name === '@/features/notifications/repository') return { listNotificationFeed: async () => ({ok:true,data:{events:[],attention:[],page:0,hasMore:false}}) };
   if (name === '@/features/auth/actions') return { logoutAction: async () => {} };
   // Security forms have their own integration suite; the regression here is their page wrapper.
   if (name === '@/features/auth/WorkspaceSecurity') return { __esModule: true, default: () => React.createElement('section', null, 'Fictional security content') };

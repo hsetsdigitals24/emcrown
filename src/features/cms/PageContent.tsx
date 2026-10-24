@@ -4,6 +4,7 @@ import { PublicPhysicianList } from "@/features/physicians/PublicPhysicians";
 import { HOME_SEED, SITE_SEED, BOOKING_SEED, PAGE_SEEDS } from "@/config/cms/content";
 import BookingContent from "@/features/cms/BookingContent";
 import type { MockSchedule } from "@/types/booking";
+import { singlePractice } from "@/lib/practice";
 import { applyContent } from "@/features/cms/fields";
 import HomeContent from "@/features/cms/HomeContent";
 import { InformationContent, type CmsContext } from "@/features/cms/InformationContent";
@@ -13,6 +14,12 @@ export default function PageContent({ path, values, siteValues, context = {}, pr
 }) {
   if (path === "/physicians" && physicianRecords?.length) return <PublicPhysicianList records={physicianRecords} content={applyContent(PAGE_SEEDS["/physicians"], values).content} site={applyContent(SITE_SEED, siteValues)} />;
   if (path === "/book" && schedule) return <BookingContent content={applyContent(BOOKING_SEED, values)} site={applyContent(SITE_SEED, siteValues)} schedule={schedule} />;
-  if (path === "/" || path === "/_site") return <HomeContent content={applyContent(HOME_SEED, path === "/" ? values : context["/"] ?? {})} preview={preview} records={physicianRecords} />;
+  if (path === "/" || path === "/_site") {
+    const content = applyContent(HOME_SEED, path === "/" ? values : context["/"] ?? {});
+    const practice = singlePractice(applyContent(SITE_SEED, siteValues).practice);
+    const location = practice.locations[0];
+    return <HomeContent content={{ ...content, location: { ...content.location, address: location.address, hours: location.hours,
+      mapLabel: location.mapLabel, directions: location.directions, phone: practice.phone } }} preview={preview} records={physicianRecords} />;
+  }
   return <InformationContent path={path} values={values} site={applyContent(SITE_SEED, siteValues)} context={context} />;
 }

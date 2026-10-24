@@ -1,19 +1,20 @@
 // Client form sections: explain the schedule essentials before optional timing controls.
 "use client";
 import { BOOKING_SETTINGS } from "@/config/booking";
+import type { PracticeLocation } from "@/types/public";
 import { PRACTICE } from "@/config/practice";
 import { CLINICAL_COPY as c } from "@/config/clinical";
 import { APPOINTMENT_WORKSPACE as copy } from "@/config/appointment-workspace";
 import type { Physician, ProviderSchedule } from "@/types/clinical";
-export default function ScheduleFields({ value, onChange, providers, editing }: {
-  value: ProviderSchedule; onChange: (value: ProviderSchedule) => void; providers: Physician[]; editing: boolean;
+export default function ScheduleFields({ value, onChange, providers, editing, locations = PRACTICE.locations }: {
+  locations?: PracticeLocation[]; value: ProviderSchedule; onChange: (value: ProviderSchedule) => void; providers: Physician[]; editing: boolean;
 }) {
   const advanced = [["intervalMinutes", c.step, 5, 180], ["bufferMinutes", c.buffer, 0, 120], ["leadHours", c.lead, 0, 720]] as const;
   return <>
     <section className="schedule-form-section" aria-labelledby="schedule-basics"><h3 id="schedule-basics">{copy.basics}</h3><p>{copy.basicsHelp}</p>
       <div className="schedule-fields">
         <label className="clinical-field">{c.provider}<select name="physicianId" value={value.physicianId} disabled={editing} onChange={event => onChange({ ...value, physicianId: event.target.value })}>{providers.map(provider => <option key={provider.id} value={provider.id}>{provider.fullName}</option>)}</select></label>
-        <label className="clinical-field">{c.location}<select name="locationId" value={value.locationId} onChange={event => onChange({ ...value, locationId: event.target.value })}>{PRACTICE.locations.map(location => <option key={location.id} value={location.id}>{location.label}</option>)}</select></label>
+        <label className="clinical-field">{c.location}<select name="locationId" value={value.locationId} onChange={event => onChange({ ...value, locationId: event.target.value })}>{locations.map(location => <option key={location.id} value={location.id}>{location.label}</option>)}</select></label>
         <label className="clinical-field">{c.type}<select name="typeId" value={value.typeId} onChange={event => onChange({ ...value, typeId: event.target.value })}>{BOOKING_SETTINGS.types.map(type => <option key={type.id} value={type.id}>{type.label}</option>)}</select></label>
         <label className="clinical-field">{c.weekday}<select name="weekday" value={value.weekday} onChange={event => onChange({ ...value, weekday: Number(event.target.value) })}>{c.weekDays.map((day, index) => <option key={day} value={index}>{day}</option>)}</select></label>
       </div>

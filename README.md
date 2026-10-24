@@ -22,7 +22,7 @@ in the demo or development tests.
 | Validation | Zod |
 | Images | Next.js Image, Sharp normalization, private Supabase Storage |
 | Authentication | Server sessions, role permissions, password hashing, TOTP MFA, recovery codes |
-| Email | Nodemailer with separate staff-authentication and patient-delivery configuration |
+| Email / SMS | Nodemailer with Amazon SES SMTP; AWS End User Messaging SMS (disabled until approved setup) |
 | CV extraction | PDF.js, Tesseract.js OCR, Mammoth for DOCX |
 | Deployment target | Vercel; PostgreSQL and Storage are configured separately |
 
@@ -204,6 +204,53 @@ flows are needed. Automatic Vercel Cron is **not configured**, so its minutely
 schedule does not block deployment on Hobby. Removing the schedule does not drain
 the notification queue: live confirmations/reminders need a worker before launch.
 Do not run delivery workers against a shared/live database as a casual test.
+
+### Notification management
+
+**Appointments → Notification management** groups patient, physician, practice-team
+and SMS messages by appointment, with scheduled times, attempts and readable
+outcomes. Administrators can toggle physician email alerts in the same view;
+records without a private email cannot be enabled. Existing permission/version
+checks protect changes.
+
+**Notifications** in the sidebar shows booking requests, appointment changes and
+message issues. The overview includes a recent-alert preview. Visible feeds
+refresh every 30 seconds and have a manual Refresh button. The feed is a shared
+operational history, not a per-user unread inbox; it contains no patient/contact
+text. Open Appointments for authorised patient details.
+
+Provider acceptance never means final delivery. Optional delivery/bounce/complaint
+tracking requires migration `0009_nebulous_eternals.sql`, its runtime grant and a
+verified SES → SNS callback connection. It stays off by default; the screens work
+without the migration while disabled. See [the messaging runbook](docs/MESSAGING.md)
+for deployment steps. Migration 0009 and its runtime grant were applied to the
+current development database on 25 October 2026; the app now uses the restricted
+`emcrown_runtime` role. AWS event subscription/activation remains pending.
+
+Local integration test (fictional records only) uses `npm run test:notifications`
+with `NOTIFICATION_TEST_DATABASE_URL` pointing to a dedicated local
+`emcrown_auth_test*` database and `NOTIFICATION_TEST_CA_FILE` pointing to its trusted
+CA. It requires the local SNS stand-in/certificate described in the runbook. It
+never sends emails or accepts remote test databases.
+
+### Change the practice address and physician alerts
+
+- Open **Admin → Practice details**, change the address/hours and click
+  **Publish practice details**. Staff without publishing permission can save a
+  draft for an administrator. One published location drives Contact, Home,
+  footer, booking and newly queued appointment messages; maps/directions follow it.
+- Review existing appointments before moving the practice: already queued
+  messages keep their captured address. Publishing also publishes other saved
+  shared-site settings; the form explains this before the publish button.
+- Open **Physicians → Edit physician → Private contact details** and enable
+  **Email this physician about appointment changes**. Add their email and save.
+  The choice defaults off. Alerts omit patient details and patient manage tokens;
+  the admin appointment link requires a separately authorised staff account.
+  Turning alerts off or changing the email cancels old pending physician alerts.
+- Delivery remains gated until the approved services and worker are configured.
+
+See [docs/MESSAGING.md](docs/MESSAGING.md) for AWS setup, free local SMS simulation,
+provider dry-run, production acceptance tests and rollback.
 
 ### Enable appointment delivery later with an external scheduler
 

@@ -1,6 +1,7 @@
 // Shared validation: constrain all private records and scheduling input at the boundary.
 import { z } from "zod";
 import { CLINICAL_POLICY } from "@/config/clinical";
+import { RETIRED_LOCATION_IDS } from "@/config/practice";
 import { BOOKING_SETTINGS } from "@/config/booking";
 const line = (max: number) => z.string().trim().max(max).refine(value => !/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(value));
 export const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine(value => {
@@ -17,10 +18,11 @@ export const physicianSchema = z.object({
     if (/^\/media\/[\w/.-]+\.(?:webp|png|jpe?g)$/i.test(value)) return !value.includes("..");
     try { const url = new URL(value); return url.protocol === "https:" && !url.username && !url.password; } catch { return false; }
   }),
+  notifyAppointments: z.boolean().default(false),
   slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(100), active: z.boolean(),
 }).strict();
 export const physicianWriteSchema = z.object({ id: z.uuid().optional(), version: z.number().int().nonnegative(),
-  profile: physicianSchema, operation: z.enum(["save", "publish", "unpublish", "archive"]) }).strict();
+  profile: physicianSchema, operation: z.enum(["save", "publish", "unpublish", "archive"]) }).strict().refine(value => !value.profile.notifyAppointments || Boolean(value.profile.email), { path: ["profile", "email"], message: "An email address is required for appointment alerts." });
 export const patientSchema = z.object({
   name: line(100).min(2), email: z.email().max(254),
   phone: z.string().trim().max(30).regex(/^\+?[\d\s().-]+$/).refine(value => { const count = value.replace(/\D/g, "").length; return count >= 10 && count <= 15; }),
@@ -28,7 +30,7 @@ export const patientSchema = z.object({
   privacyConsent: z.literal(true), consentVersion: z.literal(CLINICAL_POLICY.consentVersion),
 }).strict();
 export const scheduleSchema = z.object({
-  physicianId: z.uuid(), locationId: z.string().refine(value => BOOKING_SETTINGS.locationIds.includes(value)),
+  physicianId: z.uuid(), locationId: z.string().refine(value => [...BOOKING_SETTINGS.locationIds, ...RETIRED_LOCATION_IDS].includes(value)),
   typeId: z.string().refine(value => BOOKING_SETTINGS.types.some(type => type.id === value)),
   weekday: z.number().int().min(0).max(6), opens: clock, closes: clock,
   intervalMinutes: z.number().int().min(5).max(180), durationMinutes: z.number().int().min(5).max(180),

@@ -44,6 +44,11 @@ export const appointmentMessages = clinical.table("appointment_messages", {
 }, t => [foreignKey({ columns: [t.organisationId, t.appointmentId], foreignColumns: [appointments.organisationId, appointments.id] }),
   unique("appointment_message_once").on(t.appointmentId, t.appointmentVersion, t.channel, t.kind),
   check("appointment_message_state", sql`${t.state} in ('queued', 'sending', 'sent', 'failed', 'cancelled')`)]);
+// Optional final provider outcomes; queue state remains independent from email delivery.
+export const notificationDelivery = clinical.table("notification_delivery", {
+  messageId: uuid("message_id").primaryKey().references(() => appointmentMessages.id),
+  status: text().notNull(), occurredAt: time("occurred_at").notNull(),
+}, t => [check("notification_delivery_status", sql`${t.status} in ('delivered', 'bounced', 'complained')`)]);
 export const appointmentTokens = clinical.table("appointment_tokens", {
   tokenHash: text("token_hash").primaryKey(), organisationId: uuid("organisation_id").notNull(), appointmentId: uuid("appointment_id").notNull(),
   expiresAt: time("expires_at").notNull(), version: integer().notNull(),

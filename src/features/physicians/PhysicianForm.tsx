@@ -12,7 +12,7 @@ import ProfileFields from "@/features/physicians/ProfileFields";
 import CvImport from "@/features/physicians/CvImport";
 import { useUnsavedChanges } from "@/features/cms/useUnsavedChanges";
 import { useToast } from "@/components/ui/ToastProvider";
-const EMPTY: PhysicianProfile = { fullName: "", title: "", email: "", phone: "", bio: "", credentials: "", specialties: "", languages: "", photo: "", slug: "", active: true };
+const EMPTY: PhysicianProfile = { fullName: "", title: "", email: "", phone: "", bio: "", credentials: "", specialties: "", languages: "", photo: "", slug: "", active: true, notifyAppointments: false };
 export default function PhysicianForm({ physician, onSaved, onBack }: { physician?: Physician; onSaved: (id: string) => Promise<void>; onBack: () => void }) {
   const [profile, setProfile] = useState<PhysicianProfile>(physician ? physicianSchema.parse(physicianSchema.strip().parse(physician)) : EMPTY);
   const [pendingCv, setPendingCv] = useState<{ file: File; text: string }>(); const [busy, setBusy] = useState(false);
@@ -25,6 +25,9 @@ export default function PhysicianForm({ physician, onSaved, onBack }: { physicia
   function update(key: keyof PhysicianProfile, value: string | boolean) { setProfile(current => ({ ...current, [key]: value })); }
   async function save(operation: "save" | "publish" | "unpublish" | "archive") {
     if (busy || photoBusy || (operation === "archive" && !window.confirm(c.confirmArchive))) return;
+    if (profile.notifyAppointments && !profile.email) {
+      setErrors({ email: copy.alertEmailRequired }); notify(copy.invalid); return;
+    }
     const parsed = physicianSchema.safeParse(profile);
     if (!parsed.success) {
       const fields: Record<string, string> = {};

@@ -34,8 +34,8 @@ export async function writePhysician(input: unknown): Promise<ClinicalResult<{ i
     const [row] = await tx.select().from(physicians).where(and(eq(physicians.id, id), eq(physicians.organisationId, actor.organisationId))).for("update");
     if ((row?.version ?? 0) !== version || (parsed.data.id && !row)) return { ok: false, code: "conflict" };
     const active = operation === "archive" ? false : profile.active;
-    const { email: _email, phone: _phone, active: _active, ...publicProfile } = profile;
-    void _email; void _phone; void _active;
+    const { email: _email, phone: _phone, active: _active, notifyAppointments: _notify, ...publicProfile } = profile;
+    void _email; void _phone; void _active; void _notify;
     const publication = !active || operation === "unpublish" ? null : operation === "publish" ? seal(JSON.stringify(publicProfile), actor.organisationId, id, "publication") : row?.publication ?? null;
     await tx.insert(physicians).values({ id, organisationId: actor.organisationId, profile: seal(JSON.stringify({ ...profile, active }), actor.organisationId, id, "physician"),
       publication, slugHash: privateHash(`physician-slug:${actor.organisationId}:${profile.slug}`), active, version: version + 1 }).onConflictDoUpdate({ target: physicians.id,
@@ -52,7 +52,7 @@ export const publicPhysicians = cache(async (): Promise<PublicPhysician[]> => {
     if (!row.publication) return [];
     const raw = JSON.parse(unseal(row.publication, row.organisationId, row.id, "publication"));
     const profile = physicianSchema.parse({ ...raw, email: "", phone: "", active: true });
-    const { email: _email, phone: _phone, active: _active, ...safe } = profile; void _email; void _phone; void _active;
+    const { email: _email, phone: _phone, active: _active, notifyAppointments: _notify, ...safe } = profile; void _email; void _phone; void _active; void _notify;
     return [{ ...safe, id: row.id }];
   });
 });

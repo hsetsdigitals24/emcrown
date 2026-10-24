@@ -5,8 +5,11 @@ import { appointments, physicians, providerSchedules } from "@/lib/db/clinical";
 import type { AuthTransaction } from "@/lib/db";
 import { scheduleSchema } from "@/features/clinical/validation";
 import { buildSlots } from "@/features/appointments/slots";
+import { publishedPractice } from "@/features/clinical/practice";
 import { CLINICAL_POLICY } from "@/config/clinical";
 export async function availableSlots(tx: AuthTransaction, organisationId: string, from: string, days = CLINICAL_POLICY.defaultHorizonDays, exceptId?: string) {
+  const practice = await publishedPractice(tx);
+  const activeLocation = practice.locations[0].id;
   const requested = Date.parse(`${from}T12:00:00Z`);
   const horizon = Date.now() + CLINICAL_POLICY.horizonDays * 86400000;
   if (!Number.isFinite(requested) || requested < Date.now() - 2 * 86400000 || requested > horizon) return [];
@@ -20,6 +23,6 @@ export async function availableSlots(tx: AuthTransaction, organisationId: string
       lt(appointments.startAt, end), gte(appointments.occupiedUntil, start), exceptId ? ne(appointments.id, exceptId) : undefined));
   return buildSlots(definitions.flatMap(row => {
     const parsed = scheduleSchema.safeParse(row.definition);
-    return parsed.success && row.publication ? [parsed.data] : [];
+    return parsed.success && row.publication && parsed.data.locationId === activeLocation ? [parsed.data] : [];
   }), busy, from, days).filter(slot => Date.parse(slot.startUtc) <= horizon);
 }

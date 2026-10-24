@@ -13,11 +13,27 @@ export function deliveryEnv() {
   if (!parsed.success) throw new Error("Clinical delivery configuration is incomplete.");
   return parsed.data;
 }
-export function smsEnv() {
+// Legacy callback validation is isolated so AWS notifications never accept Twilio callbacks.
+export function twilioSmsEnv() {
+  if (process.env.CLINICAL_SMS_PROVIDER !== "twilio") throw new Error("SMS callback provider is unavailable.");
   const parsed = z.object({ TWILIO_ACCOUNT_SID: z.string().regex(/^AC[a-f0-9]{32}$/i), TWILIO_AUTH_TOKEN: z.string().min(20),
     TWILIO_MESSAGING_SERVICE_SID: z.string().regex(/^MG[a-f0-9]{32}$/i), CLINICAL_SMS_APPROVED: z.literal("true") }).safeParse(process.env);
   if (!parsed.success) throw new Error("Clinical SMS configuration is incomplete.");
-  return parsed.data;
+  return { provider: "twilio" as const, ...parsed.data };
+}
+export function smsEnv() {
+  if (process.env.CLINICAL_SMS_PROVIDER === "twilio") return twilioSmsEnv();
+  const parsed = z.object({
+    CLINICAL_SMS_PROVIDER: z.literal("aws"), CLINICAL_SMS_APPROVED: z.literal("true"),
+    CLINICAL_SMS_ENABLED: z.literal("true"),
+    AWS_REGION: z.string().regex(/^[a-z]{2}-[a-z]+-\d$/),
+    AWS_SMS_ORIGINATION_IDENTITY: z.string().min(1).max(256).regex(/^[A-Za-z0-9_:/+\-]+$/),
+    AWS_SMS_CONFIGURATION_SET: z.string().min(1).max(256).regex(/^[A-Za-z0-9_:/-]+$/),
+    AWS_SMS_PROTECT_CONFIGURATION_ID: z.string().min(1).max(256).regex(/^[A-Za-z0-9_:/-]+$/),
+    AWS_SMS_MAX_PRICE: z.string().regex(/^\d{1,2}\.\d{1,5}$/).refine(value => Number(value) > 0),
+  }).safeParse(process.env);
+  if (!parsed.success) throw new Error("Clinical SMS configuration is incomplete.");
+  return { provider: "aws" as const, ...parsed.data };
 }
 export function liveBookingEnv() {
   clinicalKeys(); privateHash("configuration-check"); const delivery = deliveryEnv();

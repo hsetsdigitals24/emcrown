@@ -13,13 +13,15 @@ import { localTimeToUtc } from "@/features/booking/zoned-time";
 import { practiceDate } from "@/features/booking/time";
 import { BOOKING_SETTINGS } from "@/config/booking";
 import { CLINICAL_POLICY } from "@/config/clinical";
+import type { InboxData } from "@/features/clinical/contracts";
+import { messageDelivery } from "@/features/notifications/messages";
 import type { Appointment, ClinicalResult, VisitStatus } from "@/types/clinical";
 const filterSchema = z.object({ page: z.coerce.number().int().min(0).max(10000).default(0), from: dateSchema.optional(), status: z.enum(["requested", "confirmed", "cancelled", "completed", "no_show"]).optional(), physicianId: z.uuid().optional() }).strict();
 export function projectAppointment(row: typeof appointments.$inferSelect): Appointment {
   return { id: row.id, physicianId: row.physicianId, locationId: row.locationId, typeId: row.typeId, startUtc: row.startAt.toISOString(), endUtc: row.endAt.toISOString(),
     status: row.status as VisitStatus, version: row.version, patient: patientSchema.parse(JSON.parse(unseal(row.patient, row.organisationId, row.id, "patient"))) };
 }
-export async function listAppointments(input: unknown): Promise<ClinicalResult<{ appointments: Appointment[]; page: number; hasMore: boolean; messages: Array<{ appointmentId: string; channel: string; kind: string; state: string }> }>> {
+export async function listAppointments(input: unknown): Promise<ClinicalResult<InboxData>> {
   const filters = filterSchema.safeParse(input); if (!filters.success) return { ok: false, code: "invalid" };
   return db().transaction(async tx => {
     const actor = await clinicalActor(tx, "appointments:read"); if (!actor) return { ok: false, code: "denied" };
@@ -32,9 +34,9 @@ export async function listAppointments(input: unknown): Promise<ClinicalResult<{
     const rows = found.slice(0, CLINICAL_POLICY.pageSize);
     await clinicalEvent(tx, actor.organisationId, "appointments.list_viewed", actor.userId);
     for (const row of rows) await clinicalEvent(tx, actor.organisationId, "appointments.viewed", actor.userId, row.id);
-    const messages = await tx.select({ appointmentId: appointmentMessages.appointmentId, channel: appointmentMessages.channel, kind: appointmentMessages.kind, state: appointmentMessages.state })
+    const messages = await tx.select({ id: appointmentMessages.id, availableAt: appointmentMessages.availableAt, updatedAt: appointmentMessages.updatedAt, attempts: appointmentMessages.attempts, appointmentId: appointmentMessages.appointmentId, channel: appointmentMessages.channel, kind: appointmentMessages.kind, state: appointmentMessages.state })
       .from(appointmentMessages).where(and(eq(appointmentMessages.organisationId, actor.organisationId), inArray(appointmentMessages.appointmentId, rows.map(row => row.id))));
-    return { ok: true, data: { appointments: rows.map(projectAppointment), page: filters.data.page, hasMore: found.length > CLINICAL_POLICY.pageSize, messages: messages.filter(message => rows.some(row => row.id === message.appointmentId)) } };
+    return { ok: true, data: { appointments: rows.map(projectAppointment), page: filters.data.page, hasMore: found.length > CLINICAL_POLICY.pageSize, messages: await messageDelivery(tx, messages.filter(message => rows.some(row => row.id === message.appointmentId))) } };
   });
 }
 export async function changeAppointment(input: unknown): Promise<ClinicalResult<null>> {
