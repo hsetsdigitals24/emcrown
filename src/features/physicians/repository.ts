@@ -2,7 +2,8 @@
 import "server-only";
 import { cache } from "react";
 import { randomUUID } from "node:crypto";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, isNotNull, sql } from "drizzle-orm";
+import { retryPublicRead } from "@/lib/db/public-read";
 import { db } from "@/lib/db";
 import { physicians, physicianDocuments } from "@/lib/db/clinical";
 import { organisations } from "@/lib/db/schema";
@@ -46,8 +47,10 @@ export async function writePhysician(input: unknown): Promise<ClinicalResult<{ i
 }
 export const publicPhysicians = cache(async (): Promise<PublicPhysician[]> => {
   if (!clinicalConfigured()) return [];
-  const rows = await db().select({ row: physicians }).from(physicians).innerJoin(organisations, eq(organisations.id, physicians.organisationId))
-    .where(and(eq(organisations.key, "emcrown"), eq(physicians.active, true)));
+  const rows = await retryPublicRead(async () => db().select({ row: {
+    id: physicians.id, organisationId: physicians.organisationId, publication: physicians.publication,
+  } }).from(physicians).innerJoin(organisations, eq(organisations.id, physicians.organisationId))
+    .where(and(eq(organisations.key, "emcrown"), eq(physicians.active, true), isNotNull(physicians.publication))));
   return rows.flatMap(({ row }) => {
     if (!row.publication) return [];
     const raw = JSON.parse(unseal(row.publication, row.organisationId, row.id, "publication"));

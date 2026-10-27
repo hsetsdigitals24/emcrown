@@ -13,11 +13,11 @@ import Location from "@/components/home/Location";
 import Faq from "@/components/home/Faq";
 import Closing from "@/components/home/Closing";
 import { HOME_SEED } from "@/config/cms/content";
-export default function HomeContent({ content, preview = false, records = [] }: { content: typeof HOME_SEED; preview?: boolean; records?: PublicPhysician[] }) {
-  const physicianContent = records.length ? { ...content.physicians, isMock: false, physicians: records.slice(0, 3).map(record => ({ id: record.id, name: physicianName(record),
+export default function HomeContent({ content, preview = false, records = [] }: { content: typeof HOME_SEED; preview?: boolean; records?: PublicPhysician[] | null }) {
+  const physicianContent = records?.length ? { ...content.physicians, isMock: false, physicians: records.slice(0, 3).map(record => ({ id: record.id, name: physicianName(record),
     specialty: record.specialties, photo: record.photo, photoLabel: CLINICAL_COPY.photoPlaceholder, link: { label: CLINICAL_COPY.profile, href: `/physicians/${record.slug}` } })) } : content.physicians;
   const sections = <><Hero content={content.hero} /><Principles content={content.principles} />
-    <Services content={content.services} /><BookingSteps content={content.booking} /><Physicians content={physicianContent} />
+    <Services content={content.services} /><BookingSteps content={content.booking} /><Physicians content={physicianContent} unavailable={records === null} />
     <Testimonials content={content.testimonials} /><Location content={content.location} /><Faq content={content.faq} /><Closing content={content.closing} /></>;
   return preview ? <div className="cms-site-preview">{sections}</div> : <HomeMotion>{sections}</HomeMotion>;
 }

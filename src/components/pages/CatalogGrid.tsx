@@ -1,4 +1,6 @@
 // Server component: reusable typed service, physician, resource and policy cards.
+import GuideCard from "@/components/pages/GuideCard";
+import { GUIDE_CARD_COPY } from "@/config/pages/guide-card";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
 import ServiceCardsMotion from "@/components/motion/ServiceCardsMotion";
@@ -8,8 +10,8 @@ import type { PublicEntry } from "@/types/public";
 export default function CatalogGrid({ entries, actionLabel, images = false, portraits = false, serviceMotion = false }: {
   entries: PublicEntry[]; actionLabel: string; images?: boolean; portraits?: boolean; serviceMotion?: boolean;
 }) {
-  const cards = entries.map((entry, index) => <article id={entry.slug} key={entry.slug} className={serviceMotion ? "service-entry" : undefined}>
-    {serviceMotion ? <div className={`service-surface ${index % 2 ? "service-surface-tint" : ""}`}><CatalogCard entry={entry} actionLabel={actionLabel} images={images} portraits={portraits} /></div> : <Card interactive><CatalogCard entry={entry} actionLabel={actionLabel} images={images} portraits={portraits} /></Card>}
+  const cards = entries.map((entry) => <article id={entry.slug} key={entry.slug} className={serviceMotion ? "service-entry" : undefined}>
+    {serviceMotion ? <GuideCard title={entry.title} description={entry.hero.body} category={entry.category} href={entry.path} action={actionLabel} image={`/media/visit-guide-${entry.slug.replace("service-", "")}.webp`} imageLabel={GUIDE_CARD_COPY.imageLabel} /> : <Card interactive><CatalogCard entry={entry} actionLabel={actionLabel} images={images} portraits={portraits} /></Card>}
   </article>);
   return serviceMotion ? <ServiceCardsMotion itemCount={entries.length}>{cards}</ServiceCardsMotion> : <Reveal stagger className="services-grid">{cards}</Reveal>;
 }

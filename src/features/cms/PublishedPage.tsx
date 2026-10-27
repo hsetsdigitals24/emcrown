@@ -1,5 +1,5 @@
 // Server component: load published content and related catalog entries without leaking drafts.
-import { publicPhysicians } from "@/features/physicians/repository";
+import { publicPhysicianPreview } from "@/features/physicians/public-preview";
 import { notFound } from "next/navigation";
 import PageContent from "@/features/cms/PageContent";
 import { publishedContent, publicValues } from "@/features/cms/public";
@@ -16,5 +16,5 @@ export default async function PublishedPage({ path }: { path: string }) {
       return [entry.path, values === undefined ? findDefinition(entry.path)!.initial : values] as const;
     }),
   ]);
-  return <PageContent path={path} values={values} siteValues={siteValues} context={Object.fromEntries(context)} physicianRecords={path === "/" ? await publicPhysicians() : undefined} />;
+  return <PageContent path={path} values={values} siteValues={siteValues} context={Object.fromEntries(context)} physicianRecords={path === "/" ? await publicPhysicianPreview() : undefined} />;
 }

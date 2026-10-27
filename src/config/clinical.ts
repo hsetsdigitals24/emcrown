@@ -10,6 +10,8 @@ export const CLINICAL_COPY = {
   profileAbout: "About", profileExplore: "Explore this profile", allPhysicians: "View all physicians",
   physicians: "Physicians", appointments: "Appointments", schedules: "Schedules & availability",
   photoPlaceholder: "[PHOTO PLACEHOLDER: physician portrait]",
+  publicProfilesUnavailable: "We couldn’t load physician profiles. Please try again shortly or contact the practice.",
+  publicProfilesContact: "Contact the practice",
   publicPhysicianIntro: "Get to know the physicians at Emcrown Physician Services.", profile: "View profile",
   physicianIntro: "Manage private physician records. Publish only the approved public profile; contact details and CVs stay private.",
   appointmentIntro: "Review requests, confirm visits, cancel or rebook. Times are shown in the practice time zone.",

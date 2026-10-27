@@ -1,7 +1,7 @@
 // Server layout: marketing chrome stays outside the private organisation workspace.
 import { practiceFooter } from "@/lib/practice";
 import { physicianName } from "@/lib/physician-name";
-import { publicPhysicians } from "@/features/physicians/repository";
+import { publicPhysicianPreview } from "@/features/physicians/public-preview";
 import SiteLayout from "@/components/layout/SiteLayout";
 import { SITE_SEED } from "@/config/cms/content";
 import { publishedContent, publicValues } from "@/features/cms/public";
@@ -14,7 +14,7 @@ export default async function PublicLayout({ children }: { children: React.React
   if (path && findDefinition(path) && await publicValues(path) === null) notFound();
   const site = await publishedContent("/_site", SITE_SEED);
   const footer = practiceFooter(site.footer, site.practice);
-  const physicians = await publicPhysicians();
-  const navigation = physicians.length ? { ...site.navigation, items: site.navigation.items.map(item => item.href === "/physicians" ? { ...item, previews: physicians.map(record => ({ label: physicianName(record), photo: record.photo, href: `/physicians/${record.slug}`, description: record.specialties })) } : item) } : site.navigation;
+  const physicians = await publicPhysicianPreview();
+  const navigation = physicians === null ? { ...site.navigation, items: site.navigation.items.map(item => item.href === "/physicians" ? { ...item, previews: [] } : item) } : physicians.length ? { ...site.navigation, items: site.navigation.items.map(item => item.href === "/physicians" ? { ...item, previews: physicians.map(record => ({ label: physicianName(record), photo: record.photo, href: `/physicians/${record.slug}`, description: record.specialties })) } : item) } : site.navigation;
   return <SiteLayout navigation={navigation} footer={footer}>{children}</SiteLayout>;
 }

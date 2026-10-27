@@ -1,4 +1,5 @@
 // Shared rendering: informational pages retain their existing components and content contracts.
+import ServiceGuide from "@/components/pages/ServiceGuide";
 import PageFrame from "@/components/pages/PageFrame";
 import CatalogGrid from "@/components/pages/CatalogGrid";
 import Container from "@/components/layout/Container";
@@ -18,6 +19,8 @@ export function InformationContent({ path, values, site, context }: { path: stri
   const fixture = Object.values(PAGE_SEEDS).find(seed => seed.content.path === path)?.content
     ?? [...SERVICE_ENTRIES, ...PHYSICIAN_ENTRIES, ...ARTICLE_ENTRIES, ...LEGAL_ENTRIES].find(entry => entry.path === path);
   if (!fixture) return null;
+  const service = SERVICE_ENTRIES.find(entry => entry.path === path);
+  if (service) return <ServiceGuide entry={applyContent({ content: service }, values).content} closing={site.closing} />;
   const content = applyContent<{ content: PageContent }>({ content: fixture }, values).content;
   const legal = applyContent(PAGE_SEEDS["/legal"], values).copy;
   const entries = path === "/services" ? SERVICE_ENTRIES : path === "/physicians" ? PHYSICIAN_ENTRIES : path === "/resources" ? ARTICLE_ENTRIES : path === "/legal" ? LEGAL_ENTRIES.map(entry => ({ ...entry, category: legal.category })) : [];

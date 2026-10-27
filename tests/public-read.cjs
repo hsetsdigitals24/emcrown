@@ -1,0 +1,73 @@
+// Node regression: inject connection failures without contacting a database or using patient data.
+/* eslint-disable @typescript-eslint/no-require-imports -- Reuse the project's TypeScript loader. */
+require("../scripts/auth.cjs");
+const assert = require("node:assert/strict");
+const Module = require("node:module");
+const { retryPublicRead, isTransientDatabaseError } = require("../src/lib/db/public-read.ts");
+const failure = code => Object.assign(new Error("Fictional driver failure"), { code });
+const wrapped = code => new Error("Fictional query failure", { cause: failure(code) });
+const originalLoad = Module._load;
+let read;
+let cmsRead;
+let poolCount = 0;
+let poolOptions;
+Module._load = function (name, ...args) {
+  if (name === "@/features/physicians/repository") return { publicPhysicians: () => retryPublicRead(read) };
+  if (name === "next/cache") return { unstable_cache: fn => fn };
+  if (name === "next/navigation") return { notFound: () => { throw failure("NOT_FOUND"); } };
+  if (name === "@/lib/auth-env") return { authConfigured: () => true, authEnv: () => ({ DATABASE_URL: "postgres://fixture@localhost/test" }) };
+  if (name === "@/lib/db") return { db: () => ({ select: () => ({ from: () => ({ innerJoin: () => ({ where: () => ({ limit: () => cmsRead() }) }) }) }) }) };
+  if (name === "postgres") return (_url, options) => { poolOptions = options; return { identity: ++poolCount }; };
+  if (name === "drizzle-orm/postgres-js") return { drizzle: (client, options) => ({ client, options }) };
+  return originalLoad.call(this, name, ...args);
+};
+(async () => {
+  let attempts = 0;
+  assert.deepEqual(await retryPublicRead(async () => { attempts++; if (attempts === 1) throw wrapped("CONNECT_TIMEOUT"); return ["published fixture"]; }), ["published fixture"]);
+  assert.equal(attempts, 2);
+  attempts = 0;
+  await assert.rejects(retryPublicRead(async () => { attempts++; throw wrapped("CONNECT_TIMEOUT"); }));
+  assert.equal(attempts, 2, "Retry must be bounded");
+  for (const code of ["42501", "28P01", "23505", "42P01"]) {
+    attempts = 0;
+    await assert.rejects(retryPublicRead(async () => { attempts++; throw wrapped(code); }));
+    assert.equal(attempts, 1, "Permission/auth/schema/write failures must not be retried");
+    assert.equal(isTransientDatabaseError(wrapped(code)), false);
+  }
+  assert.equal(isTransientDatabaseError(new Error("CONNECT_TIMEOUT in arbitrary text")), false);
+  const cycle = {}; cycle.cause = cycle;
+  assert.equal(isTransientDatabaseError(cycle), false);
+  const { publicPhysicianPreview } = require("../src/features/physicians/public-preview.ts");
+  attempts = 0;
+  read = async () => { attempts++; throw wrapped("CONNECT_TIMEOUT"); };
+  assert.equal(await publicPhysicianPreview(), null, "Outage must not masquerade as an empty directory");
+  assert.equal(attempts, 2);
+  read = async () => [];
+  assert.deepEqual(await publicPhysicianPreview(), [], "Successful empty result remains distinct");
+  read = async () => { throw wrapped("42501"); };
+  await assert.rejects(publicPhysicianPreview());
+  read = async () => { throw new Error("Fictional invalid publication"); };
+  await assert.rejects(publicPhysicianPreview());
+  const { publicValues, publishedContent } = require("../src/features/cms/public.ts");
+  attempts = 0;
+  cmsRead = async () => { attempts++; if (attempts === 1) throw wrapped("CONNECT_TIMEOUT"); return [{ withdrawn: true, published: null }]; };
+  assert.equal(await publicValues("/services"), null);
+  assert.equal(attempts, 2);
+  await assert.rejects(publishedContent("/services", { title: "must not escape" }), { code: "NOT_FOUND" });
+  cmsRead = async () => { throw wrapped("CONNECT_TIMEOUT"); };
+  await assert.rejects(publishedContent("/services", { title: "must not escape" }), "CMS outages must not publish seed/draft fallback");
+  const filename = require.resolve("../src/lib/db/index.ts");
+  delete globalThis.emcrownPostgres;
+  process.env.NODE_ENV = "development";
+  delete require.cache[filename];
+  const first = require(filename).db();
+  delete require.cache[filename];
+  const second = require(filename).db();
+  assert.equal(poolCount, 1, "Development reloads reuse the socket pool");
+  assert.equal(first.client, second.client);
+  assert.notEqual(first, second, "Drizzle schema wrapper refreshes on reload");
+  assert.equal(poolOptions.max, 3);
+  assert.equal(poolOptions.prepare, false);
+  assert.equal(poolOptions.ssl.rejectUnauthorized, true);
+  console.log("Public reads pass: bounded retry, unavailable preview, strict publication/auth failures, CMS withdrawal and development pool reuse.");
+})().catch(error => { console.error(error); process.exitCode = 1; }).finally(() => { Module._load = originalLoad; });

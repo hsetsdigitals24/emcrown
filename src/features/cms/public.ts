@@ -4,6 +4,7 @@ import { and, eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 import { unstable_cache } from "next/cache";
+import { retryPublicRead } from "@/lib/db/public-read";
 import { db } from "@/lib/db";
 import { cmsDocuments, organisations } from "@/lib/db/schema";
 import { authConfigured } from "@/lib/auth-env";
@@ -12,9 +13,9 @@ import { storedValues } from "@/features/cms/validation";
 // Version the cache when editorial field shapes change; old snapshots must not linger.
 // Cache only published snapshots. Nonce CSP requires Cache Components to remain disabled.
 const cachedPublication = unstable_cache(async (path: string) => {
-  const [row] = await db().select({ published: cmsDocuments.published, withdrawn: cmsDocuments.withdrawn }).from(cmsDocuments)
+  const [row] = await retryPublicRead(async () => db().select({ published: cmsDocuments.published, withdrawn: cmsDocuments.withdrawn }).from(cmsDocuments)
     .innerJoin(organisations, eq(organisations.id, cmsDocuments.organisationId))
-    .where(and(eq(organisations.key, "emcrown"), eq(cmsDocuments.path, path))).limit(1);
+    .where(and(eq(organisations.key, "emcrown"), eq(cmsDocuments.path, path))).limit(1));
   return row ?? null;
 }, ["cms-public-v3"], { tags: ["cms:public"], revalidate: 3600 });
 export const publicValues = cache(async (path: string) => {

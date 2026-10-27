@@ -5,7 +5,11 @@ export type PageContent = {
   notice: string; sections: SectionContent[]; photoLabel?: string;
 };
 export type PublicEntry = PageContent & { slug: string; category: string };
-export type ServiceEntry = PublicEntry & { tags: string[] };
+export type GuideExperience = {
+  intro: string; checklist: string[]; prompts: string[];
+  questions: Array<{ title: string; body: string }>;
+};
+export type ServiceEntry = PublicEntry & { tags: string[]; guide: GuideExperience; image: string };
 export type PhysicianEntry = PublicEntry & {
   name: string; specialty: string; credentials: string; languages: string[];
   labels: { credentials: string; languages: string; specialty: string };

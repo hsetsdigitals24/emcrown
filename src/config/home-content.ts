@@ -33,9 +33,10 @@ export const PRINCIPLES: HomeBlock = {
 };
 export const SERVICES: HomeBlock = {
   ...block("services", "PLAN YOUR VISIT", "Care that fits", "your life.",
-    "Explore practical guides to choosing a physician, preparing for a visit and asking about costs. Contact the practice to confirm which clinical services are available for your needs."),
+    "Explore practical guides to choosing a physician, preparing for a visit and managing appointments. Contact the practice to confirm which clinical services are available for your needs."),
   items: SERVICE_ENTRIES.map((entry, index) => ({ id: `service-${index + 1}`,
     title: entry.title, description: entry.hero.body, tags: entry.tags,
+    image: { src: `/media/visit-guide-${index + 1}.webp`, label: "Illustrative image • Not Emcrown staff or premises" },
     link: { label: "Explore this guide", href: entry.path },
   })),
 };

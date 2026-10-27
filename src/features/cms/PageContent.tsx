@@ -10,7 +10,7 @@ import HomeContent from "@/features/cms/HomeContent";
 import { InformationContent, type CmsContext } from "@/features/cms/InformationContent";
 import type { CmsValues } from "@/types/cms";
 export default function PageContent({ path, values, siteValues, context = {}, preview = false, schedule, physicianRecords }: {
-  path: string; values: CmsValues; siteValues: CmsValues; context?: CmsContext; preview?: boolean; schedule?: MockSchedule; physicianRecords?: PublicPhysician[];
+  path: string; values: CmsValues; siteValues: CmsValues; context?: CmsContext; preview?: boolean; schedule?: MockSchedule; physicianRecords?: PublicPhysician[] | null;
 }) {
   if (path === "/physicians" && physicianRecords?.length) return <PublicPhysicianList records={physicianRecords} content={applyContent(PAGE_SEEDS["/physicians"], values).content} site={applyContent(SITE_SEED, siteValues)} />;
   if (path === "/book" && schedule) return <BookingContent content={applyContent(BOOKING_SEED, values)} site={applyContent(SITE_SEED, siteValues)} schedule={schedule} />;

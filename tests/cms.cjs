@@ -46,6 +46,12 @@ function validation() {
   const previous = { ...seed, retired: "An old field" }; delete previous["hero.headline"];
   assert.equal(storedValues("/", previous)["hero.headline"], seed["hero.headline"]);
   assert.equal(storedValues("/", previous).retired, undefined);
+  const legacyGuide = { ...seed, "services.items.4.title": "Checking insurance and visit costs", "hero.headline": "Staff edited heading" };
+  const migratedGuide = storedValues("/", legacyGuide);
+  assert.equal(migratedGuide["services.items.4.title"], "Managing your appointment");
+  assert.equal(migratedGuide["hero.headline"], "Staff edited heading");
+  const guideSeed = findDefinition("/services/service-5").initial;
+  assert.equal(storedValues("/services/service-5", { ...guideSeed, "content.title": "Checking insurance and visit costs" })["content.title"], "Managing your appointment");
   assert.equal(validateValues("/", { ...seed, "__proto__.bad": "bad" }), null);
   assert.equal(validateValues("/", { ...seed, "hero.media.photo": "https://tracker.example/image.jpg" }), null);
   assert.equal(validateValues("/", { ...seed, "hero.media.photo": "/media/../../secret.jpg" }), null);

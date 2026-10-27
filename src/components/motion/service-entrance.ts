@@ -3,7 +3,12 @@ export function observeServiceCards(grid: HTMLElement) {
   const preference = matchMedia("(prefers-reduced-motion: reduce)");
   const cards = [...grid.querySelectorAll<HTMLElement>(".service-entry")];
   const revealed = new Set<Element>();
-  const animations: Animation[] = [];
+  const animations = new Set<Animation>();
+  const play = (element: Element, frames: Keyframe[], delay: number, duration: number) => {
+    const animation = element.animate(frames, { duration, delay, easing: "cubic-bezier(0.22, 1, 0.36, 1)", fill: "backwards" });
+    animations.add(animation);
+    animation.onfinish = () => { animations.delete(animation); animation.cancel(); };
+  };
   let columns = 1;
   const measure = () => { columns = getComputedStyle(grid).gridTemplateColumns.split(" ").length; };
   const observer = new IntersectionObserver((entries) => {
@@ -19,10 +24,12 @@ export function observeServiceCards(grid: HTMLElement) {
       const reverse = row % 2 === 1;
       const order = reverse ? rowLength - 1 - column : column;
       const distance = columns === 1 ? 0 : reverse ? 72 : -72;
-      animations.push(entry.target.animate([
-        { opacity: 0, transform: `translate3d(${distance}px, 20px, 0) rotate(${columns === 1 ? 0 : reverse ? 2 : -2}deg)` },
-        { opacity: 1, transform: "translate3d(0, 0, 0) rotate(0deg)" },
-      ], { duration: 950, delay: (order + (reverse ? 1 : 0)) * 170, easing: "cubic-bezier(0.22, 1, 0.36, 1)", fill: "backwards" }));
+      const delay = (order + (reverse ? 1 : 0)) * 120;
+      play(entry.target, [
+        { opacity: 0, transform: `translate3d(${distance}px, 20px, 0)` },
+        { opacity: 1, transform: "translate3d(0, 0, 0)" },
+      ], delay, 650);
+
     });
   }, { threshold: 0.12 });
   const stop = () => { if (preference.matches) animations.forEach((animation) => animation.cancel()); };

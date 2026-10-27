@@ -3,6 +3,7 @@ import type { ContentLink, SectionContent } from "@/types/content";
 export type HomeItem = {
   id: string; title: string; description: string; label?: string;
   tags?: string[]; link?: ContentLink;
+  image?: { src: string; label: string };
 };
 export type HomeBlock = SectionContent & { items: HomeItem[] };
 export type HeroContent = HomeBlock & {

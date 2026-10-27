@@ -10,6 +10,20 @@ until live integrations and launch gates are configured. Placeholder practice
 content must be approved before publication. Never use real patient information
 in the demo or development tests.
 
+## Visit guides
+
+The six `/services/service-*` pages share an image-led guide layout. Step copy
+lives in `src/config/pages/service-guides.ts`; introductions, question prompts,
+checklists and expandable answers live in `src/config/pages/guide-experience.ts`.
+These fields are exposed through the existing CMS content definitions. Shared
+presentation labels are configuration. Images remain illustrative placeholders.
+The preparation checklist uses component state only and resets on navigation;
+it sends no requests and writes no browser storage. Hover turns desktop cards;
+buttons support touch and keyboard, with instant changes for reduced motion.
+Cards keep both faces mounted, swap visibility at the edge of a short turn, and
+release animation transforms afterward. Detail-page photos remain static. FAQ
+answers open on mouse hover and retain native click/keyboard toggling.
+
 ## Technology
 
 | Area | Technology |
