@@ -2,7 +2,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import PageLoader from "@/components/ui/PageLoader";
-import { BRAND } from "@/config/brand";
+import { BRAND, PAGE_READY_EVENT } from "@/config/brand";
 export default function InitialPageLoader({ label }: { label: string }) {
   const [complete, setComplete] = useState(false);
   useEffect(() => {
@@ -18,5 +18,8 @@ export default function InitialPageLoader({ label }: { label: string }) {
     void Promise.allSettled([loaded, document.fonts.ready]).then(finish);
     return () => { mounted = false; window.clearTimeout(timeout); window.removeEventListener("load", onLoad); };
   }, []);
+  useEffect(() => {
+    if (complete) window.dispatchEvent(new Event(PAGE_READY_EVENT));
+  }, [complete]);
   return complete ? null : <div className="initial-page-loader"><PageLoader label={label} /></div>;
 }

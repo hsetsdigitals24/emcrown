@@ -1,10 +1,13 @@
 // Client island: rotate two permanently attached faces, with hover and accessible controls.
+// @refresh reset
 "use client";
+import { useMobileCardTurn } from "@/components/motion/useMobileCardTurn";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 export default function GuideFlip({ front, children, label, closeLabel }: { front: ReactNode; children: ReactNode; label: string; closeLabel: string }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const focusAfterTurn = useRef(false);
+  useMobileCardTurn(ref, setOpen);
   useEffect(() => {
     if (!focusAfterTurn.current) return;
     focusAfterTurn.current = false;

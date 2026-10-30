@@ -37,9 +37,10 @@ export default async function BookPage({ searchParams }: { searchParams: Promise
   }
   const [content, site, schedule] = await Promise.all([publishedContent("/book", BOOKING_SEED), publishedContent("/_site", SITE_SEED), getDemoSchedule()]);
   // Only this explicitly labelled demo invents sample slots; live availability stays database-backed.
-  const demoContent = preferred ? { ...content, providers: [...content.providers.filter(provider => provider.id !== preferred.id),
-    { id: preferred.id, label: physicianName(preferred), specialty: preferred.specialties }],
-    appointmentTypes: content.appointmentTypes.map(type => ({ ...type, providerIds: [...new Set([...type.providerIds, preferred.id])] })) } : content;
-  const demoSchedule = preferred ? makeMockSchedule(schedule.referenceUtc, { ...BOOKING_SETTINGS, providers: demoContent.providers, types: demoContent.appointmentTypes }, site.practice.locations.map(location => location.id)) : schedule;
+  const demoProviders = providers.map(provider => ({ id: provider.id, label: physicianName(provider), specialty: provider.specialties }));
+  const demoContent = demoProviders.length ? { ...content, providers: demoProviders,
+    appointmentTypes: content.appointmentTypes.map(type => ({ ...type, providerIds: demoProviders.map(provider => provider.id) })) } : content;
+  // Published provider/location IDs must match the sample slots, including without a physician deep link.
+  const demoSchedule = makeMockSchedule(schedule.referenceUtc, { ...BOOKING_SETTINGS, providers: demoContent.providers, types: demoContent.appointmentTypes }, site.practice.locations.slice(0, 1).map(location => location.id));
   return <BookingContent content={demoContent} site={site} schedule={demoSchedule} initialProviderId={preferred?.id} selectionUnavailable={selectionUnavailable} />;
 }

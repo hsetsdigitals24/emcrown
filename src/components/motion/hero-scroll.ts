@@ -42,6 +42,8 @@ function addHeroTweens(timeline: gsap.core.Timeline, stage: HTMLElement, state: 
     scale: 1, mediaY: 0, copyY: () => Math.max(0, (geometry().height - geometry().copyHeight) / 2 - geometry().top),
     duration: 1, ease: "none", onUpdate: render,
   }, 0);
+  timeline.fromTo(stage.querySelectorAll(".hero-media video, .hero-media .hero-poster"),
+    { scale: 1.04, yPercent: 1.5 }, { scale: 1, yPercent: 0, duration: 1, ease: "none" }, 0);
   timeline.fromTo(stage.querySelector(".hero-media-shade"), { opacity: 0.12 }, { opacity: 0.82, duration: 0.8, ease: "none" }, 0);
   timeline.to(stage.querySelector(".hero-media"), { borderRadius: 0, duration: 0.35, ease: "none" }, 0.65);
   timeline.to(stage.querySelectorAll(".hero-photo, .hero-caption"), { opacity: 0, y: 24, duration: 0.25 }, 0);
