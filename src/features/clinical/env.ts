@@ -2,15 +2,21 @@
 import "server-only";
 import { z } from "zod";
 import { clinicalKeys, privateHash } from "@/features/clinical/encryption";
+import { bookingReviewMode, reviewEmails } from "@/features/clinical/review";
 const smtpSchema = z.object({
   CLINICAL_SMTP_HOST: z.string().min(1), CLINICAL_SMTP_PORT: z.coerce.number().int().min(1).max(65535),
   CLINICAL_SMTP_USER: z.string().min(1), CLINICAL_SMTP_PASSWORD: z.string().min(1), CLINICAL_SMTP_FROM: z.email(),
   CLINICAL_STAFF_EMAIL: z.email(), CLINICAL_RETENTION_DAYS: z.coerce.number().int().min(1).max(36500),
-  CLINICAL_INTEGRATIONS_APPROVED: z.literal("true"),
 });
 export function deliveryEnv() {
   const parsed = smtpSchema.safeParse(process.env);
   if (!parsed.success) throw new Error("Clinical delivery configuration is incomplete.");
+  if (bookingReviewMode()) {
+    reviewEmails();
+    if (process.env.CLINICAL_SMS_ENABLED === "true") throw new Error("Engineering review requires SMS to be disabled.");
+  } else if (process.env.CLINICAL_INTEGRATIONS_APPROVED !== "true") {
+    throw new Error("Clinical integrations require approval.");
+  }
   return parsed.data;
 }
 // Legacy callback validation is isolated so AWS notifications never accept Twilio callbacks.

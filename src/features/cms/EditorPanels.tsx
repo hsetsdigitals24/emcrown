@@ -1,5 +1,6 @@
 // Client composition: synchronize Puck fields, preview, revision controls and mobile tabs.
 "use client";
+import { useConfirmation } from "@/components/ui/useConfirmation";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useAutosave } from "@/features/cms/useAutosave";
 import { createUsePuck } from "@puckeditor/core";
@@ -19,6 +20,7 @@ const useCmsPuck = createUsePuck<CmsConfig>();
 export default function EditorPanels(props: EditorProps) {
   const { definition, canPublish, onNavigate, onSaved, onRestore, browse, onBrowseChange, tab, onTabChange } = props;
   const notify = useToast();
+  const { confirm, confirmation } = useConfirmation();
   const data = useCmsPuck(state => state.appState.data);
   const dispatch = useCmsPuck(state => state.dispatch);
   const values = fromPuckData(definition, data);
@@ -50,10 +52,12 @@ export default function EditorPanels(props: EditorProps) {
   }, [dirty, onNavigate]);
   async function mutate(operation: CmsOperation, revisionId?: string, automatic = false) {
     if (inFlight.current) return;
-    const confirm = operation === "publish" ? CMS_COPY.publishConfirm : operation === "unpublish" ? CMS_COPY.unpublishConfirm : operation === "restore" ? CMS_COPY.restoreConfirm : "";
-    if (confirm && !window.confirm(confirm)) return;
-    inFlight.current = true; setBusy(true); setMessage("");
+    inFlight.current = true; setBusy(true);
     try {
+      const description = operation === "publish" ? CMS_COPY.publishConfirm : operation === "unpublish" ? CMS_COPY.unpublishConfirm : operation === "restore" ? CMS_COPY.restoreConfirm : "";
+      const label = operation === "unpublish" ? CMS_COPY.unpublish : operation === "restore" ? CMS_COPY.restore : CMS_COPY.publish;
+      if (description && !await confirm({ title: label, description, label, intent: operation === "unpublish" ? "danger" : operation === "restore" ? "caution" : "success" })) return;
+      setMessage("");
       const result = await cmsRequest(definition.path, { path: definition.path, operation, version: snapshot.version, values, revisionId });
       if (!result.ok) {
         const error = result.code === "conflict" ? CMS_COPY.conflict : result.code === "invalid" ? CMS_COPY.invalid : result.code === "denied" ? CMS_COPY.denied : CMS_COPY.error;
@@ -66,6 +70,7 @@ export default function EditorPanels(props: EditorProps) {
     } finally { inFlight.current = false; setBusy(false); }
   }
   return <>
+    {confirmation}
     <div className="cms-toolbar"><label className="cms-control">{CMS_COPY.page}<select value={definition.path} disabled={busy} onChange={event => void navigate(event.target.value)}>
       {CMS_DEFINITIONS.map(page => <option key={page.path} value={page.path}>{page.label}</option>)}</select></label>
       <EditorActions busy={busy} canPublish={canPublish} published={snapshot.published} site={definition.path === "/_site"} onAction={operation => void mutate(operation)} />

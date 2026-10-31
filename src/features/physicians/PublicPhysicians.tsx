@@ -41,7 +41,7 @@ export function PublicPhysicianDetail({ record }: { record: PublicPhysician }) {
       <Reveal className="physician-profile-intro" delay={120} duration={700}>
         <p className="text-eyebrow uppercase tracking-eyebrow">{c.physicians}</p>
         <h1>{name}</h1>{record.specialties && <p className="physician-specialties">{record.specialties}</p>}
-        <Button href={`/book?physician=${encodeURIComponent(record.slug)}`} purpose="primary">{c.book}</Button>
+        {record.bookingAvailable ? <Button href={`/book?physician=${encodeURIComponent(record.slug)}`} purpose="primary">{c.book}</Button> : <p role="status">{c.bookingPaused}</p>}
         <nav className="physician-profile-jumps" aria-label={c.profileExplore}>
           {record.bio && <a href="#physician-about">{c.profileAbout}</a>}
           {details.map(([label], index) => <a key={label} href={`#physician-detail-${index}`}>{label}</a>)}

@@ -1,0 +1,26 @@
+/* Server-rendered monitoring controls reuse clinical fields and adapt without horizontal scrolling. */
+.activity-filters { margin-bottom: 1.5rem; }
+.activity-filters .clinical-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem 1.25rem; }
+.activity-filters :is(input, select) { min-width: 0; max-width: 100%; }
+.activity-quick { display: flex; flex-wrap: wrap; gap: .5rem; margin-block: 1rem; }
+.activity-quick a { display: inline-flex; align-items: center; min-height: var(--spacing-target); padding: .5rem .85rem; border: 1px solid var(--color-border); border-radius: var(--radius-pill); color: var(--color-primary); background: var(--color-surfaceTint); font-size: .85rem; font-weight: 600; }
+.activity-quick a:hover { border-color: var(--color-primary); }
+.activity-quick a:focus-visible, .activity-advanced summary:focus-visible { outline: 3px solid var(--color-highlight); outline-offset: 3px; }
+.activity-advanced { margin-top: 1rem; border-block: 1px solid var(--color-border); padding-block: .5rem; }
+.activity-advanced summary { min-height: var(--spacing-target); align-content: center; cursor: pointer; color: var(--color-primary); font-weight: 600; }
+.activity-advanced p { font-size: .85rem; }
+.activity-totals { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; margin-block: 1.5rem; }
+.activity-totals > div { padding: 1rem; border: 1px solid var(--color-border); border-radius: var(--radius-control); background: var(--color-background); }
+.activity-totals dt { font-size: .85rem; color: var(--color-textSecondary); }
+.activity-totals dd { font-size: 1.75rem; font-weight: 700; }
+.activity-snapshot { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+.activity-snapshot p { font-size: .85rem; color: var(--color-textSecondary); }
+.activity-snapshot small { display: block; margin-top: .25rem; }
+.activity-snapshot > a { flex-shrink: 0; }
+.activity-pagination { justify-content: flex-end; }
+@media (max-width: 1000px) { .activity-filters .clinical-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) {
+  .activity-filters .clinical-fields { grid-template-columns: minmax(0, 1fr); }
+  .activity-totals { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
+  .activity-snapshot { align-items: flex-start; flex-direction: column; }
+}

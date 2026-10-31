@@ -38,6 +38,26 @@ async function run() {
   const future=new Date(Date.now()+3*86400000);const day=practiceDate(future.toISOString(),"America/New_York");
   const definition={physicianId,locationId:"stuart",typeId:"new-patient",weekday:new Date(`${day}T12:00:00Z`).getUTCDay(),opens:"09:00",closes:"17:00",intervalMinutes:15,durationMinutes:30,bufferMinutes:10,leadHours:0,blockedDates:[],enabled:true};
   assert.ok((await writeSchedule({version:0,definition})).ok);
+  // Pausing keeps the approved profile, and hiding keeps data/schedules for restoration.
+  assert.ok((await writePhysician({id:physicianId,version:2,profile:{...profile,bio:"Unapproved client edit"},operation:"pause"})).ok);
+  assert.equal((await publicPhysicians())[0].bookingAvailable,false);
+  assert.equal(await db().transaction(tx=>require("../src/features/physicians/media-access.ts").publishedPhysicianPhoto(tx,org,profile.photo)),true,"Paused public portraits remain authorized");
+  assert.equal((await publicPhysicians())[0].bio,profile.bio);
+  assert.equal((await db().transaction(tx=>availableSlots(tx,org,day,1))).length,0);
+  assert.equal((await listPhysicians()).data[0].bio,profile.bio,"Toggle never overwrites saved profile fields");
+  assert.ok((await writePhysician({id:physicianId,version:3,profile,operation:"resume"})).ok);
+  assert.equal((await publicPhysicians())[0].bookingAvailable,true);
+  assert.ok((await db().transaction(tx=>availableSlots(tx,org,day,1))).length>0);
+  assert.ok((await writePhysician({id:physicianId,version:4,profile,operation:"unpublish"})).ok);
+  assert.equal((await publicPhysicians()).length,0);
+  assert.equal((await listPhysicians()).data[0].active,true,"Hiding preserves booking setting");
+  assert.equal((await db().transaction(tx=>availableSlots(tx,org,day,1))).length,0);
+  assert.ok((await writePhysician({id:physicianId,version:5,profile,operation:"publish"})).ok);
+  assert.ok((await writePhysician({id:physicianId,version:6,profile,operation:"pause"})).ok);
+  assert.ok((await writePhysician({id:physicianId,version:7,profile,operation:"unpublish"})).ok);
+  assert.ok((await writePhysician({id:physicianId,version:8,profile:{...profile,active:false},operation:"publish"})).ok);
+  assert.equal((await publicPhysicians())[0].bookingAvailable,false,"Showing does not implicitly resume booking");
+  assert.ok((await writePhysician({id:physicianId,version:9,profile:{...profile,active:false},operation:"resume"})).ok);
   const slots=await db().transaction(tx=>availableSlots(tx,org,day,1));assert.ok(slots.length>3);
   const slot=(({physicianId,locationId,typeId,startUtc})=>({physicianId,locationId,typeId,startUtc}))(slots[0]);
   const patient={name:"Fictional Visitor",email:"visitor@example.test",phone:"2025550110",dateOfBirth:"2000-01-15",reason:"Fictional test visit",smsConsent:false,emailConsent:true,privacyConsent:true,consentVersion:"2026-10-20"};

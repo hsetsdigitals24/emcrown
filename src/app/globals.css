@@ -16,7 +16,9 @@
   --color-textSecondary: #475569;
   --color-border: #E2E8F0;
   --color-success: #15803D;
+  --color-successHover: #166534;
   --color-error: #B91C1C;
+  --color-errorHover: #991B1B;
   --font-heading: var(--font-manrope, sans-serif), sans-serif;
   --font-sans: var(--font-inter, sans-serif), sans-serif;
   --spacing: 0.25rem;

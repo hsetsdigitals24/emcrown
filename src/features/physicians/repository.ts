@@ -11,6 +11,7 @@ import { physicianSchema, physicianWriteSchema } from "@/features/clinical/valid
 import { seal, unseal, clinicalConfigured, privateHash } from "@/features/clinical/encryption";
 import { clinicalActor, clinicalEvent } from "@/features/clinical/access";
 import { CLINICAL_POLICY } from "@/config/clinical";
+import { physicianState } from "@/features/physicians/lifecycle";
 import { hasPermission } from "@/config/auth";
 import type { ClinicalResult, Physician, PublicPhysician } from "@/types/clinical";
 export async function listPhysicians(): Promise<ClinicalResult<Physician[]>> {
@@ -28,16 +29,23 @@ export async function writePhysician(input: unknown): Promise<ClinicalResult<{ i
   const parsed = physicianWriteSchema.safeParse(input); if (!parsed.success) return { ok: false, code: "invalid" };
   return db().transaction(async tx => {
     const actor = await clinicalActor(tx, "physicians:manage"); if (!actor) return { ok: false, code: "denied" };
-    const { profile, operation, version } = parsed.data;
+    const { operation, version } = parsed.data;
+    let { profile } = parsed.data;
     if (["publish", "unpublish"].includes(operation) && !hasPermission(actor.role, "content:publish")) return { ok: false, code: "denied" };
     const id = parsed.data.id ?? randomUUID();
     await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${actor.organisationId}), hashtext(${id}))`);
     const [row] = await tx.select().from(physicians).where(and(eq(physicians.id, id), eq(physicians.organisationId, actor.organisationId))).for("update");
     if ((row?.version ?? 0) !== version || (parsed.data.id && !row)) return { ok: false, code: "conflict" };
-    const active = operation === "archive" ? false : profile.active;
+    // Visibility/booking toggles use the locked saved record, never stale client fields.
+    if (["unpublish", "archive", "pause", "resume"].includes(operation)) {
+      if (!row) return { ok: false, code: "conflict" };
+      profile = physicianSchema.parse(JSON.parse(unseal(row.profile, actor.organisationId, id, "physician")));
+      profile.active = row.active;
+    }
+    const { active, published } = physicianState(operation, profile.active, Boolean(row?.publication));
     const { email: _email, phone: _phone, active: _active, notifyAppointments: _notify, ...publicProfile } = profile;
     void _email; void _phone; void _active; void _notify;
-    const publication = !active || operation === "unpublish" ? null : operation === "publish" ? seal(JSON.stringify(publicProfile), actor.organisationId, id, "publication") : row?.publication ?? null;
+    const publication = !published ? null : operation === "publish" ? seal(JSON.stringify(publicProfile), actor.organisationId, id, "publication") : row?.publication ?? null;
     await tx.insert(physicians).values({ id, organisationId: actor.organisationId, profile: seal(JSON.stringify({ ...profile, active }), actor.organisationId, id, "physician"),
       publication, slugHash: privateHash(`physician-slug:${actor.organisationId}:${profile.slug}`), active, version: version + 1 }).onConflictDoUpdate({ target: physicians.id,
       set: { profile: seal(JSON.stringify({ ...profile, active }), actor.organisationId, id, "physician"), publication, slugHash: privateHash(`physician-slug:${actor.organisationId}:${profile.slug}`), active, version: version + 1, updatedAt: new Date() } });
@@ -48,14 +56,14 @@ export async function writePhysician(input: unknown): Promise<ClinicalResult<{ i
 export const publicPhysicians = cache(async (): Promise<PublicPhysician[]> => {
   if (!clinicalConfigured()) return [];
   const rows = await retryPublicRead(async () => db().select({ row: {
-    id: physicians.id, organisationId: physicians.organisationId, publication: physicians.publication,
+    id: physicians.id, organisationId: physicians.organisationId, publication: physicians.publication, active: physicians.active,
   } }).from(physicians).innerJoin(organisations, eq(organisations.id, physicians.organisationId))
-    .where(and(eq(organisations.key, "emcrown"), eq(physicians.active, true), isNotNull(physicians.publication))));
+    .where(and(eq(organisations.key, "emcrown"), isNotNull(physicians.publication))));
   return rows.flatMap(({ row }) => {
     if (!row.publication) return [];
     const raw = JSON.parse(unseal(row.publication, row.organisationId, row.id, "publication"));
     const profile = physicianSchema.parse({ ...raw, email: "", phone: "", active: true });
     const { email: _email, phone: _phone, active: _active, notifyAppointments: _notify, ...safe } = profile; void _email; void _phone; void _active; void _notify;
-    return [{ ...safe, id: row.id }];
+    return [{ ...safe, id: row.id, bookingAvailable: row.active }];
   });
 });

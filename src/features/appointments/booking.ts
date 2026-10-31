@@ -13,9 +13,11 @@ import { queueAppointmentMessages } from "@/features/appointments/notifications"
 import { BOOKING_SETTINGS } from "@/config/booking";
 import { practiceDate } from "@/features/booking/time";
 import type { ClinicalResult } from "@/types/clinical";
+import { reviewRecipientAllowed } from "@/features/clinical/review";
 export async function reserveAppointment(input: unknown): Promise<ClinicalResult<{ accepted: true }>> {
   const parsed = bookingSchema.safeParse(input); if (!parsed.success) return { ok: false, code: "invalid" };
   const { patient, slot, idempotencyKey } = parsed.data;
+  if (!reviewRecipientAllowed(patient.email)) return { ok: false, code: "invalid" };
   if (patient.dateOfBirth > practiceDate(new Date().toISOString(), BOOKING_SETTINGS.timeZone) || patient.dateOfBirth < "1900-01-01") return { ok: false, code: "invalid" };
   return db().transaction(async tx => {
     const [organisation] = await tx.select({ id: organisations.id }).from(organisations).where(eq(organisations.key, "emcrown"));

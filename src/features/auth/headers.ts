@@ -4,7 +4,7 @@ export function adminResponse(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const development = process.env.NODE_ENV === "development";
   const booking = request.nextUrl.pathname === "/book" || request.nextUrl.pathname.startsWith("/book/");
-  const challenge = booking && process.env.CLINICAL_INTEGRATIONS_APPROVED === "true";
+  const challenge = booking && (process.env.CLINICAL_INTEGRATIONS_APPROVED === "true" || process.env.CLINICAL_REVIEW_MODE === "true");
   const preview = request.nextUrl.pathname === "/emcrown-admin/cms/preview";
   const practice = request.nextUrl.pathname === "/emcrown-admin/practice";
   const physicians = request.nextUrl.pathname.startsWith("/emcrown-admin/physicians");

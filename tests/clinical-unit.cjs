@@ -9,9 +9,19 @@ const { seal, unseal, privateHash } = require("../src/features/clinical/encrypti
 const { createManageToken, verifyManageToken } = require("../src/features/appointments/tokens.ts");
 const { buildSlots, wallToUtc } = require("../src/features/appointments/slots.ts");
 const { physicianSchema, scheduleSchema, patientSchema } = require("../src/features/clinical/validation.ts");
+const { physicianState } = require("../src/features/physicians/lifecycle.ts");
 const { cvType } = require("../src/features/physicians/cv-validation.ts");
 const { cvSuggestions } = require("../src/features/physicians/cv-suggestions.ts");
 (async () => {
+  // Every visibility/booking combination supports reversible independent controls.
+  for (const active of [false, true]) for (const published of [false, true]) {
+    assert.deepEqual(physicianState("pause", active, published), {active:false,published});
+    assert.deepEqual(physicianState("archive", active, published), {active:false,published});
+    assert.deepEqual(physicianState("resume", active, published), {active:true,published});
+    assert.deepEqual(physicianState("publish", active, published), {active,published:true});
+    assert.deepEqual(physicianState("unpublish", active, published), {active,published:false});
+    assert.deepEqual(physicianState("save", active, published), {active,published});
+  }
   const org = randomUUID(), id = randomUUID();
   const encrypted = seal("fictional test payload", org, id, "patient");
   assert.equal(unseal(encrypted, org, id, "patient"), "fictional test payload");

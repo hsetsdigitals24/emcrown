@@ -1,5 +1,17 @@
 // Shared admin form labels, examples and guidance; examples never populate records.
 export const PHYSICIAN_FORM = {
+  settings: "Profile settings", scheduling: "Scheduling", publication: "Website publication",
+  unchanged: "No unsaved changes.",
+  visible: "Visible on website", hidden: "Hidden from website", accepting: "Online booking enabled", paused: "Online booking paused",
+  visibility: "Website visibility", booking: "Online booking", show: "Show on website", resume: "Resume online booking",
+  withdrawHelp: "Hide this physician from the public website and prevent new public bookings. Private details, CVs and existing appointments are kept. Use Show on website to undo this. The booking setting is preserved.",
+  pauseHelp: "Prevent new online bookings for this physician. If the profile is visible on the website, it stays visible with an online booking unavailable message. Private details, CVs, schedules and existing appointments are unchanged. Use Resume online booking to undo this.",
+  showHelp: "Publish the currently saved name, portrait, biography, credentials, specialties and languages on the website. Review these details in Edit first. Private contact details and CVs stay private. Use Hide from website to undo this.",
+  resumeHelp: "Enable online booking for this physician, subject to enabled schedules, available times and the practice’s booking setup. Existing appointments are unchanged. Use Pause online booking to undo this.",
+  visibleBooking: "The profile will be public and online booking enabled, subject to schedules and the practice’s booking setup.",
+  visiblePaused: "The profile will be public, with online booking paused.",
+  hiddenBooking: "The profile stays hidden. Public booking will only be possible after you also choose Show on website.",
+  changed: "Physician settings updated.",
   intro: "Build the profile below or import a CV. Save privately, then publish when it is ready.",
   alertLabel: "Email this physician about appointment changes", alertHelp: "Send a minimal alert for requests, confirmations, reschedules and cancellations. No patient details or patient manage link are included. Viewing appointments requires a staff account. Delivery must be configured first.", alertEmailRequired: "Add an email address to enable appointment alerts.",
   identity: "Profile essentials", identityHelp: "Start with the physician’s name and how they appear on the website.",

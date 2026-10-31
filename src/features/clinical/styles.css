@@ -53,6 +53,13 @@
 .clinical-save-help { font-size: .85rem; }
 .clinical-form-actions { padding-top: 1rem; border-top: 1px solid var(--color-border); }
 .clinical-actions button.clinical-secondary { background: var(--color-background); color: var(--color-primary); }
+.physician-disclosure > summary { min-height: 44px; align-content: center; cursor: pointer; font-weight: 600; color: var(--color-primary); }
+.physician-disclosure > summary:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 3px; }
+.physician-list-settings { margin-top: .75rem; border-top: 1px solid var(--color-border); padding-top: .5rem; }
+.clinical-actions button.physician-withdraw { background: var(--color-background); border-color: var(--color-error); color: var(--color-error); }
+.clinical-actions button.physician-archive { background: var(--color-textSecondary); color: var(--color-background); }
+.physician-confirm { margin: auto; width: min(34rem, calc(100% - 2rem)); max-height: calc(100dvh - 2rem); overflow-y: auto; color: var(--color-text); }
+.physician-confirm::backdrop { background: color-mix(in srgb, var(--color-navy) 60%, transparent); }
 @media (max-width: 640px) {
   .physician-editor .clinical-fields { grid-template-columns: minmax(0, 1fr); }
   .physician-photo { flex-direction: column; padding: 1rem; }

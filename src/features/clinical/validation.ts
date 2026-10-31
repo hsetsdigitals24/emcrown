@@ -22,7 +22,7 @@ export const physicianSchema = z.object({
   slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/).max(100), active: z.boolean(),
 }).strict();
 export const physicianWriteSchema = z.object({ id: z.uuid().optional(), version: z.number().int().nonnegative(),
-  profile: physicianSchema, operation: z.enum(["save", "publish", "unpublish", "archive"]) }).strict().refine(value => !value.profile.notifyAppointments || Boolean(value.profile.email), { path: ["profile", "email"], message: "An email address is required for appointment alerts." });
+  profile: physicianSchema, operation: z.enum(["save", "publish", "unpublish", "archive", "pause", "resume"]) }).strict().refine(value => !value.profile.notifyAppointments || Boolean(value.profile.email), { path: ["profile", "email"], message: "An email address is required for appointment alerts." });
 export const patientSchema = z.object({
   name: line(100).min(2), email: z.email().max(254),
   phone: z.string().trim().max(30).regex(/^\+?[\d\s().-]+$/).refine(value => { const count = value.replace(/\D/g, "").length; return count >= 10 && count <= 15; }),

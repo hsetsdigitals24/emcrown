@@ -37,7 +37,7 @@ export default function NotificationCenter({ initial, compact = false }: { initi
           <Link href="/emcrown-admin/appointments" prefetch={false} aria-label={`${content?.title ?? copy.latest}: ${copy.openAppointments}`}>↗</Link></li>;
       })}</ul>}
     <div className="notification-footer">{compact ? <Link href="/emcrown-admin/notifications" prefetch={false}>{copy.viewAll} ↗</Link> : <>
-      <span>{copy.page} {page + 1}</span><button type="button" disabled={busy || page === 0} onClick={() => void refresh(page - 1)}>{copy.previous}</button>
-      <button type="button" disabled={busy || !data?.hasMore} onClick={() => void refresh(page + 1)}>{copy.next}</button></>}</div>
+      <span>{copy.page} {page + 1}</span><button data-intent="secondary" type="button" disabled={busy || page === 0} onClick={() => void refresh(page - 1)}>{copy.previous}</button>
+      <button data-intent="secondary" type="button" disabled={busy || !data?.hasMore} onClick={() => void refresh(page + 1)}>{copy.next}</button></>}</div>
   </section>;
 }

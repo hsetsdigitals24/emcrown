@@ -4,10 +4,12 @@ import { physicianName } from "@/lib/physician-name";
 import { useState } from "react";
 import { z } from "zod";
 import type { Physician } from "@/types/clinical";
+import { PHYSICIAN_FORM as copy } from "@/config/clinical-form";
 import { CLINICAL_COPY as c } from "@/config/clinical";
 import { physicianSchema } from "@/features/clinical/validation";
 import { clinicalRequest } from "@/features/clinical/client";
 import PhysicianForm from "@/features/physicians/PhysicianForm";
+import PhysicianSettings from "@/features/physicians/PhysicianSettings";
 import { useToast } from "@/components/ui/ToastProvider";
 const recordSchema = physicianSchema.extend({ id: z.uuid(), version: z.number().int().positive(), published: z.boolean(), documentId: z.uuid().optional() });
 export default function PhysicianWorkspace({ initial, canManage }: { initial: Physician[]; canManage: boolean }) {
@@ -20,10 +22,11 @@ export default function PhysicianWorkspace({ initial, canManage }: { initial: Ph
   }
   const physician = records.find(record => record.id === selected);
   if (selected && canManage) return <PhysicianForm key={`${selected}:${physician?.version ?? 0}`} physician={physician} onSaved={refresh} onBack={() => { void refresh(); }} />;
-  return <section className="clinical-panel"><p>{c.physicianIntro}</p>{canManage && <div className="clinical-actions"><button onClick={() => setSelected("new")}>{c.create}</button></div>}
+  return <section className="clinical-panel"><p>{c.physicianIntro}</p>{canManage && <div className="clinical-actions"><button data-intent="primary" onClick={() => setSelected("new")}>{c.create}</button></div>}
     {!records.length ? <p>{c.emptyPhysicians}</p> : <ul className="clinical-list">{records.map(record => <li key={record.id}>
-      <h2>{physicianName(record)}</h2><p>{record.email} {record.phone}</p><p>{!record.active ? c.retired : record.published ? c.published : c.draft}</p>
-      {canManage && <button className="clinical-button" onClick={() => setSelected(record.id)}>{c.edit}</button>}
+      <h2>{physicianName(record)}</h2><p>{record.email} {record.phone}</p><p>{record.published ? copy.visible : copy.hidden} · {record.active ? copy.accepting : copy.paused}</p>
+      {canManage && <button data-intent="primary" className="clinical-button" onClick={() => setSelected(record.id)}>{c.edit}</button>}
+      {canManage && <PhysicianSettings physician={record} onChanged={refresh} />}
     </li>)}</ul>}
   </section>;
 }

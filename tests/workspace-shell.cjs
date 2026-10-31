@@ -26,7 +26,10 @@ Module._load = function(name, ...args) {
   if (name === '@/features/auth/session') return { readSession: async () => signedIn ? { ...actor, stage: 'full', privateCanary: 'MUST_NOT_RENDER' } : null, sessionDestination: () => '/emcrown-admin/mfa' };
   if (name === '@/features/auth/authorize') return { authorisedRead: async permission => {
     permissions.push(permission);
-    return { actor, events: [] };
+    return { actor, events: [], activity: permission === 'audit:read' ? {
+      filters: require('../src/features/activity/filters.ts').activityFilterSchema.parse({snapshot:'2020-10-30T14:00:00.000Z'}),
+      events:[],actors:[],total:0,success:0,failure:0,denied:0,pageCount:1,invalid:false,
+    } : undefined };
   } };
   if (name === '@/features/notifications/repository') return { listNotificationFeed: async () => ({ok:true,data:{events:[],attention:[],page:0,hasMore:false}}) };
   if (name === '@/features/auth/actions') return { logoutAction: async () => {} };
@@ -53,6 +56,13 @@ async function main() {
     assert.ok(html.includes('<h1>' + title + '</h1>'), path + ': correct page title');
     assert.equal(permissions.at(-1), permission, path + ': page permission retained');
     assert.doesNotMatch(html, /MUST_NOT_RENDER/);
+    if (props.activity) {
+      assert.match(html, /method="get"/);
+      for (const field of ['period','category','action','outcome','role','actor','actorId','hideRoutine']) assert.ok(html.includes('name="'+field+'"'), 'Filter control: '+field);
+      assert.match(html, /No events match these filters/);
+      assert.match(html, /Results as of/);
+      assert.doesNotMatch(html, /name="snapshot"/, 'Applying filters starts a fresh snapshot');
+    }
     console.log('Single-shell rendering verified: ' + path);
   }
   signedIn = false;

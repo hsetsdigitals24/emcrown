@@ -367,16 +367,40 @@ send personal/health data to URLs, logs, analytics, or client storage. Before
 changing a Next.js convention, read the installed guides under
 `node_modules/next/dist/docs/` and follow `AGENTS.md`.
 
+Physician list cards separate **Hide from website / Show on website** from
+**Pause online booking / Resume online booking** under Profile settings. Each action
+has a confirmation explaining its effect and reversal. Pausing preserves a visible
+public profile and portrait; hiding removes it from public view. Both retain private
+records, CVs, schedules and existing appointments. Showing publishes the saved draft;
+resuming booking preserves visibility and still requires schedules and booking setup.
+
+Admin action colours follow one shared scheme: blue for saves/edits, green for
+confirming/publishing/enabling, red for cancellation/hiding/removal, slate for
+pausing or cautionary changes, and neutral outlines for back/dismiss/navigation.
+CMS publication/revision and appointment-cancellation confirmations use accessible
+native modal dialogs with matching action colours and a neutral Go back option.
+
+The Activity log filters stored organisation account/security/access history by UTC
+period or custom dates, category, exact activity, result, recorded role and actor.
+Staff choices come only from actors in that organisation’s audit history; unknown
+actors/roles remain explicit. Quick views highlight blocked/unsuccessful activity,
+recent events and your own activity; routine view events can be hidden. Totals
+cover matching history and 25-event pages share a fixed snapshot. Refresh or Apply
+starts a fresh snapshot. Invalid filters fail closed instead of showing all events.
+Clinical appointment/CMS histories are separate and are not merged into this view.
+
 ## Development checks
 
 ```bash
 npm run lint
 npm run typecheck
 node tests/workspace-shell.cjs
+node --conditions=react-server tests/activity.cjs
 node tests/booking.cjs
 node --conditions=react-server tests/booking-calendar.cjs
 node --conditions=react-server tests/appointment-scheduler.cjs
 npm run test:clinical-unit
+node tests/physician-controls.cjs
 ```
 
 For auth/CMS/clinical integration tests, use a **dedicated disposable local**
@@ -419,3 +443,30 @@ separate actions and require the project owner's explicit authorization. Do not
 commit, push, change branches, or modify remotes without that authorization.
 # emcrown
 # emcrown
+
+### Engineering booking review (fictional details only)
+
+Engineers can exercise the real database-backed booking flow before patient-launch
+approval. Set `CLINICAL_BOOKING_ENABLED=true`, `CLINICAL_REVIEW_MODE=true` and
+`CLINICAL_REVIEW_EMAILS` to a comma-separated list of reviewer mailboxes. Keep
+`CLINICAL_INTEGRATIONS_APPROVED=false` and `CLINICAL_SMS_ENABLED=false`. Configure
+the existing clinical encryption keys, dedicated runtime database role, SMTP,
+Turnstile keys and exact `AUTH_ORIGIN` as usual. Review mode never bypasses these
+technical requirements. Its notice requires fictional patient details; the server
+rejects other booking email addresses and restricts all outgoing mail to the list,
+including staff/physician alerts. Use a separate review deployment/database for
+the engineers, or keep the current prelaunch deployment restricted to reviewers.
+
+Set `CLINICAL_RETENTION_DAYS` for test records (local engineering default chosen:
+7 days). This setting does not automatically delete records; cleanup remains
+manual. Review records use the existing appointment schema and occupy real slots.
+The existing `npm run appointments:deliver` processes queued test mail; reminders
+need a recurring worker. Local activation does not change Vercel environment
+variables or deploy code. Add the same settings to the engineer-review deployment
+and redeploy through the normal release process. Include reviewer and intended
+staff mailboxes in the list; omitted recipients receive no review messages.
+
+Before patient launch, clean up fictional records, disable review mode, remove
+reviewer settings and complete the documented patient-launch approval. Switching
+off review without approval disables booking again. Review regression checks:
+`node --conditions=react-server tests/booking-review.cjs`.

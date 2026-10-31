@@ -10,10 +10,10 @@ export default function EditorActions({ busy, canPublish, published, site, onAct
 }) {
   const history = useCmsPuck(state => state.history);
   return <div className="cms-actions" aria-busy={busy}>
-    <button type="button" onClick={history.back} disabled={busy || !history.hasPast}>{CMS_COPY.undo}</button>
-    <button type="button" onClick={history.forward} disabled={busy || !history.hasFuture}>{CMS_COPY.redo}</button>
-    <button type="button" onClick={() => onAction("save")} disabled={busy}>{CMS_COPY.save}</button>
-    {canPublish && <button className="cms-primary" type="button" onClick={() => onAction("publish")} disabled={busy}>{CMS_COPY.publish}</button>}
-    {canPublish && published && !site && <button type="button" onClick={() => onAction("unpublish")} disabled={busy}>{CMS_COPY.unpublish}</button>}
+    <button data-intent="secondary" type="button" onClick={history.back} disabled={busy || !history.hasPast}>{CMS_COPY.undo}</button>
+    <button data-intent="secondary" type="button" onClick={history.forward} disabled={busy || !history.hasFuture}>{CMS_COPY.redo}</button>
+    <button data-intent="primary" type="button" onClick={() => onAction("save")} disabled={busy}>{CMS_COPY.save}</button>
+    {canPublish && <button data-intent="success" className="cms-primary" type="button" onClick={() => onAction("publish")} disabled={busy}>{CMS_COPY.publish}</button>}
+    {canPublish && published && !site && <button data-intent="danger" type="button" onClick={() => onAction("unpublish")} disabled={busy}>{CMS_COPY.unpublish}</button>}
   </div>;
 }

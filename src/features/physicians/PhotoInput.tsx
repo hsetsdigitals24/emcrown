@@ -29,7 +29,7 @@ export default function PhotoInput({ value, onChange, onBusy }: { value: string;
     {(["upload", "link"] as const).map(option => <button type="button" key={option} aria-pressed={mode === option} disabled={busy} onClick={() => setMode(option)}>{copy[option]}</button>)}
   </div>{mode === "upload" ? <label className="clinical-field"><span>{copy.upload}</span><input key="photo-upload" type="file" accept="image/jpeg,image/png,image/webp" disabled={busy} onChange={event => { void upload(event.target.files?.[0]); event.target.value = ""; }} /><small>{copy.photoHelp}</small></label>
     : <label className="clinical-field"><span>{copy.link}</span><input key="photo-link" type="text" value={value} placeholder={copy.placeholders.photo} maxLength={2048} spellCheck={false} onChange={event => onChange(event.target.value.trim())} /><small>{copy.linkHelp}</small></label>}
-    {value && <button className="clinical-text-button" type="button" disabled={busy} onClick={() => { onChange(""); setError(""); }}>{copy.remove}</button>}
+    {value && <button data-intent="danger" className="clinical-text-button" type="button" disabled={busy} onClick={() => { onChange(""); setError(""); }}>{copy.remove}</button>}
     {busy && <p role="status">{copy.uploading}</p>}{(error || (value && failed === value)) && <p className="clinical-error" role="alert">{error || copy.imageError}</p>}
   </div></div>;
 }

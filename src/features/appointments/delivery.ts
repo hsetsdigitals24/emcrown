@@ -7,6 +7,7 @@ import { CLINICAL_COPY } from "@/config/clinical";
 import { calendarAttachment } from "@/features/appointments/calendar";
 import { sendAwsSms } from "@/features/appointments/aws-sms";
 import { authEnv } from "@/lib/auth-env";
+import { bookingReviewMode, reviewRecipientAllowed } from "@/features/clinical/review";
 export const messagePayloadSchema = z.object({ to: z.string().min(1).max(320), text: z.string().max(5000), calendar: z.object({ startUtc: z.iso.datetime(), endUtc: z.iso.datetime(), location: z.string().max(300), uid: z.uuid() }).optional() }).strict();
 export function normalizePhone(value: string) {
   const digits = value.replace(/\D/g, "");
@@ -14,6 +15,7 @@ export function normalizePhone(value: string) {
 }
 export async function deliverMessage(id: string, channel: string, payload: z.infer<typeof messagePayloadSchema>) {
   const env = deliveryEnv();
+  if (bookingReviewMode() && (channel === "sms" || !reviewRecipientAllowed(payload.to))) throw new Error("Review delivery recipient is not enabled.");
   if (channel === "sms") {
     if (process.env.CLINICAL_SMS_ENABLED !== "true") throw new Error("SMS delivery is disabled.");
     const sms = smsEnv();

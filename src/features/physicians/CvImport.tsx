@@ -23,8 +23,8 @@ export default function CvImport({ onReviewed }: { onReviewed: (file: File, text
   return <section className="clinical-panel"><h2>{c.cv}</h2><p>{c.cvHelp}</p>
     <label className="clinical-field">{c.cv}<input type="file" disabled={busy} accept=".pdf,.docx,.png,.jpg,.jpeg"
       onChange={event => { void read(event.target.files?.[0]); event.target.value = ""; }} /></label>
-    {busy && <div role="status">{c.extracting} {Math.round(progress * 100)}% <button type="button" onClick={() => controller.current?.abort()}>{c.cancel}</button></div>}
+    {busy && <div role="status">{c.extracting} {Math.round(progress * 100)}% <button data-intent="secondary" type="button" onClick={() => controller.current?.abort()}>{c.cancel}</button></div>}
     {file && <><label className="clinical-field">{c.reviewCv}<textarea rows={10} value={text} maxLength={CLINICAL_POLICY.cvCharacters} onChange={event => setText(event.target.value)} /></label>
-      <p>{c.extractionNote}</p><button type="button" className="clinical-button" onClick={() => { onReviewed(file, text); setFile(undefined); setText(""); }}>{c.applyCv}</button></>}
+      <p>{c.extractionNote}</p><button data-intent="success" type="button" className="clinical-button" onClick={() => { onReviewed(file, text); setFile(undefined); setText(""); }}>{c.applyCv}</button></>}
   </section>;
 }

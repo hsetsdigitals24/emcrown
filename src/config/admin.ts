@@ -1,5 +1,6 @@
 // Shared configuration: editable workspace navigation and dashboard text.
 export const ADMIN_COPY = {
+  dismissConfirmation: "Go back",
   loadingPage: "Loading workspace page…",
   hideSidebar: "Hide sidebar", showSidebar: "Show sidebar",
   breadcrumb: "Workspace breadcrumb", workspace: "Practice workspace", overview: "Overview", activity: "Activity log",

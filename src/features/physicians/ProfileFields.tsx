@@ -15,11 +15,11 @@ export default function ProfileFields({ profile, errors, update, onPhotoBusy }: 
   }
   return <><section className="clinical-form-section"><h3>{copy.identity}</h3><p>{copy.identityHelp}</p><div className="clinical-fields">{input("title")}{input("fullName")}{input("slug")}</div>
     <PhotoInput value={profile.photo} onChange={value => update("photo", value)} onBusy={onPhotoBusy} />{errors.photo && <p className="clinical-error" role="alert">{errors.photo}</p>}
-  </section><section className="clinical-form-section"><h3>{copy.contact}</h3><p>{copy.contactHelp}</p><div className="clinical-fields">{input("email")}{input("phone")}</div>
-    <label className="clinical-check clinical-setting"><input name="notifyAppointments" type="checkbox" checked={profile.notifyAppointments} onChange={event => update("notifyAppointments", event.target.checked)} /><span>{copy.alertLabel}<small>{copy.alertHelp}</small></span></label></section>
-  <section className="clinical-form-section"><h3>{copy.biography}</h3><p>{copy.biographyHelp}</p><div className="clinical-fields">
+  </section><details className="clinical-form-section physician-disclosure"><summary>{copy.contact}</summary><p>{copy.contactHelp}</p><div className="clinical-fields">{input("email")}{input("phone")}</div>
+    <label className="clinical-check clinical-setting"><input name="notifyAppointments" type="checkbox" checked={profile.notifyAppointments} onChange={event => update("notifyAppointments", event.target.checked)} /><span>{copy.alertLabel}<small>{copy.alertHelp}</small></span></label></details>
+  <details className="clinical-form-section physician-disclosure"><summary>{copy.biography}</summary><p>{copy.biographyHelp}</p><div className="clinical-fields">
     {(["bio", "credentials", "specialties", "languages"] as const).map(key => <label className={`clinical-field ${key === "bio" ? "clinical-field-wide" : ""}`} key={key} htmlFor={`physician-${key}`}><span>{c[key]} <span className="clinical-field-tag">{copy.optional}</span></span>
       <textarea id={`physician-${key}`} rows={key === "bio" ? 5 : 3} placeholder={copy.placeholders[key]} maxLength={key === "bio" ? 12000 : key === "languages" ? 1000 : 2000} value={profile[key]} aria-invalid={Boolean(errors[key])} aria-describedby={`physician-${key}-help`} onChange={event => update(key, event.target.value)} />
       <small id={`physician-${key}-help`}>{errors[key] || copy.hints[key]}</small></label>)}
-  </div></section><label className="clinical-check clinical-setting"><input type="checkbox" checked={profile.active} onChange={event => update("active", event.target.checked)} /><span>{c.active}<small>{copy.activeHelp}</small></span></label></>;
+  </div></details></>;
 }

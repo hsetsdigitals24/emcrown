@@ -79,7 +79,7 @@ export default function ScheduleEditor({ providers, initial, locations = PRACTIC
           <button type="button" className="clinical-button" disabled={busy} onClick={() => select(row)}>{copy.edit}<span className="sr-only"> · {providers.find(provider => provider.id === row.definition.physicianId)?.fullName} · {c.weekDays[row.definition.weekday]} · {row.definition.opens}</span></button>
         </div>
       </li>)}</ul>
-      <div className="clinical-actions"><button type="button" className="clinical-secondary" disabled={busy} onClick={async () => { setBusy(true); try { if (!await refresh()) notify(c.error); } finally { setBusy(false); } }}>{copy.refreshSchedules}</button></div>
+      <div className="clinical-actions"><button data-intent="secondary" type="button" className="clinical-secondary" disabled={busy} onClick={async () => { setBusy(true); try { if (!await refresh()) notify(c.error); } finally { setBusy(false); } }}>{copy.refreshSchedules}</button></div>
       <p className="clinical-save-help">{copy.nextStep}</p>
     </> : <form noValidate onSubmit={event => { event.preventDefault(); void submit(); }}>
       <fieldset disabled={busy || !providers.length}><div className="schedule-editor-heading"><h3 ref={heading} tabIndex={-1}>{selected ? copy.editTitle : copy.createTitle}</h3><button type="button" className="clinical-text-button" onClick={close}>{copy.close}</button></div>
@@ -87,7 +87,7 @@ export default function ScheduleEditor({ providers, initial, locations = PRACTIC
         <ScheduleFields locations={locations} value={definition} onChange={updateDefinition} providers={providers} editing={Boolean(selected)} />
         <ScheduleClosures key={selected?.id ?? "new"} value={definition} onChange={updateDefinition} onPendingChange={setPending} />
         <div className="clinical-setting"><label className="clinical-check"><input type="checkbox" checked={definition.enabled} onChange={event => updateDefinition({ ...definition, enabled: event.target.checked })} /><strong>{copy.active}</strong></label><small>{copy.activeHelp}</small></div>
-        <div className="clinical-actions clinical-form-actions"><button type="submit">{busy ? c.working : copy.save}</button><button type="button" className="clinical-secondary" onClick={close}>{c.cancel}</button></div>
+        <div className="clinical-actions clinical-form-actions"><button data-intent="primary" type="submit">{busy ? c.working : copy.save}</button><button data-intent="secondary" type="button" className="clinical-secondary" onClick={close}>{c.cancel}</button></div>
       </fieldset>
     </form>}
   </section>;

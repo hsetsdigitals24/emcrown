@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import type { Metadata } from "next";
 import { AUTH_COPY } from "@/config/auth";
 import "@/app/emcrown-admin/styles.css";
+import "@/app/emcrown-admin/buttons.css";
 export const metadata: Metadata = {
   title: "Staff workspace | Emcrown", description: "Authorised Emcrown organisation workspace.",
   robots: { index: false, follow: false, nocache: true },

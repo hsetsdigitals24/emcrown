@@ -31,6 +31,6 @@ export default function AppointmentNotifications({ initial, providers, canManage
       <summary><strong>{appointment.patient.name}</strong><span>{slotLabel(appointment, providers)}</span></summary>
       <MessageStatusList messages={messages.filter(message => message.appointmentId === appointment.id)} />
     </details>)}
-    <div className="clinical-actions"><span>{copy.page} {data.page + 1}</span><button type="button" disabled={busy || data.page === 0} onClick={() => void refresh(data.page - 1)}>{copy.previous}</button><button type="button" disabled={busy || !data.hasMore} onClick={() => void refresh(data.page + 1)}>{copy.next}</button></div>
+    <div className="clinical-actions"><span>{copy.page} {data.page + 1}</span><button data-intent="secondary" type="button" disabled={busy || data.page === 0} onClick={() => void refresh(data.page - 1)}>{copy.previous}</button><button data-intent="secondary" type="button" disabled={busy || !data.hasMore} onClick={() => void refresh(data.page + 1)}>{copy.next}</button></div>
     </section>{canManage && <PhysicianAlertSettings providers={providers} />}</div>;
 }

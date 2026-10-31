@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { BookingCopy } from "@/config/booking-copy";
 import type { BookingState } from "@/types/booking";
-export default function BookingHeading({ state, copy }: { state: BookingState; copy: BookingCopy }) {
+export default function BookingHeading({ state, copy }: { state: Pick<BookingState, "step" | "phase">; copy: BookingCopy }) {
   const ref = useRef<HTMLHeadingElement>(null);
   const mounted = useRef(false);
   useEffect(() => { if (mounted.current) ref.current?.focus(); mounted.current = true; }, [state.step, state.phase]);

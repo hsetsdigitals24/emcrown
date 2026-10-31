@@ -14,6 +14,7 @@ import { SITE_FOOTER } from "@/config/site-shell";
 import { publishedPractice } from "@/features/clinical/practice";
 import { physicianAlertRecipient } from "@/features/appointments/physician-alerts";
 import { formatDay, formatTime, practiceDate } from "@/features/booking/time";
+import { bookingReviewMode, reviewRecipientAllowed } from "@/features/clinical/review";
 export type MessagePayload = { to: string; text: string; calendar?: { startUtc: string; endUtc: string; location: string; uid: string } };
 export async function queueAppointmentMessages(tx: AuthTransaction, row: { physicianId: string; id: string; organisationId: string; version: number; startAt: Date; endAt: Date; locationId: string }, patient: PatientDetails, kind: string) {
   await tx.update(appointmentMessages).set({ state: "cancelled", updatedAt: new Date() }).where(and(eq(appointmentMessages.appointmentId, row.id), inArray(appointmentMessages.state, ["queued", "failed"])));
@@ -40,6 +41,7 @@ export async function queueAppointmentMessages(tx: AuthTransaction, row: { physi
     if (patient.smsConsent) items.push({ channel: "sms", to: patient.phone, kind: `reminder-${hours}`, at });
   }
   for (const item of items) {
+    if (bookingReviewMode() && (item.channel === "sms" || !reviewRecipientAllowed(item.to))) continue;
     const id = randomUUID();
     // Staff links lead to MFA-protected admin; they never receive the bearer manage token.
     const update = kind === "cancelled" ? "Appointment cancelled" : kind === "rescheduled" ? "Appointment rescheduled" : kind === "confirmed" ? "Appointment confirmed" : "Appointment request received";

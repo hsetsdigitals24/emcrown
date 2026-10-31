@@ -22,13 +22,13 @@ export default function SecurityForm({ mode, candidates = [] }: {
         <option value="" disabled>{copy.choose}</option>{candidates.map(candidate => <option value={candidate.id} key={candidate.id}>{candidate.email}</option>)}
       </select></label><label className="admin-checkbox"><input type="checkbox" name="confirm" required />{copy.confirm}</label></>}
       <label>{copy.code}<input name="code" placeholder={copy.codePlaceholder} aria-describedby={codeHintId} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" minLength={6} maxLength={6} required /><small id={codeHintId}>{copy.codeHint}</small></label>
-      <button type="submit" className={`admin-button ${mode === "transfer" ? "admin-danger" : ""}`} disabled={mode === "transfer" && !candidates.length}>
+      <button data-intent={mode === "transfer" ? "danger" : mode === "codes" ? "caution" : "primary"} type="submit" className={`admin-button ${mode === "transfer" ? "admin-danger" : ""}`} disabled={mode === "transfer" && !candidates.length}>
         {pending ? copy.pending : labels[mode]}</button>
     </fieldset>
     <Toast key={state.message + String(pending)} message={state.message} success={state.success} />
     {state.codes && !saved && <section className="admin-recovery-codes" aria-label={copy.recoveryTitle}>
       <p>{copy.generated}</p><ul>{state.codes.map(code => <li key={code}><code>{code}</code></li>)}</ul>
-      <button type="button" className="admin-button" onClick={() => setSaved(true)}>{copy.acknowledge}</button>
+      <button data-intent="success" type="button" className="admin-button" onClick={() => setSaved(true)}>{copy.acknowledge}</button>
     </section>}
   </form>;
 }

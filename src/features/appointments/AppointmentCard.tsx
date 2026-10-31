@@ -1,5 +1,6 @@
 // Client appointment detail: explicit audited mutations and server-validated rebooking slots.
 "use client";
+import { useConfirmation } from "@/components/ui/useConfirmation";
 import { useState } from "react";
 import { z } from "zod";
 import type { Appointment, AvailabilitySlot, Physician } from "@/types/clinical";
@@ -20,6 +21,7 @@ export function slotLabel(slot: { startUtc: string; physicianId: string }, provi
 export default function AppointmentCard({ appointment: a, providers, canManage, messages, onSaved, locations = PRACTICE.locations }: {
   locations?: PracticeLocation[]; appointment: Appointment; providers: Physician[]; canManage: boolean; messages: NotificationMessage[]; onSaved: () => Promise<void>;
 }) {
+  const { confirm, confirmation } = useConfirmation();
   const [busy, setBusy] = useState(false); const [rebooking, setRebooking] = useState(false);
   const [slots, setSlots] = useState<AvailabilitySlot[]>([]); const [selected, setSelected] = useState("");
   const [from, setFrom] = useState(practiceDate(new Date().toISOString(), BOOKING_SETTINGS.timeZone)); const notify = useToast();
@@ -31,10 +33,11 @@ export default function AppointmentCard({ appointment: a, providers, canManage, 
     } finally { setBusy(false); }
   }
   async function mutate(operation: "confirm" | "cancel" | "complete" | "no_show" | "rebook") {
-    if (busy || (operation === "cancel" && !window.confirm(c.confirmCancel))) return;
+    if (busy) return;
     const slot = slots.find((_, index) => String(index) === selected);
     setBusy(true);
     try {
+      if (operation === "cancel" && !await confirm({ title: c.cancelVisit, description: c.confirmCancel, label: c.cancelVisit, intent: "danger" })) return;
       const result = await clinicalRequest("/emcrown-admin/appointments/api", z.null(), { id: a.id, version: a.version, operation,
         ...(operation === "rebook" && slot ? { slot: { physicianId: slot.physicianId, locationId: slot.locationId, typeId: slot.typeId, startUtc: slot.startUtc } } : {}) });
       if (!result.ok) { notify(result.code === "conflict" ? c.conflict : c.error); return; }
@@ -50,14 +53,15 @@ export default function AppointmentCard({ appointment: a, providers, canManage, 
         [c.consent, `${c.email}: ${a.patient.emailConsent ? "✓" : "—"} · SMS: ${a.patient.smsConsent ? "✓" : "—"}`]].map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
     </dl><h4>{c.notifications}</h4><MessageStatusList messages={messages} /></details>
     {canManage && !finished && <fieldset disabled={busy}><div className="clinical-actions">
-      {a.status === "requested" && <button onClick={() => void mutate("confirm")}>{c.confirm}</button>}
-      <button className="clinical-secondary" onClick={() => void loadSlots()}>{copy.reschedule}</button>
-      {a.status !== "cancelled" && new Date(a.endUtc) <= new Date() && <><button className="clinical-secondary" onClick={() => void mutate("complete")}>{copy.complete}</button><button className="clinical-secondary" onClick={() => void mutate("no_show")}>{copy.missed}</button></>}
-      {a.status !== "cancelled" && <button className="appointment-cancel" onClick={() => void mutate("cancel")}>{c.cancelVisit}</button>}
+      {a.status === "requested" && <button data-intent="success" onClick={() => void mutate("confirm")}>{c.confirm}</button>}
+      <button data-intent="primary" className="clinical-secondary" onClick={() => void loadSlots()}>{copy.reschedule}</button>
+      {a.status !== "cancelled" && new Date(a.endUtc) <= new Date() && <><button data-intent="success" className="clinical-secondary" onClick={() => void mutate("complete")}>{copy.complete}</button><button data-intent="caution" className="clinical-secondary" onClick={() => void mutate("no_show")}>{copy.missed}</button></>}
+      {a.status !== "cancelled" && <button data-intent="danger" className="appointment-cancel" onClick={() => void mutate("cancel")}>{c.cancelVisit}</button>}
     </div>{rebooking && <div><label className="clinical-field">{c.date}<input type="date" value={from} onChange={event => setFrom(event.target.value)} /></label>
-      <div className="clinical-actions"><button onClick={() => void loadSlots()}>{c.refresh}</button></div><label className="clinical-field">{c.start}<select value={selected} onChange={event => setSelected(event.target.value)}><option value="">{c.select}</option>
+      <div className="clinical-actions"><button data-intent="secondary" onClick={() => void loadSlots()}>{c.refresh}</button></div><label className="clinical-field">{c.start}<select value={selected} onChange={event => setSelected(event.target.value)}><option value="">{c.select}</option>
         {slots.map((slot, index) => <option key={index} value={index}>{slotLabel(slot, providers)} · {slot.typeId} · {slot.locationId}</option>)}</select></label>
-      {!slots.length && <p>{c.noResults}</p>}<div className="clinical-actions"><button disabled={!selected} onClick={() => void mutate("rebook")}>{copy.reschedule}</button><button className="clinical-secondary" onClick={() => setRebooking(false)}>{copy.closeReschedule}</button></div></div>}
+      {!slots.length && <p>{c.noResults}</p>}<div className="clinical-actions"><button data-intent="success" disabled={!selected} onClick={() => void mutate("rebook")}>{copy.reschedule}</button><button data-intent="secondary" className="clinical-secondary" onClick={() => setRebooking(false)}>{copy.closeReschedule}</button></div></div>}
     </fieldset>}
+    {confirmation}
   </li>;
 }
