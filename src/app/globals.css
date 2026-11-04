@@ -378,8 +378,8 @@
   .booking-background-photo-0 { left: 0; }
   .booking-background-photo-1 { right: 0; }
   .booking-background-photo img { object-fit: cover; }
-  .booking-background-blend { position: absolute; inset: 0; background: linear-gradient(90deg, color-mix(in srgb, var(--color-surfaceTint) 78%, transparent), color-mix(in srgb, var(--color-surfaceTint) 58%, transparent)), linear-gradient(0deg, var(--color-sectionAlt), transparent 25%, transparent 75%, var(--color-sectionAlt)); }
-  .booking-stock-label { position: relative; margin-top: 2rem; font-size: 0.7rem; color: var(--color-textSecondary); }
+  .booking-background-blend { position: absolute; inset: 0; background: var(--color-navy); opacity: 0.82; }
+  .booking-stock-label { position: relative; margin-top: 2rem; font-size: 0.7rem; color: var(--color-background); }
 }
 @media (prefers-reduced-motion: reduce) {
   .service-surface, .service-surface::before, .service-surface::after, .service-card a span { transition: none; }
@@ -388,6 +388,15 @@
 
 /* Reduced motion keeps the section photography in the normal scrolling plane. */
 @media (prefers-reduced-motion: reduce) { .booking-background-photo { position: absolute; } }
+
+/* Unlayered so the photo-overlay contrast takes precedence over text colour utilities. */
+.booking-intro .block-heading > *, .booking-intro .block-heading .text-highlight { color: var(--color-background); }
+.booking-intro :focus-visible { outline-color: var(--color-background); }
+.booking-step { transform-origin: right center; transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1); }
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .booking-step:hover { transform: translateX(-8px) scale(1.015); }
+}
+@media (prefers-reduced-motion: reduce) { .booking-step { transition: none; } }
 
 /* Manual testimonial slideshow: no scroll capture, pinning or scroll-linked movement. */
 @layer components {
