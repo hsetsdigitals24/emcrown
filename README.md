@@ -24,6 +24,19 @@ Cards keep both faces mounted, swap visibility at the edge of a short turn, and
 release animation transforms afterward. Detail-page photos remain static. FAQ
 answers open on mouse hover and retain native click/keyboard toggling.
 
+## Homepage motion
+
+Homepage section entrances follow scroll progress in both directions through the
+deferred GSAP/ScrollTrigger island. Service cards alternate row directions;
+appointment cards slide from the right while fading and growing. Later headings,
+physician cards, testimonial region, location and FAQ rows reveal and reverse
+within their viewport range. The closing wave also follows scroll progress.
+Hover and manual controls remain independent.
+FAQ rows use the appointment cards' rightward slide/fade/scale entrance. Find us
+uses a gentler 24px horizontal/12px vertical drift from 65% opacity to full visibility.
+Reduced motion and JavaScript-free views keep content visible. Keyboard focus
+reveals interactive content immediately; booking buttons remain available.
+
 ## Technology
 
 | Area | Technology |

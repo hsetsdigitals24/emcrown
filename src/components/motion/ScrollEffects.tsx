@@ -4,6 +4,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { animateHero } from "@/components/motion/hero-scroll";
+import { animateHomeSections } from "@/components/motion/home-scroll";
 import type { RefObject } from "react";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -24,16 +25,6 @@ function pinPrinciples(root: HTMLElement) {
     timeline.to({}, { duration: 0.6 });
   });
 }
-function animateSteps(root: HTMLElement) {
-  root.querySelectorAll(".booking-step").forEach((step) => {
-    const badge = step.querySelector(".step-number");
-    if (!badge) return;
-    gsap.fromTo(badge, { scale: 1, opacity: 0.65 }, { scale: 1.15, opacity: 1, ease: "none",
-      scrollTrigger: { trigger: step, start: "top 70%", end: "top 35%", scrub: 0.4, invalidateOnRefresh: true },
-    });
-    gsap.fromTo(step, { y: 12 }, { y: 0, ease: "none", scrollTrigger: { trigger: step, start: "top 85%", end: "top 45%", scrub: 0.5 } });
-  });
-}
 export default function ScrollEffects({ scope }: { scope: RefObject<HTMLDivElement | null> }) {
   useGSAP(() => {
     const root = scope.current;
@@ -41,11 +32,12 @@ export default function ScrollEffects({ scope }: { scope: RefObject<HTMLDivEleme
     const media = gsap.matchMedia();
     media.add("(min-width: 1024px) and (prefers-reduced-motion: no-preference)", () => {
       const cleanupHero = animateHero(root);
-      animateSteps(root);
       return cleanupHero;
     });
     // Pinning must fit below navigation instead of covering content on short screens.
     media.add("(min-width: 1024px) and (min-height: 800px) and (prefers-reduced-motion: no-preference)", () => pinPrinciples(root));
+    // Register below pinned sections so later triggers measure their final scroll positions.
+    media.add("(prefers-reduced-motion: no-preference)", () => animateHomeSections(root));
     return () => media.revert();
   }, { scope });
   return null;

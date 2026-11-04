@@ -9,7 +9,8 @@ export default function ServiceCardsMotion({ children, itemCount }: { children: 
   useEffect(() => {
     const grid = ref.current;
     if (!grid) return;
-    const stop = observeServiceCards(grid);
+    // Homepage entrances belong to its reversible scroll timeline; index pages keep their own reveals.
+    const stop = grid.closest("[data-home-motion]") ? () => {} : observeServiceCards(grid);
     return () => { stop(); if (pointerFrame.current !== null) cancelAnimationFrame(pointerFrame.current); };
   }, [itemCount]);
   return <div ref={ref} className="services-grid services-motion" onPointerMove={(event) => {

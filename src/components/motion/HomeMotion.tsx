@@ -6,5 +6,5 @@ import type { ReactNode } from "react";
 const ScrollEffects = dynamic(() => import("@/components/motion/ScrollEffects"), { ssr: false });
 export default function HomeMotion({ children }: { children: ReactNode }) {
   const scope = useRef<HTMLDivElement>(null);
-  return <div ref={scope} className="min-w-0"><ScrollEffects scope={scope} />{children}</div>;
+  return <div ref={scope} className="home-motion min-w-0" data-home-motion><ScrollEffects scope={scope} />{children}</div>;
 }
