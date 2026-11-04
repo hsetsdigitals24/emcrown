@@ -10,7 +10,12 @@ const smtpSchema = z.object({
 });
 export function deliveryEnv() {
   const parsed = smtpSchema.safeParse(process.env);
-  if (!parsed.success) throw new Error("Clinical delivery configuration is incomplete.");
+  if (!parsed.success) {
+    // Only schema-owned names reach logs; validation messages can contain input values.
+    const invalidSettings = Object.keys(smtpSchema.shape).filter(name =>
+      parsed.error.issues.some(issue => issue.path[0] === name));
+    throw new Error(`Clinical delivery configuration is incomplete. Missing or invalid settings: ${invalidSettings.join(", ")}.`);
+  }
   if (bookingReviewMode()) {
     reviewEmails();
     if (process.env.CLINICAL_SMS_ENABLED === "true") throw new Error("Engineering review requires SMS to be disabled.");
