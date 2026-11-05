@@ -13,6 +13,8 @@ import { clinicalEvent } from "@/features/clinical/access";
 import { practiceDate } from "@/features/booking/time";
 import { BOOKING_SETTINGS } from "@/config/booking";
 import { CLINICAL_POLICY } from "@/config/clinical";
+import { emailPhysician } from "@/features/appointments/email-physician";
+import { publishedPractice } from "@/features/clinical/practice";
 const schema = z.object({ token: z.string().max(1500), operation: z.enum(["view", "cancel", "rebook"]), slot: slotSchema.optional() }).strict();
 export async function manageAppointment(input: unknown) {
   const parsed = schema.safeParse(input); if (!parsed.success) return { ok: false as const, code: "invalid" as const };
@@ -26,7 +28,11 @@ export async function manageAppointment(input: unknown) {
     if (Date.now() >= cutoff) return { ok: false as const, code: "denied" as const };
     if (parsed.data.operation === "view") {
       await clinicalEvent(tx, row.organisationId, "appointments.manage_viewed", undefined, row.id);
-      return { ok: true as const, data: { startUtc: row.startAt.toISOString(), endUtc: row.endAt.toISOString(), physicianId: row.physicianId,
+      const practice = await publishedPractice(tx);
+      const location = practice.locations.find(item => item.id === row.locationId);
+      const display = { physician: await emailPhysician(tx, row.organisationId, row.physicianId),
+        location: location ? `${location.label} — ${location.address}` : row.locationId };
+      return { ok: true as const, data: { display, startUtc: row.startAt.toISOString(), endUtc: row.endAt.toISOString(), physicianId: row.physicianId,
         typeId: row.typeId, locationId: row.locationId, slots: await availableSlots(tx, row.organisationId, practiceDate(new Date().toISOString(), BOOKING_SETTINGS.timeZone), undefined, row.id) } };
     }
     const patch: Partial<typeof appointments.$inferInsert> = { version: row.version + 1, updatedAt: new Date() };

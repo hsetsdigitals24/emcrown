@@ -3,7 +3,8 @@ import { sql } from "drizzle-orm";
 import { pgSchema, uuid, text, timestamp, boolean, integer, jsonb, primaryKey, unique, foreignKey, check, index } from "drizzle-orm/pg-core";
 import { organisations, users } from "@/lib/db/schema";
 import type { ProviderSchedule } from "@/types/clinical";
-const clinical = pgSchema("emcrown_admin");
+import { DATABASE_SCHEMA } from "@/config/database";
+const clinical = pgSchema(DATABASE_SCHEMA);
 const time = (name: string) => timestamp(name, { withTimezone: true });
 export const physicians = clinical.table("physicians", {
   id: uuid().primaryKey().defaultRandom(), organisationId: uuid("organisation_id").notNull().references(() => organisations.id),

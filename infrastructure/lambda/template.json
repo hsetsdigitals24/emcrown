@@ -1,0 +1,368 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Emcrown email processing migration. Delivery and schedule are disabled by default. No patient data in scheduler events.",
+  "Parameters": {
+    "Name": {
+      "Type": "String",
+      "Default": "emcrown-email-staging",
+      "AllowedPattern": "[a-z][a-z0-9-]{2,44}"
+    },
+    "ArtifactBucket": {
+      "Type": "String",
+      "Description": "Existing private S3 bucket in this region containing the reviewed archive."
+    },
+    "ArtifactKey": {
+      "Type": "String",
+      "Description": "Versioned S3 key for email-worker.zip; change for every release."
+    },
+    "DeliveryEnabled": {
+      "Type": "String",
+      "Default": "false",
+      "AllowedValues": [
+        "false",
+        "true"
+      ]
+    },
+    "ScheduleState": {
+      "Type": "String",
+      "Default": "DISABLED",
+      "AllowedValues": [
+        "DISABLED",
+        "ENABLED"
+      ]
+    },
+    "AlarmTopicArn": {
+      "Type": "String",
+      "Default": "",
+      "Description": "Optional existing approved SNS topic ARN for infrastructure alarms.",
+      "AllowedPattern": "^$|arn:aws[a-z-]*:sns:[a-z0-9-]+:[0-9]{12}:[A-Za-z0-9_-]+"
+    },
+    "WorkerSettingsJson": {
+      "Type": "String",
+      "Default": "{}",
+      "NoEcho": true,
+      "MaxLength": 3900,
+      "Description": "Private JSON settings matching settings.example.json. Leave {} for disabled preparation; update privately before readiness. Never put credentials in the template or scheduler payload."
+    },
+    "DatabaseScope": {
+      "Type": "String",
+      "Default": "staging",
+      "AllowedValues": [
+        "live",
+        "staging"
+      ],
+      "Description": "Staging uses emcrown_staging with emcrown_staging_runtime. Select live only for an approved production cutover."
+    }
+  },
+  "Conditions": {
+    "HasAlarmTopic": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "AlarmTopicArn"
+            },
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "Resources": {
+    "WorkerLogs": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Sub": "/aws/lambda/${Name}"
+        },
+        "RetentionInDays": 14
+      }
+    },
+    "WorkerRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "WriteOnlyWorkerLogs",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": {
+                    "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${Name}:*"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "Worker": {
+      "Type": "AWS::Lambda::Function",
+      "DependsOn": [
+        "WorkerLogs"
+      ],
+      "Properties": {
+        "FunctionName": {
+          "Ref": "Name"
+        },
+        "Runtime": "nodejs22.x",
+        "Architectures": [
+          "x86_64"
+        ],
+        "Handler": "bootstrap.handler",
+        "MemorySize": 256,
+        "Timeout": 300,
+        "ReservedConcurrentExecutions": 1,
+        "Role": {
+          "Fn::GetAtt": [
+            "WorkerRole",
+            "Arn"
+          ]
+        },
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ArtifactBucket"
+          },
+          "S3Key": {
+            "Ref": "ArtifactKey"
+          }
+        },
+        "Environment": {
+          "Variables": {
+            "NODE_ENV": "production",
+            "WORKER_DELIVERY_ENABLED": {
+              "Ref": "DeliveryEnabled"
+            },
+            "WORKER_SETTINGS_JSON": {
+              "Ref": "WorkerSettingsJson"
+            },
+            "EMCROWN_DATABASE_SCOPE": {
+              "Ref": "DatabaseScope"
+            }
+          }
+        }
+      }
+    },
+    "NoAsyncRetries": {
+      "Type": "AWS::Lambda::EventInvokeConfig",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "Worker"
+        },
+        "Qualifier": "$LATEST",
+        "MaximumRetryAttempts": 0,
+        "MaximumEventAgeInSeconds": 60
+      }
+    },
+    "ScheduleGroup": {
+      "Type": "AWS::Scheduler::ScheduleGroup",
+      "Properties": {
+        "Name": {
+          "Fn::Sub": "${Name}-schedules"
+        }
+      }
+    },
+    "SchedulerRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "scheduler.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                "StringEquals": {
+                  "aws:SourceAccount": {
+                    "Ref": "AWS::AccountId"
+                  }
+                },
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "ScheduleGroup",
+                      "Arn"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "InvokeOnlyEmailWorker",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "lambda:InvokeFunction"
+                  ],
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "Worker",
+                      "Arn"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "Schedule": {
+      "Type": "AWS::Scheduler::Schedule",
+      "DependsOn": [
+        "NoAsyncRetries"
+      ],
+      "Properties": {
+        "Name": {
+          "Fn::Sub": "${Name}-minute"
+        },
+        "GroupName": {
+          "Ref": "ScheduleGroup"
+        },
+        "State": {
+          "Ref": "ScheduleState"
+        },
+        "ScheduleExpression": "rate(1 minute)",
+        "FlexibleTimeWindow": {
+          "Mode": "OFF"
+        },
+        "Target": {
+          "Arn": {
+            "Fn::GetAtt": [
+              "Worker",
+              "Arn"
+            ]
+          },
+          "RoleArn": {
+            "Fn::GetAtt": [
+              "SchedulerRole",
+              "Arn"
+            ]
+          },
+          "Input": "{\"operation\": \"deliver-email\"}",
+          "RetryPolicy": {
+            "MaximumRetryAttempts": 0,
+            "MaximumEventAgeInSeconds": 60
+          }
+        }
+      }
+    },
+    "WorkerErrors": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "AlarmDescription": "Infrastructure failure only; inspect application notification failures separately.",
+        "Namespace": "AWS/Lambda",
+        "MetricName": "Errors",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "Worker"
+            }
+          }
+        ],
+        "Statistic": "Sum",
+        "Period": 300,
+        "EvaluationPeriods": 1,
+        "Threshold": 1,
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "TreatMissingData": "notBreaching",
+        "AlarmActions": {
+          "Fn::If": [
+            "HasAlarmTopic",
+            [
+              {
+                "Ref": "AlarmTopicArn"
+              }
+            ],
+            []
+          ]
+        }
+      }
+    },
+    "WorkerThrottles": {
+      "Type": "AWS::CloudWatch::Alarm",
+      "Properties": {
+        "AlarmDescription": "Infrastructure failure only; inspect application notification failures separately.",
+        "Namespace": "AWS/Lambda",
+        "MetricName": "Throttles",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "Worker"
+            }
+          }
+        ],
+        "Statistic": "Sum",
+        "Period": 300,
+        "EvaluationPeriods": 1,
+        "Threshold": 1,
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "TreatMissingData": "notBreaching",
+        "AlarmActions": {
+          "Fn::If": [
+            "HasAlarmTopic",
+            [
+              {
+                "Ref": "AlarmTopicArn"
+              }
+            ],
+            []
+          ]
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "WorkerName": {
+      "Value": {
+        "Ref": "Worker"
+      }
+    },
+    "WorkerArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "Worker",
+          "Arn"
+        ]
+      }
+    },
+    "ScheduleName": {
+      "Value": {
+        "Ref": "Schedule"
+      }
+    },
+    "ReadinessEvent": {
+      "Value": "{\"operation\":\"check-configuration\"}"
+    }
+  }
+}

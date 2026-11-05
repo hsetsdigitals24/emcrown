@@ -10,7 +10,10 @@ import { audit } from "@/features/auth/audit";
 import { HANDOVER_COPY } from "@/config/handover";
 import { AUTH_COPY } from "@/config/auth";
 import { cleanExpiredAuthData } from "@/features/auth/cleanup";
-export async function deliverResetEmails() {
+import { renderEmail } from "@/lib/email-template";
+import { EMAIL_COPY } from "@/config/email";
+import { reviewRecipientAllowed } from "@/features/clinical/review";
+export async function deliverResetEmails(limit = 20, canStart: () => boolean = () => true) {
   await cleanExpiredAuthData();
   const env = authEnv();
   const transport = nodemailer.createTransport({
@@ -21,7 +24,8 @@ export async function deliverResetEmails() {
     disableFileAccess: true, disableUrlAccess: true, logger: false, debug: false,
   });
   let processed = 0;
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < Math.min(20, limit); i++) {
+    if (!canStart()) break;
     const found = await db().transaction(async tx => {
       const now = new Date();
       const [job] = await tx.select().from(mailOutbox).where(and(gt(mailOutbox.expiresAt, now),
@@ -35,12 +39,16 @@ export async function deliverResetEmails() {
       let success = false;
       try {
         if (!user || (job.kind === "invitation" ? !invitation || user.active : !user.active)) throw new Error("Ineligible account");
+        // Staging restrictions also cover account emails, so testing cannot reach other inboxes.
+        if (!reviewRecipientAllowed(user.email)) throw new Error("Ineligible recipient");
         const isInvitation = job.kind === "invitation";
         const subject = isInvitation ? HANDOVER_COPY.invitationSubject : AUTH_COPY.emailSubject;
         const body = isInvitation ? HANDOVER_COPY.invitationBody : AUTH_COPY.emailBody;
         const route = isInvitation ? "accept-invitation" : "reset-password";
+        const text = `${body}\n\n${env.AUTH_ORIGIN}/emcrown-admin/${route}#token=${decrypt(job.payload)}`;
         const delivery = await transport.sendMail({ from: env.SMTP_FROM, to: user.email, subject,
-          text: `${body}\n\n${env.AUTH_ORIGIN}/emcrown-admin/${route}#token=${decrypt(job.payload)}` });
+          text, html: renderEmail({ title: subject, text, origin: env.AUTH_ORIGIN,
+            actionLabel: isInvitation ? EMAIL_COPY.invitation : EMAIL_COPY.reset }) });
         // SMTP may resolve with rejected recipients. Never discard a job without acceptance.
         success = delivery.accepted.some(recipient =>
           recipient.toLowerCase() === user.email.toLowerCase())

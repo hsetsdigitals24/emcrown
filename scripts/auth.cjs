@@ -17,6 +17,7 @@ require.extensions[".ts"] = (module, filename) => {
 };
 async function main() {
   const command = process.argv[2];
+  if (process.env.EMCROWN_DATABASE_SCOPE === "staging" && ["seed", "migrate"].includes(command)) throw new Error("Use the reviewed staging schema setup; live migration/seed commands cannot target staging.");
   if (["seed", "migrate"].includes(command) && process.env.DATABASE_MIGRATION_URL) {
     process.env.DATABASE_URL = process.env.DATABASE_MIGRATION_URL;
   }

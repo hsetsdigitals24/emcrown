@@ -13,6 +13,7 @@ const eslintConfig = defineConfig([
     "public/ocr/**",
     "out/**",
     "build/**",
+    "artifacts/lambda/**",
     "next-env.d.ts",
   ]),
 ]);

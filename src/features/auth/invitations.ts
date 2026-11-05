@@ -1,5 +1,6 @@
 // Server-only invitations: inactive new identities, expiring hashed tokens and encrypted mail.
 import "server-only";
+import { DATABASE_SCHEMA } from "@/config/database";
 import { and, eq, gt, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { users, invitations, mailOutbox } from "@/lib/db/schema";
@@ -42,7 +43,7 @@ export async function acceptInvitation(token: string, password: string) {
     const [candidate] = await tx.select().from(invitations).where(and(eq(invitations.tokenHash, tokenHash(token)), gt(invitations.expiresAt, new Date())));
     if (!candidate) { await audit(tx, "members.accepted", "failure"); return null; }
     await tx.select({ id: users.id }).from(users).where(eq(users.id, candidate.userId)).for("update");
-    const rows = await tx.execute(sql`select emcrown_admin.accept_invitation(${tokenHash(token)}) as accepted`);
+    const rows = await tx.execute(sql`select ${sql.identifier(DATABASE_SCHEMA)}.accept_invitation(${tokenHash(token)}) as accepted`);
     if (!rows[0]?.accepted) { await audit(tx, "members.accepted", "failure"); return null; }
     await tx.update(users).set({ passwordHash, mustChangePassword: false, active: true }).where(eq(users.id, candidate.userId));
     await tx.delete(mailOutbox).where(eq(mailOutbox.userId, candidate.userId));

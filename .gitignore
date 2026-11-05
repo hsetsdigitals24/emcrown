@@ -20,6 +20,8 @@
 
 # production
 /build
+/artifacts/lambda/
+/artifacts/staging/
 
 # misc
 .DS_Store

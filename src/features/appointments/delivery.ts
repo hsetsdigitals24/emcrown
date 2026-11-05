@@ -8,7 +8,9 @@ import { calendarAttachment } from "@/features/appointments/calendar";
 import { sendAwsSms } from "@/features/appointments/aws-sms";
 import { authEnv } from "@/lib/auth-env";
 import { bookingReviewMode, reviewRecipientAllowed } from "@/features/clinical/review";
-export const messagePayloadSchema = z.object({ to: z.string().min(1).max(320), text: z.string().max(5000), calendar: z.object({ startUtc: z.iso.datetime(), endUtc: z.iso.datetime(), location: z.string().max(300), uid: z.uuid() }).optional() }).strict();
+import { renderEmail } from "@/lib/email-template";
+import { EMAIL_COPY } from "@/config/email";
+export const messagePayloadSchema = z.object({ to: z.string().min(1).max(320), text: z.string().max(5000), physician: z.object({ name: z.string().min(1).max(160), photo: z.string().max(2048) }).strict().optional(), calendar: z.object({ startUtc: z.iso.datetime(), endUtc: z.iso.datetime(), location: z.string().max(300), uid: z.uuid() }).optional() }).strict();
 export function normalizePhone(value: string) {
   const digits = value.replace(/\D/g, "");
   return value.startsWith("+") ? `+${digits}` : digits.length === 10 ? `+1${digits}` : `+${digits}`;
@@ -34,7 +36,10 @@ export async function deliverMessage(id: string, channel: string, payload: z.inf
     connectionTimeout: 10000, greetingTimeout: 10000, socketTimeout: 15000 });
   const sent = await transport.sendMail({ from: env.CLINICAL_SMTP_FROM, to: z.email().parse(payload.to), subject: CLINICAL_COPY.notificationSubject,
     headers: { "X-Emcrown-Notification-ID": id },
-    text: payload.text, messageId: `<${id}@${new URL(authEnv().AUTH_ORIGIN).hostname}>`,
+    text: payload.physician ? `${payload.physician.name}\n${payload.text}` : payload.text,
+    html: renderEmail({ title: EMAIL_COPY.appointment, text: payload.text, origin: authEnv().AUTH_ORIGIN,
+      actionLabel: channel === "email" ? EMAIL_COPY.manage : EMAIL_COPY.staff, physician: channel === "email" ? payload.physician : undefined }),
+    messageId: `<${id}@${new URL(authEnv().AUTH_ORIGIN).hostname}>`,
     ...(payload.calendar ? { attachments: [{ filename: "appointment.ics", content: calendarAttachment(payload.calendar), contentType: "text/calendar; charset=utf-8" }] } : {}) });
   if (!sent.accepted?.length) throw new Error("Delivery unavailable.");
   return id;

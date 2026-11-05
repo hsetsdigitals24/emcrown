@@ -3,13 +3,14 @@
 require("./auth.cjs");
 const { db } = require("../src/lib/db/index.ts");
 const { sql } = require("drizzle-orm");
+const { DATABASE_SCHEMA } = require("../src/config/database.ts");
 let database;
 async function main() {
   database = db();
-  const rows = await database.execute(sql`select to_regclass('emcrown_admin.users') is not null as users,
-    to_regclass('emcrown_admin.memberships') is not null as memberships,
-    to_regclass('emcrown_admin.sessions') is not null as sessions,
-    to_regclass('emcrown_admin.audit_events') is not null as audit`);
+  const rows = await database.execute(sql`select to_regclass(${`${DATABASE_SCHEMA}.users`}) is not null as users,
+    to_regclass(${`${DATABASE_SCHEMA}.memberships`}) is not null as memberships,
+    to_regclass(${`${DATABASE_SCHEMA}.sessions`}) is not null as sessions,
+    to_regclass(${`${DATABASE_SCHEMA}.audit_events`}) is not null as audit`);
   console.log("Database connection: verified TLS successful.");
   console.log(Object.values(rows[0]).every(Boolean) ? "Admin schema: present." : "Admin schema: missing/incomplete; run approved migrations before signing in.");
 }

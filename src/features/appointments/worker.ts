@@ -7,7 +7,7 @@ import { unseal, privateHash } from "@/features/clinical/encryption";
 import { deliverMessage, messagePayloadSchema, normalizePhone } from "@/features/appointments/delivery";
 import { deliveryEnv } from "@/features/clinical/env";
 import { physicianAlertRecipient } from "@/features/appointments/physician-alerts";
-import { clinicalEvent } from "@/features/clinical/access";
+import { clinicalEvent } from "@/features/clinical/events";
 async function claimMessage() {
   return db().transaction(async tx => {
     const [row] = await tx.select().from(appointmentMessages).where(and(eq(appointmentMessages.state, "queued"), lte(appointmentMessages.availableAt, new Date())))
@@ -37,12 +37,13 @@ async function sendClaimed(row: typeof appointmentMessages.$inferSelect) {
   });
 }
 function inActiveStatus(status: string) { return ["requested", "confirmed"].includes(status); }
-export async function deliverAppointments(limit = 25) {
+export async function deliverAppointments(limit = 25, canStart: () => boolean = () => true) {
   deliveryEnv();
   // A crash after provider acceptance is ambiguous. Mark stale claims failed for staff review.
   await db().update(appointmentMessages).set({ state: "failed", updatedAt: new Date() }).where(and(eq(appointmentMessages.state, "sending"), lt(appointmentMessages.updatedAt, new Date(Date.now() - 10 * 60000))));
   let processed = 0;
   for (let index = 0; index < Math.min(100, limit); index++) {
+    if (!canStart()) break;
     const row = await claimMessage(); if (!row) break;
     try { await sendClaimed(row); } catch {
       await db().update(appointmentMessages).set({ state: "failed", updatedAt: new Date() }).where(and(eq(appointmentMessages.id, row.id), inArray(appointmentMessages.state, ["sending", "queued"])));

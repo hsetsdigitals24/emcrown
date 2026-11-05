@@ -20,12 +20,21 @@
     "test:cms-selection": "node tests/cms-selection.cjs",
     "cv:assets": "node scripts/cv-assets.cjs",
     "appointments:deliver": "node --conditions=react-server scripts/appointments.cjs",
+    "worker:package": "node scripts/package-worker.cjs",
+    "test:worker": "node --conditions=react-server tests/lambda-worker.cjs",
+    "test:auth-mail-review": "node --conditions=react-server tests/auth-mail-review.cjs",
+    "staging:prepare": "node scripts/staging-sql.cjs",
+    "staging:console": "node --conditions=react-server scripts/staging-console.cjs",
+    "staging:configure": "node --conditions=react-server scripts/staging-configure.cjs",
+    "staging:check": "node --conditions=react-server scripts/staging-check.cjs",
+    "test:staging": "node --conditions=react-server tests/staging-schema.cjs",
     "test:clinical": "node --conditions=react-server tests/clinical.cjs",
     "test:clinical-unit": "node --conditions=react-server tests/clinical-unit.cjs",
     "test:clinical-ocr": "node tests/clinical-ocr.cjs",
     "test:messaging": "node --conditions=react-server tests/messaging.cjs",
     "messaging:dry-run": "node --conditions=react-server scripts/messaging-check.cjs",
-    "test:notifications": "node --conditions=react-server tests/notifications.cjs"
+    "test:notifications": "node --conditions=react-server tests/notifications.cjs",
+    "worker:check-env": "node scripts/worker-environment.cjs"
   },
   "dependencies": {
     "@aws-sdk/client-pinpoint-sms-voice-v2": "3.1156.0",

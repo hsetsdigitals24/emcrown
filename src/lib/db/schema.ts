@@ -2,8 +2,9 @@
 import { sql } from "drizzle-orm";
 import { pgSchema, uuid, text, timestamp, boolean, integer, bigint, primaryKey, unique, check, index, foreignKey, jsonb } from "drizzle-orm/pg-core";
 import type { CmsValues } from "@/types/cms";
+import { DATABASE_SCHEMA } from "@/config/database";
 import { ADMIN_ROLES, AUDIT_ACTIONS } from "@/types/auth";
-export const admin = pgSchema("emcrown_admin");
+export const admin = pgSchema(DATABASE_SCHEMA);
 export const roleEnum = admin.enum("role", ADMIN_ROLES);
 export const stageEnum = admin.enum("session_stage", ["password", "enroll", "mfa", "full"]);
 export const actionEnum = admin.enum("audit_action", AUDIT_ACTIONS);

@@ -483,3 +483,63 @@ Before patient launch, clean up fictional records, disable review mode, remove
 reviewer settings and complete the documented patient-launch approval. Switching
 off review without approval disables booking again. Review regression checks:
 `node --conditions=react-server tests/booking-review.cjs`.
+
+### Prepared AWS Lambda migration
+
+Staging is prepared for the **same Supabase project**, using a separate schema
+and restricted login. See the [shared-project setup and local isolation proof](infrastructure/staging/PLAN.md).
+`EMCROWN_DATABASE_SCOPE` defaults to `live`; staging is explicit and requires its
+own login, review inbox list and disabled SMS. The hosted staging schema is now
+created and verified empty. The developer has privately assigned its password and
+enabled its runtime login. Run `npm run staging:configure` interactively to create
+an ignored, owner-readable `.env.staging` with independent encryption/signing keys.
+The command asks for a separate origin, confirmation before reusing SMTP settings,
+approved test inboxes and a hidden database password. It never overwrites an
+existing staging file or changes `.env`. Booking, SMS and delivery remain disabled.
+This prepares configuration only: it does not check the password against Supabase,
+start a staging website, seed records, deploy Lambda or send email. Next.js does
+not automatically load `.env.staging`; an explicit staging launcher is still needed.
+Run `npm run staging:check` to verify the saved staging password and actual worker
+database permissions using metadata-only queries. This never delivers mail. If
+Supabase rejects authentication (`28P01`), re-enter the saved password privately
+with `npm run staging:configure -- --password-only`, then rerun the check. This
+updates only the local connection password and preserves all staging keys; it
+does not reset the password in Supabase. If forgotten, use `staging:console` and
+`\password emcrown_staging_runtime` first. Never delete/recreate the configuration
+just to correct a password, because that would discard its encryption keys.
+
+The approved setup uses Lambda-managed encrypted environment configuration, with
+no Secrets Manager dependency. `npm run worker:check-env` estimates the local
+configuration size without displaying credentials; AWS's 4 KB limit still applies.
+
+The optional email worker package and disabled CloudFormation stack are documented
+in [the Lambda operator guide](infrastructure/lambda/README.md). It explains each
+service, decisions, costs, permissions, console deployment, staging tests, cutover
+and rollback. Run `npm run worker:package`, then `npm run test:worker` for local
+preparation. These commands do not deploy or send messages. The first migration
+keeps one-minute polling and processes both appointment and account email queues.
+Actual AWS resource creation, privacy approval and delivery verification remain
+operator steps; existing delivery runners stay in place until cutover.
+
+### Shared transactional email presentation
+
+`src/lib/email-template.ts` renders escaped, table-based HTML with a plain-text
+alternative, a blue action button and a copyable secure link. Password resets,
+staff invitations and all appointment email channels share this renderer. Copy
+and email-compatible theme values live in `src/config/email.ts`; email clients
+cannot use the website's CSS variables. There are no tracking pixels or scripts.
+
+New patient booking updates snapshot only the published physician name/photo
+inside the encrypted outbox payload. Reminder/SMS content stays minimal; staff
+emails retain only the protected admin link. Old queued payloads still render,
+but cannot acquire a physician snapshot retrospectively. Portraits use published
+image URLs, so local-only images require a reachable production origin and some
+mail clients may block images. Names and appointment details remain readable.
+No clinical reason, date of birth or patient contact details are added to email.
+
+The manage page keeps its bearer token only in mounted memory and strips the URL
+fragment. Refreshing needs the original complete email link; updates rotate it.
+Missing links, temporary failures and rejected/expired links have distinct help.
+Cancelled messages omit the unusable manage link. Test without sending:
+`node --conditions=react-server tests/email-template.cjs` and
+`node --conditions=react-server tests/practice-notifications.cjs`.

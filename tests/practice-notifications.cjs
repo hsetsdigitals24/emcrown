@@ -21,7 +21,7 @@ const values = {...findDefinition("/_site").initial, "practice.locations.0.addre
 const messages=[];
 const tx = {
   select() { return { from(table) {
-    const result = table === cmsDocuments ? [{published:values}] : table === physicians ? [{active:true, profile:seal(JSON.stringify({...profile,notifyAppointments:enabled}),org,physicianId,"physician")}] : [];
+    const result = table === cmsDocuments ? [{published:values}] : table === physicians ? [{active:true, publication:seal(JSON.stringify(profile),org,physicianId,"publication"), profile:seal(JSON.stringify({...profile,notifyAppointments:enabled}),org,physicianId,"physician")}] : [];
     const query={innerJoin(){return query;},where(){return query;},limit(){return Promise.resolve(result);},then(resolve,reject){return Promise.resolve(result).then(resolve,reject);}};
     return query;
   }}; },
@@ -48,9 +48,16 @@ const tx = {
     const body=JSON.parse(unseal(item.payload,org,item.id,"message"));
     assert.ok(!item.payload.includes(patient.email));assert.ok(!body.text.includes(patient.reason));
     if(item.channel==="physician"){assert.equal(body.to,profile.email);assert.ok(!body.text.includes(patient.name));assert.ok(!body.text.includes("/book/manage#"));assert.ok(body.text.includes("/emcrown-admin/appointments"));assert.equal(body.calendar,undefined);}
-    if(item.channel==="email")assert.ok(body.text.includes("[TEST ADDRESS]"));
+    if(item.channel==="email") { assert.ok(body.text.includes("[TEST ADDRESS]")); if(item.kind.startsWith("reminder")) assert.equal(body.physician,undefined); else assert.equal(body.physician.name,profile.fullName); }
   }
   assert.equal(messages.filter(item=>item.channel==="email"&&item.kind.startsWith("reminder")).length,2);
   enabled=false;assert.equal(await physicianAlertRecipient(tx,org,physicianId),null,"Disabled preference is rechecked for queued alerts");
+  messages.length=0;
+  await queueAppointmentMessages(tx,row,patient,"cancelled");
+  for(const item of messages.filter(item=>item.channel==="email")) {
+    const body=JSON.parse(unseal(item.payload,org,item.id,"message"));
+    assert.ok(!body.text.includes("/book/manage#"),"Cancelled visits must not offer an unusable manage link");
+    assert.equal(body.calendar,undefined);
+  }
   console.log("Practice/notification checks passed: one published address, derived directions, alert defaults/validation, opt-in encrypted minimal alerts and patient reminders.");
 })().catch(error=>{console.error(error);process.exitCode=1;});

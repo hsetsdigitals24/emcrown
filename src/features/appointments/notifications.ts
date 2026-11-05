@@ -15,7 +15,7 @@ import { publishedPractice } from "@/features/clinical/practice";
 import { physicianAlertRecipient } from "@/features/appointments/physician-alerts";
 import { formatDay, formatTime, practiceDate } from "@/features/booking/time";
 import { bookingReviewMode, reviewRecipientAllowed } from "@/features/clinical/review";
-export type MessagePayload = { to: string; text: string; calendar?: { startUtc: string; endUtc: string; location: string; uid: string } };
+import { emailPhysician } from "@/features/appointments/email-physician";
 export async function queueAppointmentMessages(tx: AuthTransaction, row: { physicianId: string; id: string; organisationId: string; version: number; startAt: Date; endAt: Date; locationId: string }, patient: PatientDetails, kind: string) {
   await tx.update(appointmentMessages).set({ state: "cancelled", updatedAt: new Date() }).where(and(eq(appointmentMessages.appointmentId, row.id), inArray(appointmentMessages.state, ["queued", "failed"])));
   await tx.delete(appointmentTokens).where(eq(appointmentTokens.appointmentId, row.id));
@@ -26,8 +26,9 @@ export async function queueAppointmentMessages(tx: AuthTransaction, row: { physi
   const practice = await publishedPractice(tx);
   const currentLocation = practice.locations.find(item => item.id === row.locationId);
   const location = currentLocation ? `${currentLocation.label} — ${currentLocation.address}` : row.locationId;
-  const text = `${SITE_FOOTER.practiceName}\n${formatDay(practiceDate(startUtc, BOOKING_SETTINGS.timeZone), BOOKING_SETTINGS.timeZone, "en-US")} ${formatTime(startUtc, BOOKING_SETTINGS.timeZone, "en-US")}\n${location}\n${link}`;
+  const text = `${SITE_FOOTER.practiceName}\n${formatDay(practiceDate(startUtc, BOOKING_SETTINGS.timeZone), BOOKING_SETTINGS.timeZone, "en-US")} ${formatTime(startUtc, BOOKING_SETTINGS.timeZone, "en-US")}\n${location}${kind === "cancelled" ? "" : `\n${link}`}`;
   const calendar = { startUtc, endUtc: row.endAt.toISOString(), location, uid: row.id };
+  const physician = await emailPhysician(tx, row.organisationId, row.physicianId);
   const items: Array<{ channel: string; to: string; kind: string; at: Date }> = [];
   // Confirmation/cancellation email is transactional; optional email consent controls reminders.
   items.push({ channel: "email", to: patient.email, kind, at: new Date() });
@@ -49,6 +50,8 @@ export async function queueAppointmentMessages(tx: AuthTransaction, row: { physi
       : item.kind.startsWith("reminder") ? text : `${update}\n${text}`;
     await tx.insert(appointmentMessages).values({ id, organisationId: row.organisationId, appointmentId: row.id, appointmentVersion: row.version,
       channel: item.channel, kind: item.kind, availableAt: item.at,
-      payload: seal(JSON.stringify({ to: item.to, text: body, ...(item.channel === "email" && kind !== "cancelled" ? { calendar } : {}) }), row.organisationId, id, "message") });
+      payload: seal(JSON.stringify({ to: item.to, text: body,
+        ...(item.channel === "email" && !item.kind.startsWith("reminder") && physician ? { physician } : {}),
+        ...(item.channel === "email" && kind !== "cancelled" ? { calendar } : {}) }), row.organisationId, id, "message") });
   }
 }

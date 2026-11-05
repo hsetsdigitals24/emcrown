@@ -8,7 +8,8 @@ import { randomToken, tokenHash, encrypt } from "@/features/auth/crypto";
 import { AUTH_POLICY } from "@/config/auth";
 import { generateSecret } from "otplib";
 import type { SessionStage } from "@/types/auth";
-const cookieName = () => process.env.NODE_ENV === "production" ? "__Host-emcrown_admin" : "emcrown_admin";
+import { DATABASE_SCHEMA } from "@/config/database";
+const cookieName = () => process.env.NODE_ENV === "production" ? `__Host-${DATABASE_SCHEMA}` : DATABASE_SCHEMA;
 export async function readSessionToken() {
   const token = (await cookies()).get(cookieName())?.value;
   return token && /^[a-f0-9]{64}$/.test(token) ? token : null;

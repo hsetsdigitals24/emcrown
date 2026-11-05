@@ -3,6 +3,7 @@
 require("./auth.cjs");
 const nodemailer = require("nodemailer");
 const { sql } = require("drizzle-orm");
+const { DATABASE_SCHEMA } = require("../src/config/database.ts");
 const { db } = require("../src/lib/db/index.ts");
 const { authEnv } = require("../src/lib/auth-env.ts");
 let database;
@@ -21,11 +22,11 @@ async function main() {
   const [health] = await database.execute(sql`
     select count(*) filter (where expires_at > now() and attempts < 5)::int as pending,
       count(*) filter (where expires_at <= now() or attempts >= 5)::int as exhausted
-    from emcrown_admin.mail_outbox`);
+    from ${sql.identifier(DATABASE_SCHEMA)}.mail_outbox`);
   const [last] = await database.execute(sql`
     select max(created_at) filter (where outcome = 'success') as accepted,
       max(created_at) filter (where outcome = 'failure') as failed
-    from emcrown_admin.audit_events where action = 'auth.reset_email'`);
+    from ${sql.identifier(DATABASE_SCHEMA)}.audit_events where action = 'auth.reset_email'`);
   console.log(`Pending jobs: ${health.pending}. Expired/exhausted jobs: ${health.exhausted}.`);
   console.log(`Latest SMTP acceptance (UTC): ${last.accepted ? new Date(last.accepted).toISOString() : "none recorded"}.`);
   console.log(`Latest delivery attempt failure (UTC): ${last.failed ? new Date(last.failed).toISOString() : "none recorded"}.`);

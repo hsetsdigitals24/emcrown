@@ -1,5 +1,6 @@
 // Server-only handover: fresh MFA followed by a database-enforced permanent transfer latch.
 import "server-only";
+import { DATABASE_SCHEMA } from "@/config/database";
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { memberships, users, ownership } from "@/lib/db/schema";
@@ -12,7 +13,7 @@ export async function transferOwnership(targetId: string, code: string) {
     if (!actor || actor.role !== "super_admin" || !await freshMfa(tx, actor, code)) {
       await audit(tx, "ownership.transferred", "denied", actor ?? undefined); return false;
     }
-    const result = await tx.execute(sql`select emcrown_admin.transfer_ownership(${actor.tokenHash}, ${targetId}::uuid) as transferred`);
+    const result = await tx.execute(sql`select ${sql.identifier(DATABASE_SCHEMA)}.transfer_ownership(${actor.tokenHash}, ${targetId}::uuid) as transferred`);
     if (!result[0]?.transferred) { await audit(tx, "ownership.transferred", "denied", actor); return false; }
     // Audit the initiating owner; the permanently latched ownership row records the recipient.
     return true;

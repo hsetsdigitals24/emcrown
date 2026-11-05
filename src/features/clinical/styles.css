@@ -1,4 +1,19 @@
 /* Admin clinical surfaces share the established theme and remain usable without animation. */
+.manage-workspace { display: grid; gap: 1.5rem; margin-block: 2rem 5rem; }
+.manage-status, .manage-summary { border: 1px solid var(--color-border); border-radius: var(--radius-card); padding: clamp(1.5rem, 4vw, 3rem); background: var(--color-surfaceTint); }
+.manage-workspace h2 { font-family: var(--font-heading); color: var(--color-primary); font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.3; margin-bottom: 1rem; }
+.manage-workspace p { line-height: 1.7; max-width: 65ch; }
+.manage-kicker { color: var(--color-textSecondary); font-size: .75rem; text-transform: uppercase; letter-spacing: .12em; margin-bottom: 1rem; }
+.manage-note { font-size: .875rem; color: var(--color-textSecondary); margin-top: 1.5rem; }
+.manage-link { display: inline-flex; align-items: center; min-height: 44px; padding: .5rem 0; color: var(--color-primary); text-decoration: underline; text-underline-offset: .25em; }
+.manage-physician { display: flex; gap: 1rem; align-items: center; margin-block: 1.5rem; }
+.manage-physician img { border-radius: var(--radius-control); object-fit: cover; }
+.manage-physician span { color: var(--color-textSecondary); font-size: .8rem; }
+.manage-physician p { font-weight: 600; }
+.manage-cancel { border-top: 1px solid var(--color-border); margin-top: 1.5rem; padding-top: 1.5rem; }
+.manage-cancel h3 { font-weight: 600; }
+.manage-workspace .clinical-actions .manage-danger { background: var(--color-background); color: var(--color-error); border-color: var(--color-error); }
+.manage-workspace .clinical-actions .manage-danger:hover { background: var(--color-error); color: var(--color-background); }
 .clinical-layout { display: grid; gap: 1.5rem; }
 .clinical-panel { background: var(--color-background); border: 1px solid var(--color-border); border-radius: 1rem; padding: clamp(1rem, 3vw, 1.75rem); min-width: 0; }
 .clinical-panel h2 { font-size: 1.25rem; font-weight: 700; margin-bottom: .75rem; }
