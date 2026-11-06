@@ -13,6 +13,8 @@ export function hasPermission(role: AdminRole, permission: Permission) {
   return permissions[role].includes(permission);
 }
 export const AUTH_COPY = {
+  showPassword: "Show password", hidePassword: "Hide password",
+  invalidResetLink: "This reset link is invalid, expired or has already been used. Request a new reset link.",
   brand: "Emcrown", eyebrow: "Organisation workspace", title: "Staff sign in",
   intro: "Secure access for authorised administrators and staff.",
   email: "Work email", password: "Password", newPassword: "New password",

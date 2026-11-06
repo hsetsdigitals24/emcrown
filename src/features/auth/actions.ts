@@ -41,7 +41,7 @@ export async function resetAction(_: AuthState, form: FormData): Promise<AuthSta
   if (!input.success) { await rejected("auth.reset_completed"); return invalid; }
   try {
     if (!await validateRequest("reset", input.data.token, 5)) return invalid;
-    if (!await resetPassword(input.data.token, input.data.password)) return invalid;
+    if (!await resetPassword(input.data.token, input.data.password)) return { message: AUTH_COPY.invalidResetLink };
     await clearSessionCookie();
   } catch { return failed; }
   return { message: AUTH_COPY.resetDone, success: true };

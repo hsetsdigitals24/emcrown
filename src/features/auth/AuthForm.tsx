@@ -5,6 +5,7 @@ import Link from "next/link";
 import { acceptAction, recoverAction } from "@/features/auth/security-actions";
 import { HANDOVER_COPY } from "@/config/handover";
 import Toast from "@/features/auth/Toast";
+import PasswordField from "@/features/auth/PasswordField";
 import { loginAction, forgotAction, resetAction, passwordAction, mfaAction } from "@/features/auth/actions";
 import { loginSchema, forgotSchema, resetSchema, passwordSchema, mfaSchema, acceptSchema, recoverySchema } from "@/features/auth/validation";
 import type { AuthMode, AuthState } from "@/types/auth";
@@ -38,12 +39,11 @@ export default function AuthForm({ mode, blocked = false }: { mode: AuthMode; bl
     <fieldset disabled={blocked || !ready || pending || (state.success && (mode === "reset" || mode === "accept"))} className="admin-fields">
       {(mode === "login" || mode === "forgot") && <label>{AUTH_COPY.email}
         <input name="email" type="email" autoComplete="username" required maxLength={254} /></label>}
-      {(mode === "login" || newPassword) && <label>{newPassword ? AUTH_COPY.newPassword : AUTH_COPY.password}
-        <input name="password" type="password" autoComplete={newPassword ? "new-password" : "current-password"}
-          required minLength={newPassword ? 12 : 1} maxLength={128} /></label>}
+      {(mode === "login" || newPassword) && <PasswordField name="password"
+        label={newPassword ? AUTH_COPY.newPassword : AUTH_COPY.password} newPassword={newPassword}
+        describedBy={newPassword ? "password-help" : undefined} />}
       {newPassword && <><p className="text-sm text-textSecondary" id="password-help">{AUTH_COPY.passwordHelp}</p>
-        <label>{AUTH_COPY.confirmPassword}<input name="confirmPassword" type="password" autoComplete="new-password"
-          required minLength={12} maxLength={128} aria-describedby="password-help" /></label></>}
+        <PasswordField name="confirmPassword" label={AUTH_COPY.confirmPassword} newPassword describedBy="password-help" /></>}
       {mode === "mfa" && <label>{AUTH_COPY.code}<input name="code" inputMode="numeric" autoComplete="one-time-code"
         pattern="[0-9]{6}" minLength={6} maxLength={6} required /></label>}
       {(mode === "reset" || mode === "accept") && <input name="token" type="hidden" value={token} />}
