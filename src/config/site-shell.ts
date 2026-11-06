@@ -3,6 +3,7 @@ import type { FooterContent, NavigationContent } from "@/types/content";
 import { SERVICE_ENTRIES, PHYSICIAN_ENTRIES } from "@/config/pages/catalogs";
 import { PRACTICE } from "@/config/practice";
 export const NAVIGATION_COPY = { viewAll: "View all" };
+export const STAGING_FOOTER_NOTICE = "Staging preview — for testing only.";
 export const SITE_NAVIGATION: NavigationContent = {
   brand: { label: "Emcrown", href: "/" }, label: "Main navigation", menuLabel: "Menu", skipLabel: "Skip to content",
   items: [
