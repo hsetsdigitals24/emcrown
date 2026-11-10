@@ -64,6 +64,13 @@ async function orchestration(run) {
     await assert.rejects(handler(event,context),/Email worker failed/);assert.equal(configurations.length,count,"Oversize environment must fail before worker loading");
     process.env.WORKER_SETTINGS_JSON=JSON.stringify(settings);
     await assert.rejects(createHandler({loadWorker:()=>{throw new Error("SENSITIVE_PROVIDER_TEXT");}})(event,context),/Email worker failed/);
+    const driverError=Object.assign(new Error("SENSITIVE_PROVIDER_TEXT"),{code:"28P01"});
+    const failedReadiness=createHandler({loadWorker:()=>({configureWorker:()=>{},runWorker:async()=>{
+      throw new Error("SENSITIVE_QUERY_TEXT",{cause:driverError});
+    }})});
+    await assert.rejects(failedReadiness({operation:"check-configuration"},context),/Email worker failed/);
+    assert.ok(logs.at(-1).includes('"code":"28P01"'),"Wrapped driver failures expose only the safe code");
+    assert.ok(!logs.join("").includes("SENSITIVE_QUERY_TEXT"));
     assert.ok(!logs.join("").includes("SENSITIVE_PROVIDER_TEXT"));assert.ok(!logs.join("").includes(settings.AUTH_SECRET));
   } finally {console.log=oldLog;console.error=oldError;}
   configureWorker(settings);

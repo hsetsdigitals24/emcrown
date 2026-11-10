@@ -508,6 +508,14 @@ does not reset the password in Supabase. If forgotten, use `staging:console` and
 `\password emcrown_staging_runtime` first. Never delete/recreate the configuration
 just to correct a password, because that would discard its encryption keys.
 
+For the first controlled account-mail test, `npm run staging:account` reviews a
+fictional organisation and approved reviewer staff account without creating them.
+`npm run staging:account -- --apply` explicitly creates them only in empty staging
+account tables, using the matching private migration connection. It does not send
+email or reveal an initial password. Request a password reset through the staging
+website, then manually invoke the staging Lambda after delivery approval. Never
+use this fixture setup against live scope or existing staging accounts.
+
 The approved setup uses Lambda-managed encrypted environment configuration, with
 no Secrets Manager dependency. `npm run worker:check-env` estimates the local
 configuration size without displaying credentials; AWS's 4 KB limit still applies.

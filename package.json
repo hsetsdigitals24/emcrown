@@ -27,6 +27,7 @@
     "staging:console": "node --conditions=react-server scripts/staging-console.cjs",
     "staging:configure": "node --conditions=react-server scripts/staging-configure.cjs",
     "staging:check": "node --conditions=react-server scripts/staging-check.cjs",
+    "staging:account": "node --conditions=react-server scripts/staging-account.cjs",
     "test:staging": "node --conditions=react-server tests/staging-schema.cjs",
     "test:clinical": "node --conditions=react-server tests/clinical.cjs",
     "test:clinical-unit": "node --conditions=react-server tests/clinical-unit.cjs",
