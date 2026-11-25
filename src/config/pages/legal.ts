@@ -1,17 +1,17 @@
 // Shared legal-page drafts: website guidance, not an invented approved practice policy.
 import { mockPage, mockSection } from "@/config/pages/helpers";
-const reviewNotice = "Website guidance for client review. Practice policies and the formal Notice of Privacy Practices require approval before launch.";
+const reviewNotice = "Contact the practice for its current policies and Notice of Privacy Practices.";
 export const LEGAL_PAGE = { ...mockPage("/legal", "Privacy, terms and accessibility", "Information for", "using this website.", "Find guidance on privacy, website use and accessibility. For questions about information relating to your care, contact the practice and ask for its approved privacy notice."), notice: reviewNotice };
 export const LEGAL_ENTRIES = [
   { ...mockPage("/privacy", "Website privacy information", "Make informed choices", "about what you share.", "This page explains how to use this website with your privacy in mind. It does not replace the practice’s formal Notice of Privacy Practices or describe every use of medical information in clinical care."), slug: "privacy", notice: reviewNotice,
     sections: [
       mockSection("privacy-information", "Share only what is needed", "Do not put medical history, diagnoses, insurance identifiers or other sensitive details into a general enquiry. Before sending documents or personal medical information, contact the practice to ask which secure route to use."),
-      mockSection("privacy-use", "Check the service you are using", "The appointment page identifies whether you are using a demonstration. Use fictional details in demo forms. A demonstration does not reserve an appointment or provide a way to send a clinical message. External websites linked from this site have their own privacy information."),
-      mockSection("privacy-contact", "Questions about your information", "For questions about a medical record, an information request or the practice’s privacy arrangements, call the practice and ask to speak with the person responsible for privacy. The final website policy must identify the approved contact and explain actual collection, use, retention and service-provider arrangements before launch."),
+      mockSection("privacy-use", "Check the service you are using", "Follow the appointment page instructions when requesting a visit. Contact the practice for help with sharing clinical information. External websites linked from this site have their own privacy information."),
+      mockSection("privacy-contact", "Questions about your information", "For questions about a medical record, an information request or the practice’s privacy arrangements, call the practice and ask to speak with the person responsible for privacy."),
     ] },
   { ...mockPage("/terms", "Website use", "A clearer guide to", "using this website.", "Use this website to learn about Emcrown Physician Services, explore published physician profiles and find practical information about arranging a visit."), slug: "terms", notice: reviewNotice,
     sections: [
-      mockSection("terms-use", "Appointments and enquiries", "A visit is not confirmed simply because you browse the site or complete a demonstration. Follow the confirmation instructions provided by the practice. Do not use a general enquiry or demo form to send an urgent message or personal medical information."),
+      mockSection("terms-use", "Appointments and enquiries", "Follow the confirmation instructions provided by the practice when arranging a visit. Contact the practice directly for help with an appointment or sharing medical information."),
       mockSection("terms-content", "General information, personal decisions", "Website articles are general information. They cannot account for your circumstances and do not replace advice from a clinician who knows your care. Service availability, eligibility, coverage and charges should be confirmed with the practice and, where relevant, your insurer."),
       mockSection("terms-contact", "When you need help", "Call the practice with questions about visiting or using this website. If you believe you are experiencing a medical emergency, call 911. Do not wait for a response through the website. External links are offered for further reading and may be updated by their owners."),
     ] },
@@ -25,4 +25,4 @@ export const LEGAL_ENTRIES = [
     sections: [mockSection("notice-link", "Request the practice’s current notice", "A formal notice explains the practice’s uses and disclosures of protected health information, your privacy rights and who to contact. This page is not that notice. Call the practice to request the approved document; it will be linked here when supplied.")],
   },
 ];
-export const LEGAL_COPY = { updated: "Review status", updateValue: "Client approval pending", notice: "Request the Notice of Privacy Practices", read: "Read this information", category: "Website information" };
+export const LEGAL_COPY = { updated: "", updateValue: "", notice: "Request the Notice of Privacy Practices", read: "Read this information", category: "Website information" };

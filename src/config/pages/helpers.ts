@@ -15,3 +15,6 @@ export const BOOKING_CTA = {
   ...mockSection("page-next-step", "Let’s talk about", "Explore our physicians or contact the practice with your questions before arranging a visit.", "your next step."),
   eyebrow: "HERE FOR YOUR NEXT CHAPTER", buttonLabel: "Book appointment", buttonLink: "/book",
 };
+
+// Shared editorial asset slots are discovered by the existing CMS field adapter.
+export function pageImage(src: string, alt = "") { return { src, alt }; }

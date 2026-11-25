@@ -1,28 +1,21 @@
-// Server component: editable hero; word splitting is derived from plain CMS strings.
-import HeroEntrance from "@/components/motion/HeroEntrance";
-import Button from "@/components/ui/Button";
+// Server component: full-width reference hero with CMS-managed text and photography.
 import Image from "next/image";
-import HeroVideo from "@/components/home/HeroVideo";
+import Container from "@/components/layout/Container";
+import Button from "@/components/ui/Button";
+import { Heading } from "@/components/ui/Typography";
 import type { HeroContent } from "@/types/home";
-function Words({ text, highlighted = false }: { text: string; highlighted?: boolean }) {
-  return <span className={highlighted ? "hero-highlight" : ""}>{text.split(" ").map((word, index) =>
-    <span key={`${word}-${index}`} className="hero-word-clip inline-block"><span className="hero-word inline-block">{word}{" "}</span></span>,
-  )}</span>;
-}
 export default function Hero({ content }: { content: HeroContent }) {
-  return <HeroEntrance><section id={content.id} aria-labelledby="hero-heading" className="home-hero" data-mock={content.isMock}>
-    <div className="hero-stage"><div className="hero-copy-track"><div className="hero-copy">
-      <p data-cms-field="hero.eyebrow" className="text-eyebrow uppercase tracking-eyebrow">{content.eyebrow}</p>
-      <h1 id="hero-heading" aria-label={`${content.headline} ${content.highlightedPhrase}`} className="hero-title font-heading font-light">
-        <span aria-hidden="true"><span data-cms-field="hero.headline"><Words text={content.headline} /></span><br /><span data-cms-field="hero.highlightedPhrase"><Words text={content.highlightedPhrase} highlighted /></span></span>
-      </h1>
-      <p className="hero-description">{content.body}</p>
-      <div className="hero-actions flex flex-wrap justify-center gap-4"><Button purpose="primary" href={content.buttonLink}>{content.buttonLabel}</Button></div>
-      <p className="preview-notice">{content.notice}</p>
-    </div></div>
-    <div className="hero-media" data-cms-field="hero.media.poster"><HeroVideo media={content.media} /><div className="hero-media-shade" /></div>
-    <div className="hero-photo" data-cms-field="hero.media.photo"><Image src={content.media.photo} alt={content.photoLabel} fill unoptimized={content.media.photo.startsWith("/media/cms/")} sizes="(min-width: 1024px) 160px, 96px" /></div>
-    <span className="hero-chip">{content.media.label}</span><p className="hero-caption">{content.imageCaption}</p>
+  return <section id={content.id} aria-labelledby="hero-heading" className="reference-hero" data-cms-group="hero">
+    <div className="reference-hero-photo" data-cms-field="hero.media.poster">
+      <Image loading="eager" fetchPriority="high" src={content.media.poster} alt={content.photoLabel} fill
+        unoptimized={content.media.poster.startsWith("/media/cms/")} sizes="100vw" />
     </div>
-  </section></HeroEntrance>;
+    <Container><div className="reference-hero-copy">
+        <Heading as="h1" display id="hero-heading" highlightedPhrase={content.highlightedPhrase}
+          cmsFields={{ headline: "hero.headline", highlightedPhrase: "hero.highlightedPhrase" }}>{content.headline}</Heading>
+        {content.subheading && <p className="reference-hero-subheading" data-cms-field="hero.subheading">{content.subheading}</p>}
+        <p className="reference-hero-body" data-cms-field="hero.body">{content.body}</p>
+        <div className="reference-actions" data-cms-field="hero.buttonLabel"><Button purpose="primary" bookingAction href={content.buttonLink}>{content.buttonLabel}<span aria-hidden="true">›</span></Button></div>
+    </div></Container>
+  </section>;
 }

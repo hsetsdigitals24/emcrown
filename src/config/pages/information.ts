@@ -1,12 +1,14 @@
 // Shared editorial drafts: patient-facing copy without unverified practice claims.
-import { mockPage, mockSection } from "@/config/pages/helpers";
+import { mockPage, mockSection, pageImage } from "@/config/pages/helpers";
 import type { InsuranceConfig } from "@/types/public";
+const about = mockPage("/about", "About Emcrown Physician Services", "Care starts with", "a conversation.", "Get to know Emcrown Physician Services, explore our physicians and find practical information to help you prepare for a visit.");
 export const ABOUT_PAGE = {
-  ...mockPage("/about", "About Emcrown Physician Services", "Your health is personal.", "Your care should be, too.", "A question about your health deserves a conversation. At Emcrown Physician Services, our focus starts with the person behind that question: what matters to you, what you want to understand and what comes next."),
+  ...about,
+  hero: { ...about.hero, image: pageImage("/media/hero-care.jpg", "A clinician taking a blood pressure reading"), buttonLabel: "Meet our physicians", buttonLink: "/physicians" },
   sections: [
-    mockSection("about-story", "Start with what matters to you", "You bring more than a reason for an appointment. You bring your daily routine, your concerns and your own experience of your health. Our aim is to make room for that perspective, so conversations about care begin with you."),
+    { ...mockSection("about-story", "Start with what matters to you", "You bring more than a reason for an appointment. You bring your daily routine, your concerns and your own experience of your health. Our aim is to make room for that perspective, so conversations about care begin with you."), image: pageImage("/media/hero-consultation.jpg", "A consultation around a table") },
     mockSection("about-mission", "Understanding is part of care", "Medical decisions can raise new questions. We believe people should feel able to ask what an option means, why it is being discussed and what the next step involves. Clear language and an open conversation are at the heart of the experience we want to offer."),
-    mockSection("about-certifications", "Get to know your physician", "Choosing a physician is a personal decision. Explore our published profiles to learn about each physician’s background and areas of care. If you are unsure who to see, contact the practice before requesting an appointment."),
+    { ...mockSection("about-certifications", "Get to know your physician", "Choosing a physician is a personal decision. Explore our published profiles to learn about each physician’s background and areas of care. If you are unsure who to see, contact the practice before requesting an appointment."), buttonLabel: "Explore our physicians", buttonLink: "/physicians" },
     mockSection("about-awards", "A little preparation makes a difference", "Write down the questions you want to discuss and keep any appointment instructions together. Our visit guides explain how to prepare, what to ask about coverage and which practical details to confirm before you travel."),
     mockSection("about-affiliations", "Take the next step at your pace", "Browse our physicians, read the visit information or call with a practical question. You do not need to know every answer before you get in touch. Start with the question you have today."),
   ],
@@ -23,3 +25,13 @@ export const INSURANCE_PAGE = {
 };
 export const INSURANCE_SETTINGS: InsuranceConfig = { state: "comingSoon", plans: [], comingSoonLabel: "Please contact the practice to check your plan. An accepted-plan list is not yet published.", availableLabel: "Accepted insurance plans" };
 export const CATALOG_COPY = { serviceLink: "Explore this guide", physicianLink: "View biography", articleLink: "Read the guide", categories: "Browse by topic", all: "All resources", biographyBooking: "Request an appointment", biographyBookingLink: "/book", back: "Back to index" };
+
+SERVICES_PAGE.hero.image = pageImage("/media/visit-guide-1.webp", "Planning an appointment on a calendar");
+SERVICES_PAGE.hero.buttonLabel = "Explore visit guides";
+SERVICES_PAGE.hero.buttonLink = "#page-catalog";
+RESOURCES_PAGE.hero.image = pageImage("/media/visit-guide-3.webp");
+RESOURCES_PAGE.hero.buttonLabel = "Browse resources";
+RESOURCES_PAGE.hero.buttonLink = "#page-catalog";
+INSURANCE_PAGE.hero.image = pageImage("/media/visit-guide-5.webp", "Checking appointment details on a phone");
+INSURANCE_PAGE.hero.buttonLabel = "Contact the practice";
+INSURANCE_PAGE.hero.buttonLink = "/contact";

@@ -1,10 +1,7 @@
-// Client component: defer the scroll library while keeping all content server-rendered.
+// Client island: short one-shot reveals preserve normal scrolling and server-visible content.
 "use client";
-import dynamic from "next/dynamic";
-import { useRef } from "react";
 import type { ReactNode } from "react";
-const ScrollEffects = dynamic(() => import("@/components/motion/ScrollEffects"), { ssr: false });
+import Reveal from "@/components/motion/Reveal";
 export default function HomeMotion({ children }: { children: ReactNode }) {
-  const scope = useRef<HTMLDivElement>(null);
-  return <div ref={scope} className="home-motion min-w-0" data-home-motion><ScrollEffects scope={scope} />{children}</div>;
+  return <Reveal className="home-motion" selector=".reference-hero-copy > h1, .reference-hero-copy > p, .home-section .block-heading, .reference-features > *, .reference-about-photo, .physician-card, .location-details, .reference-insurance-documents" distance={32} duration={750} interval={100} easing="cubic-bezier(.16, 1, .3, 1)">{children}</Reveal>;
 }

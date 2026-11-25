@@ -10,8 +10,9 @@
   --color-background: #FFFFFF;
   --color-sectionAlt: #F6F8FC;
   --color-navy: #0A1F4D;
-  --color-accentOrange: #C2410C;
-  --color-accentOrangeHover: #9A3412;
+  --color-accentOrange: #EB6C1B;
+  --color-accentOrangeHover: #EB6C1B;
+  --color-footer: #070B12;
   --color-text: #0F172A;
   --color-textSecondary: #475569;
   --color-border: #E2E8F0;
@@ -29,6 +30,8 @@
   --radius-card: 1rem;
   --radius-control: 0.625rem;
   --radius-pill: 9999px;
+  --radius-feature: 2.5rem;
+  --radius-picture: 8rem;
   --text-display: clamp(2.5rem, 5.5vw, 5.25rem);
   --text-heading: clamp(2rem, 4vw, 3rem);
   --text-body: 1.0625rem;

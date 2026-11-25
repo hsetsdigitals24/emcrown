@@ -8,9 +8,9 @@ export function Heading({ children, highlightedPhrase, as: Tag = "h2", display =
     {children}{highlightedPhrase && <> <span data-cms-field={cmsFields?.highlightedPhrase} className="text-highlight">{highlightedPhrase}</span></>}
   </Tag>;
 }
-export function Eyebrow({ children }: { children: ReactNode }) {
-  return <p className="text-eyebrow font-medium uppercase tracking-eyebrow text-textSecondary">{children}</p>;
+export function Eyebrow({ children, cmsField }: { children: ReactNode; cmsField?: string }) {
+  return <p data-cms-field={cmsField} className="text-eyebrow font-medium uppercase tracking-eyebrow text-textSecondary">{children}</p>;
 }
-export function BodyText({ children }: { children: ReactNode }) {
-  return <p className="text-body leading-body text-textSecondary">{children}</p>;
+export function BodyText({ children, cmsField }: { children: ReactNode; cmsField?: string }) {
+  return <p data-cms-field={cmsField} className="text-body leading-body text-textSecondary">{children}</p>;
 }

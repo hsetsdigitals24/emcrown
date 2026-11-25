@@ -1,4 +1,5 @@
 // Shared validation boundary: field allowlists prevent structure, script and URL injection.
+import { RETIRED_STARTER_COPY } from "@/features/cms/legacy-copy";
 import { z } from "zod";
 import { findDefinition } from "@/config/cms/registry";
 import { CMS_POLICY } from "@/config/cms/copy";
@@ -37,12 +38,23 @@ export function storedValues(path: string, input: unknown): CmsValues | null {
   const parsed = valuesSchema.safeParse(input);
   if (!definition || !parsed.success) return null;
   const known = Object.fromEntries(definition.fields.filter(field => parsed.data[field.key] !== undefined).map(field => [field.key, parsed.data[field.key]]));
+  // Retired six-item navigation snapshots must not shift labels onto the new routes.
+  if (path === "/_site" && parsed.data["navigation.items.5.href"] !== undefined) {
+    for (const field of definition.fields) {
+      if (field.key.startsWith("navigation.items.") || field.key.startsWith("navigation.home.") || field.key.startsWith("footer.links.")) {
+        known[field.key] = definition.initial[field.key];
+      }
+    }
+  }
   // Retire only the old insurance guide; preserve unrelated staff edits and route IDs.
   const prefix = path === "/" ? "services.items.4." : path === "/services/service-5" ? "content." : null;
   if (prefix && known[`${prefix}title`] === "Checking insurance and visit costs") {
     for (const key of Object.keys(known)) {
       if (key.startsWith(prefix)) delete known[key];
     }
+  }
+  for (const change of RETIRED_STARTER_COPY) {
+    if (change.path === path && known[change.key] === change.before) known[change.key] = definition.initial[change.key];
   }
   return validateValues(path, { ...definition.initial, ...known });
 }

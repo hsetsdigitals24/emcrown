@@ -19,7 +19,7 @@ export default function PageContent({ path, values, siteValues, context = {}, pr
     const practice = singlePractice(applyContent(SITE_SEED, siteValues).practice);
     const location = practice.locations[0];
     return <HomeContent content={{ ...content, location: { ...content.location, address: location.address, hours: location.hours,
-      mapLabel: location.mapLabel, directions: location.directions, phone: practice.phone } }} preview={preview} records={physicianRecords} />;
+      mapLabel: location.mapLabel, directions: location.directions, phone: practice.phone } }} preview={preview} records={physicianRecords} insuranceAvailable={context["/insurance"] !== null} />;
   }
   return <InformationContent path={path} values={values} site={applyContent(SITE_SEED, siteValues)} context={context} />;
 }

@@ -2,6 +2,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
+import { useNavigationScroll } from "@/components/layout/useNavigationScroll";
 function closeDisclosures(element: HTMLElement, restoreFocus = false) {
   element.querySelectorAll<HTMLDetailsElement>("details[open]").forEach((details) => {
     details.open = false;
@@ -10,8 +11,8 @@ function closeDisclosures(element: HTMLElement, restoreFocus = false) {
 }
 export default function NavigationShadow({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
+  useNavigationScroll(ref);
   useEffect(() => {
-    const update = () => { if (ref.current) ref.current.dataset.scrolled = String(window.scrollY > 40); };
     const dismiss = (event: PointerEvent) => {
       const shell = ref.current;
       if (!shell || !(event.target instanceof Element)) return;
@@ -33,10 +34,8 @@ export default function NavigationShadow({ children }: { children: ReactNode }) 
     const resize = () => { if (innerWidth >= 1280 && mobile) mobile.open = false; syncMenu(); };
     mobile?.addEventListener("toggle", syncMenu);
     window.addEventListener("resize", resize);
-    update();
-    window.addEventListener("scroll", update, { passive: true });
     document.addEventListener("pointerdown", dismiss, true);
-    return () => { window.removeEventListener("scroll", update); document.removeEventListener("pointerdown", dismiss, true); mobile?.removeEventListener("toggle", syncMenu); window.removeEventListener("resize", resize); targets.forEach((element) => { element.inert = false; }); };
+    return () => { document.removeEventListener("pointerdown", dismiss, true); mobile?.removeEventListener("toggle", syncMenu); window.removeEventListener("resize", resize); targets.forEach((element) => { element.inert = false; }); };
   }, []);
   return <div ref={ref} className="navigation-shell" onKeyDown={(event) => {
     if (event.key === "Tab" && ref.current?.querySelector<HTMLDetailsElement>(".navigation-mobile")?.open) {

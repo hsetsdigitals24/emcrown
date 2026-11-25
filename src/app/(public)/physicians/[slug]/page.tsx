@@ -3,6 +3,8 @@ import { physicianName } from "@/lib/physician-name";
 import { notFound } from "next/navigation";
 import PublishedPage from "@/features/cms/PublishedPage";
 import { cmsMetadata } from "@/features/cms/metadata";
+import { publishedContent } from "@/features/cms/public";
+import { SITE_SEED } from "@/config/cms/content";
 import { PHYSICIAN_ENTRIES } from "@/config/cms/content";
 import { findDefinition } from "@/config/cms/registry";
 import { publicPhysicians } from "@/features/physicians/repository";
@@ -19,7 +21,7 @@ export async function generateMetadata({ params }: Props) {
 }
 export default async function DetailPage({ params }: Props) {
   const { slug } = await params; const record = (await publicPhysicians()).find(item => item.slug === slug);
-  if (record) return <PublicPhysicianDetail record={record} />;
+  if (record) return <PublicPhysicianDetail record={record} site={await publishedContent("/_site", SITE_SEED)} />;
   const path = `/physicians/${slug}`; if (!findDefinition(path)) notFound();
   return <PublishedPage path={path} />;
 }

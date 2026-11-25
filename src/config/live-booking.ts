@@ -8,6 +8,12 @@ export const BOOKING_REVIEW_COPY = {
   completeBody: "Your test request is saved in the admin appointment inbox. Test emails are queued for delivery to enabled reviewer mailboxes.",
 };
 export const LIVE_BOOKING_COPY = { ...BOOKING_COPY,
+  confirming: "Sending request…", location: "Practice location", dates: "Choose a date", times: "Choose a time",
+  mockAvailability: "Available appointments", chooseDate: "Choose a date to view available times.", loading: "Loading appointments…",
+  unavailable: "There are no available times for this selection. Choose another date or contact the practice.",
+  loadError: "Appointments could not be loaded. Please try again.", unavailableBadge: "No available times", errorBadge: "Unable to load appointments",
+  yes: "Opted in", selectionLocation: "Location", confirmationError: "Your request could not be submitted. Please try again or contact the practice.",
+  demoTitle: "", demoNotice: "",
   introduction: "Choose a visit and an available time. The practice will review your appointment request.",
   noScript: "Online booking needs JavaScript. Please contact the practice if you need help arranging an appointment.",
   steps: [
@@ -23,6 +29,6 @@ export const LIVE_BOOKING_COPY = { ...BOOKING_COPY,
   review: "Review appointment", confirm: "Request appointment", reset: "Request another appointment",
   reasonHint: "Brief, general wording only. Do not enter diagnoses, insurance IDs or medical history.",
   smsConsent: c.smsConsent, emailConsent: c.emailConsent, consentHint: "Reminder choices are optional. Declining reminders does not prevent booking.",
-  errors: { ...BOOKING_COPY.errors, nameRequired: "Enter your full name within the allowed length.", phoneInvalid: "Enter a valid phone number with 10–15 digits.",
+  errors: { ...BOOKING_COPY.errors, dateRequired: "Choose a date.", slotRequired: "Choose an available time.", nameRequired: "Enter your full name within the allowed length.", phoneInvalid: "Enter a valid phone number with 10–15 digits.",
     emailInvalid: "Enter a valid email address.", reasonRequired: "Enter a short reason within the allowed length." },
 };

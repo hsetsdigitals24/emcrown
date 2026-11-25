@@ -2,10 +2,12 @@
 /* eslint-disable @typescript-eslint/no-require-imports -- Reuse the repository TypeScript loader. */
 require("../scripts/auth.cjs");
 const assert = require("node:assert/strict");
-const { BOOKING_SETTINGS } = require("../src/config/booking.ts");
+const { BOOKING_SETTINGS: BASE_SETTINGS } = require("../src/config/booking.ts");
 const { makeMockSchedule, availableMockSlots, fitsBusinessHours } = require("../src/features/booking/schedule.ts");
 const { calendarCells, shiftMonth } = require("../src/features/booking/calendar.ts");
 const { buildSlots } = require("../src/features/appointments/slots.ts");
+const provider = { id: "calendar-fixture", label: "Calendar test", specialty: "" };
+const BOOKING_SETTINGS = { ...BASE_SETTINGS, providers: [provider], types: BASE_SETTINGS.types.map(type => ({ ...type, providerIds: [provider.id] })) };
 const zone = BOOKING_SETTINGS.timeZone;
 assert.equal(fitsBusinessHours("2026-10-23T13:00:00Z", 30, zone), true);
 assert.equal(fitsBusinessHours("2026-10-23T12:30:00Z", 30, zone), false);

@@ -6,7 +6,7 @@ export const RECOVERY_COPY = {
   searchLabel: "Find a page", searchPlaceholder: "Search public pages", searchButton: "Search", searchEmpty: "No public pages matched. Try another search.", searchHeading: "Public pages",
 };
 export const PUBLIC_PAGES = [
-  { label: "Book appointment [demo]", href: "/book" },
+  { label: "Book appointment", href: "/book" },
   { label: "About", href: "/about" }, { label: "Services", href: "/services" }, { label: "Physicians", href: "/physicians" },
   { label: "Resources and blog", href: "/resources" }, { label: "Insurance", href: "/insurance" }, { label: "Contact", href: "/contact" },
   { label: "Frequently asked questions", href: "/faq" }, { label: "Legal and accessibility", href: "/legal" },

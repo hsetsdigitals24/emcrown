@@ -1,4 +1,4 @@
-// Shared frontend contracts for the draft homepage blocks.
+// Shared contracts: editable homepage blocks and published physician presentation.
 import type { ContentLink, SectionContent } from "@/types/content";
 export type HomeItem = {
   id: string; title: string; description: string; label?: string;
@@ -7,13 +7,15 @@ export type HomeItem = {
 };
 export type HomeBlock = SectionContent & { items: HomeItem[] };
 export type HeroContent = HomeBlock & {
-  photoLabel: string; chip: string; secondary: ContentLink;
+  photoLabel: string; chip: string;
   notice: string; imageCaption: string;
   media: { poster: string; photo: string; video: string; label: string; pauseLabel: string; playLabel: string };
 };
 export type BookingStepsContent = HomeBlock & { background: { images: string[]; label: string } };
+export type AboutContent = HomeBlock & { image: { src: string; alt: string } };
 export type PhysicianContent = HomeBlock & {
-  physicians: Array<{ id: string; name: string; specialty: string; photoLabel: string; photo?: string; link: ContentLink }>;
+  labels: { profile: string; book: string; unavailable: string; contact: ContentLink };
+  physicians: Array<{ id: string; name: string; specialty: string; photoLabel: string; photo?: string; link: ContentLink; booking?: ContentLink }>;
 };
 export type TestimonialsContent = HomeBlock & {
   controls: { autoplayMs: number; pause: string; play: string; label: string; roleDescription: string; previous: string; next: string; goTo: string; slide: string; of: string };

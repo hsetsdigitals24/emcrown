@@ -12,6 +12,7 @@ export function defineContent(path: string, label: string, seed: unknown): CmsDe
       const name = segments.at(-1) ?? "";
       if (IMMUTABLE.has(name)) return;
       const key = segments.join(".");
+      if (path === "/" && key === "hero.eyebrow") return;
       // These displayed details come from the single practice record, not duplicate text slots.
       if (path === "/" && ["location.address", "location.hours", "location.mapLabel", "location.phone.label", "location.phone.href", "location.directions.label", "location.directions.href"].includes(key)) return;
       if (path === "/_site" && (key === "footer.address" || key.startsWith("footer.locations.") || key.startsWith("footer.hours."))) return;

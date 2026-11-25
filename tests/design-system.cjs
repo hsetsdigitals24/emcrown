@@ -51,10 +51,18 @@ const SiteLayout = require('../src/components/layout/SiteLayout.tsx').default;
 const { SITE_NAVIGATION, SITE_FOOTER } = require('../src/config/site-shell.ts');
 const home = renderToStaticMarkup(React.createElement(SiteLayout, { navigation: SITE_NAVIGATION, footer: SITE_FOOTER }, React.createElement(Home, {content:HOME_SEED})));
 const sections = [...home.matchAll(/<section id="([^"]+)"/g)].map((match) => match[1]);
-assert.deepEqual(sections, ['home','about','services','booking','contact','faq','next-step']);
+assert.deepEqual(sections, ['home','mission','about','services','physicians','insurance','contact','next-step']);
 assert.equal((home.match(/<h1 /g) || []).length, 1);
-assert.equal((home.match(/class="faq-item"/g) || []).length, 5);
-assert.equal((home.match(/class="service-card"/g) || []).length, 6);
+const Hero = require('../src/components/home/Hero.tsx').default;
+const hero = renderToStaticMarkup(React.createElement(Hero, { content: HOME_SEED.hero }));
+assert.equal((hero.match(/<a /g) || []).length, 1);
+assert.doesNotMatch(hero, /<figcaption|editorial-trust|Call us|Free parking|ADA accessible/);
+assert.doesNotMatch(hero, /Compassionate and personalized care|reference-eyebrow/);
+assert.doesNotMatch(home, /href="tel:|editorial-mobile-call/);
+assert.deepEqual([SITE_NAVIGATION.home, ...SITE_NAVIGATION.items].map(item => item.label), ['Home','About Us','Our Services','Appointment','Contact Us']);
+
+assert.equal((home.match(/class="faq-item"/g) || []).length, 0);
+assert.equal((home.match(/class="reference-feature reference-service"/g) || []).length, 3);
 assert.equal((home.match(/class="physician-card"/g) || []).length, 0);
 assert.equal((home.match(/class="testimonial-card"/g) || []).length, 0);
 assert.match(home, /id="legal-notice"/);
@@ -63,9 +71,10 @@ assert.match(home, /<iframe[^>]+src="https:\/\/www\.google\.com\/maps\?/);
 assert.match(home, /loading="lazy" referrerPolicy="no-referrer"/);
 assert.doesNotMatch(home, /TESTIMONIAL PLACEHOLDER/);
 assert.doesNotMatch(home, /\[PHYSICIAN NAME\]/);
-assert.match(home, /reference details pending final verification/);
+assert.match(home, /confirm your appointment location/i);
+assert.doesNotMatch(home, /demonstration|website demo|company approved/i);
 assert.match(home, /href="\/book"/);
-console.log('Passed: homepage section order, single h1, six visit guides, omitted empty physician/testimonial slots, native FAQs, provisional facts and no backend form.');
+console.log('Passed: homepage highlights, single h1, three clinical services, no fabricated physician/testimonial records, working destinations and no backend form.');
 
 function luminance(hex) {
   const channels = hex.match(/[a-f\d]{2}/gi).map((value) => parseInt(value, 16) / 255);
@@ -77,8 +86,9 @@ function contrast(first, second) {
   return (values[0] + 0.05) / (values[1] + 0.05);
 }
 const colors = Object.fromEntries([...css.matchAll(/--color-(\w+):\s*(#[A-Fa-f\d]{6});/g)].map((match) => [match[1], match[2]]));
-for (const [foreground, background] of [['text','background'],['textSecondary','background'],['textSecondary','surfaceTint'],['primary','surfaceSoft'],['background','accentOrange'],['background','navy']]) {
+for (const [foreground, background] of [['text','background'],['textSecondary','background'],['textSecondary','surfaceTint'],['primary','surfaceSoft'],['text','accentOrange'],['background','navy']]) {
   assert.ok(contrast(colors[foreground], colors[background]) >= 4.5, `${foreground}/${background} contrast`);
 }
 assert.ok(contrast(colors.highlight, colors.background) >= 3, 'Large headline highlight contrast');
+assert.ok(contrast(colors.background, colors.accentOrange) >= 3, 'Bold 20px white booking labels meet large-text contrast');
 console.log('Passed: theme text combinations meet WCAG AA contrast thresholds.');

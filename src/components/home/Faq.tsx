@@ -1,4 +1,5 @@
 // Server component: native accessible accordions work without JavaScript.
+
 import FaqHover from "@/components/home/FaqHover";
 import Container from "@/components/layout/Container";
 import BlockHeading from "@/components/home/BlockHeading";

@@ -4,34 +4,6 @@
 .navigation-physician-photo { flex-shrink: 0; width: 64px; height: 72px; object-fit: cover; border-radius: var(--radius-control); }
 .mobile-submenu-links .navigation-link:has(.navigation-physician-photo) { justify-content: flex-start; gap: .75rem; }
 .mobile-submenu-links .navigation-physician-photo { width: 48px; height: 56px; }
-.physician-profile { padding-block: 1.5rem 5rem; background: linear-gradient(var(--color-surfaceSoft), var(--color-background) 65%); }
-.physician-back { display: inline-flex; align-items: center; min-height: 44px; margin-bottom: 1.5rem; color: var(--color-primary); text-decoration: underline; text-underline-offset: .3em; }
-.physician-profile-hero { display: grid; align-items: center; gap: 2rem; }
-.physician-profile-portrait { overflow: hidden; border-radius: var(--radius-card); background: var(--color-surfaceTint); }
-.physician-profile-portrait img { width: 100%; aspect-ratio: 5 / 6; max-height: 36rem; object-fit: cover; object-position: center 25%; }
-.physician-portrait-placeholder { min-height: 20rem; display: grid; place-items: center; padding: 2rem; color: var(--color-textSecondary); }
-.physician-profile-intro { display: grid; justify-items: start; gap: 1.5rem; }
-.physician-profile-intro h1 { font-family: var(--font-heading); font-size: clamp(2.5rem, 5vw, 4.5rem); line-height: 1.1; letter-spacing: -.05em; color: var(--color-primary); overflow-wrap: anywhere; }
-.physician-specialties { color: var(--color-textSecondary); font-size: 1.125rem; white-space: pre-line; }
-.physician-profile-jumps { display: flex; flex-wrap: wrap; gap: .5rem 1rem; }
-.physician-profile-jumps a { display: inline-flex; align-items: center; min-height: 44px; border-bottom: 1px solid var(--color-border); color: var(--color-primary); }
-.physician-profile-jumps a:hover { border-color: var(--color-primary); }
-.physician-profile-body { display: grid; gap: 2.5rem; margin-top: 3.5rem; }
-.physician-about h2 { font-family: var(--font-heading); font-size: 2rem; color: var(--color-primary); margin-block: 1rem 1.5rem; }
-.physician-about > p:last-child { color: var(--color-textSecondary); line-height: 1.85; }
-.physician-profile-facts { display: grid; align-content: start; gap: 1rem; }
-.physician-profile-facts details { border: 1px solid var(--color-border); border-radius: var(--radius-card); background: var(--color-background); padding: 1rem 1.25rem; }
-.physician-profile-facts summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 44px; cursor: pointer; color: var(--color-primary); font-weight: 500; }
-.physician-profile-facts summary span { font-size: 1.5rem; transition: transform 200ms ease; }
-.physician-profile-facts details[open] summary span { transform: rotate(45deg); }
-.physician-profile-facts details p { padding-block: .75rem; color: var(--color-textSecondary); line-height: 1.75; }
-.physician-profile [id] { scroll-margin-top: 7rem; }
-@media (min-width: 768px) {
-  .physician-profile-hero { grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 4rem; }
-  .physician-profile-body { grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); gap: 4rem; }
-}
-@media (prefers-reduced-motion: reduce) { .physician-profile-facts summary span { transition: none; } }
-
 .physician-directory { padding-block: 0 5rem; }
 .physician-directory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 21rem), 1fr)); gap: 2rem; }
 .physician-directory-card { min-width: 0; padding: .75rem; border: 1px solid var(--color-border); border-radius: var(--radius-card); background: var(--color-background); box-shadow: var(--shadow-raised); }
@@ -41,3 +13,58 @@
 .physician-directory-copy h2 { color: var(--color-primary); font-family: var(--font-heading); font-size: 1.5rem; line-height: 1.3; overflow-wrap: anywhere; }
 .physician-directory-link { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 44px; margin-top: .5rem; border-top: 1px solid var(--color-border); color: var(--color-primary); }
 .physician-directory-link:hover { text-decoration: underline; text-underline-offset: .3em; }
+
+/* Public profile: compact portrait, readable record and shared practice details. */
+.profile-page { padding-block: 1rem var(--spacing-section); background: var(--color-sectionAlt); }
+.profile-back { display: inline-flex; align-items: center; gap: .75rem; min-height: var(--spacing-target); margin-bottom: 1.5rem; color: var(--color-primary); font-size: .9375rem; }
+.profile-back:hover { text-decoration: underline; text-underline-offset: .3em; }
+.profile-layout { display: grid; gap: 2rem; align-items: start; }
+.profile-portrait-column { min-width: 0; }
+.profile-portrait { padding: .75rem; border: 1px solid var(--color-border); border-radius: var(--radius-card); background: var(--color-background); box-shadow: var(--shadow-soft); }
+.profile-portrait img { width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; object-position: center 25%; border-radius: var(--radius-control); }
+.profile-practice-name { margin: 1rem auto 0; max-width: 15rem; text-align: center; color: var(--color-textSecondary); font-size: .875rem; }
+.profile-content { min-width: 0; padding: clamp(1.5rem, 3vw, 3rem); background: var(--color-background); border: 1px solid var(--color-border); border-radius: var(--radius-card); }
+.profile-introduction { display: grid; gap: 1rem; }
+.profile-introduction h1 { font-family: var(--font-heading); font-size: clamp(2.25rem, 4vw, 3.5rem); font-weight: 400; line-height: 1.12; letter-spacing: -.05em; text-wrap: balance; }
+.profile-specialty { color: var(--color-textSecondary); white-space: pre-line; font-size: 1.125rem; }
+.profile-primary-action { padding-top: .5rem; }
+.profile-primary-action a { gap: 1.5rem; }
+.profile-booking-status { border-left: 2px solid var(--color-primary); padding: .75rem 1rem; background: var(--color-surfaceTint); color: var(--color-textSecondary); }
+.profile-navigation { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; margin-top: 2rem; padding-block: .5rem; border-block: 1px solid var(--color-border); }
+.profile-navigation a { display: inline-flex; align-items: center; min-height: var(--spacing-target); color: var(--color-primary); font-size: .875rem; text-decoration-thickness: 1px; text-underline-offset: .35em; }
+.profile-navigation a:hover { text-decoration: underline; }
+.profile-biography { padding-block: 2rem; }
+.profile-content h2 { font-family: var(--font-heading); font-weight: 400; font-size: clamp(1.5rem, 2.3vw, 1.875rem); line-height: 1.3; letter-spacing: -.03em; }
+.profile-biography p { margin-top: 1rem; white-space: pre-line; color: var(--color-textSecondary); line-height: 1.8; }
+.profile-facts { display: grid; gap: .75rem; margin-bottom: 2rem; }
+.profile-facts details { border: 1px solid var(--color-border); border-radius: var(--radius-control); padding: .75rem 1.25rem; }
+.profile-facts summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: var(--spacing-target); cursor: pointer; list-style: none; color: var(--color-primary); }
+.profile-facts summary::-webkit-details-marker { display: none; }
+.profile-facts summary span { font-size: 1.5rem; transition: transform 180ms ease; }
+.profile-facts details[open] summary span { transform: rotate(45deg); }
+.profile-facts details p { padding: .5rem 0 .75rem; white-space: pre-line; color: var(--color-textSecondary); }
+.profile-visit { padding: clamp(1.25rem, 2vw, 2rem); margin-top: 1.5rem; background: var(--color-surfaceTint); border-radius: var(--radius-card); }
+.profile-visit-heading { display: grid; gap: .75rem; margin-bottom: 1.5rem; }
+.profile-visit p, .profile-visit address { font-size: .9375rem; color: var(--color-textSecondary); font-style: normal; }
+.profile-visit-details { display: grid; gap: 1.5rem; }
+.profile-visit-details > div { display: grid; align-content: start; gap: .75rem; min-width: 0; }
+.profile-visit h3 { font-weight: 500; font-size: 1rem; }
+.profile-directions { display: inline-flex; align-items: center; gap: 1rem; min-height: var(--spacing-target); color: var(--color-primary); font-size: .9375rem; }
+.profile-contact > a { display: inline-flex; align-items: center; min-height: var(--spacing-target); color: var(--color-primary); }
+.profile-contact > a:last-child { font-size: .875rem; }
+.profile-content [id] { scroll-margin-top: 8rem; }
+@media (min-width: 48rem) {
+  .profile-layout { grid-template-columns: minmax(12rem, .65fr) minmax(0, 1.65fr); gap: 2rem; }
+  .profile-layout-text { grid-template-columns: minmax(0, 1fr); max-width: 55rem; margin-inline: auto; }
+  .profile-portrait-column { position: sticky; top: 7rem; }
+  .profile-visit-details { grid-template-columns: 1.3fr 1fr; }
+  .profile-contact { border-left: 1px solid var(--color-border); padding-left: 1.5rem; }
+}
+@media (max-width: 47.999rem) {
+  .profile-portrait-column { width: min(100%, 14rem); margin-inline: auto; }
+  .profile-content { padding: 1.25rem; }
+  .profile-primary-action a { width: 100%; }
+  .profile-visit { margin-inline: -.25rem; }
+  .profile-practice-name { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .profile-facts summary span { transition: none; } }

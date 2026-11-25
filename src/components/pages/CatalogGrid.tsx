@@ -1,9 +1,10 @@
 // Server component: reusable typed service, physician, resource and policy cards.
+import Image from "next/image";
 import GuideCard from "@/components/pages/GuideCard";
 import { GUIDE_CARD_COPY } from "@/config/pages/guide-card";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
-import ServiceCardsMotion from "@/components/motion/ServiceCardsMotion";
+
 import Reveal from "@/components/motion/Reveal";
 import PhotoPlaceholder from "@/components/home/PhotoPlaceholder";
 import type { PublicEntry } from "@/types/public";
@@ -11,13 +12,14 @@ export default function CatalogGrid({ entries, actionLabel, images = false, port
   entries: PublicEntry[]; actionLabel: string; images?: boolean; portraits?: boolean; serviceMotion?: boolean;
 }) {
   const cards = entries.map((entry) => <article id={entry.slug} key={entry.slug} className={serviceMotion ? "service-entry" : undefined}>
-    {serviceMotion ? <GuideCard title={entry.title} description={entry.hero.body} category={entry.category} href={entry.path} action={actionLabel} image={`/media/visit-guide-${entry.slug.replace("service-", "")}.webp`} imageLabel={GUIDE_CARD_COPY.imageLabel} /> : <Card interactive><CatalogCard entry={entry} actionLabel={actionLabel} images={images} portraits={portraits} /></Card>}
+    {serviceMotion ? <GuideCard showImage heading="h2" title={entry.title} description={entry.hero.body} category={entry.category} href={entry.path} action={actionLabel} image={`/media/visit-guide-${entry.slug.replace("service-", "")}.webp`} imageLabel={GUIDE_CARD_COPY.imageLabel} /> : <Card interactive><CatalogCard entry={entry} actionLabel={actionLabel} images={images} portraits={portraits} /></Card>}
   </article>);
-  return serviceMotion ? <ServiceCardsMotion itemCount={entries.length}>{cards}</ServiceCardsMotion> : <Reveal stagger className="services-grid">{cards}</Reveal>;
+  return <Reveal stagger className="services-grid">{cards}</Reveal>;
 }
 function CatalogCard({ entry, actionLabel, images, portraits }: { entry: PublicEntry; actionLabel: string; images: boolean; portraits: boolean }) {
   return <div className="catalog-card">
-      {images && entry.photoLabel && <div className={portraits ? "" : "catalog-image"}><PhotoPlaceholder label={entry.photoLabel} /></div>}
+      {images && entry.hero.image && <Image className="catalog-photo" src={entry.hero.image.src} alt={entry.hero.image.alt} width={512} height={320} sizes="(min-width: 1024px) 360px, 100vw" />}
+      {images && !entry.hero.image && entry.photoLabel && <div className={portraits ? "" : "catalog-image"}><PhotoPlaceholder label={entry.photoLabel} /></div>}
       <span className="service-tag">{entry.category}</span>
       <h2 className="font-heading text-2xl font-light text-primary"><Link href={entry.path}>{entry.title}</Link></h2>
       <p className="text-textSecondary">{entry.hero.body}</p>

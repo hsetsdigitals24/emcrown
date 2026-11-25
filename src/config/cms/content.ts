@@ -1,5 +1,5 @@
 // Shared seeds: retain current approved structure and expose its named content slots.
-import { HERO, PRINCIPLES, SERVICES, BOOKING, PHYSICIANS, TESTIMONIALS, LOCATION, FAQ, CLOSING, HOME_METADATA } from "@/config/home-content";
+import { HERO, PRINCIPLES, ABOUT, SERVICES, PHYSICIANS, TESTIMONIALS, INSURANCE, LOCATION, CLOSING, HOME_METADATA } from "@/config/home-content";
 import { ABOUT_PAGE, SERVICES_PAGE, PHYSICIANS_PAGE, RESOURCES_PAGE, INSURANCE_PAGE, INSURANCE_SETTINGS, CATALOG_COPY } from "@/config/pages/information";
 import { SERVICE_ENTRIES, PHYSICIAN_ENTRIES, ARTICLE_ENTRIES } from "@/config/pages/catalogs";
 import { CONTACT_PAGE, CONTACT_COPY, FAQ_PAGE, FAQ_GROUPS } from "@/config/pages/contact";
@@ -7,10 +7,10 @@ import { LEGAL_PAGE, LEGAL_ENTRIES, LEGAL_COPY } from "@/config/pages/legal";
 import { SITE_NAVIGATION, SITE_FOOTER } from "@/config/site-shell";
 import { PRACTICE } from "@/config/practice";
 import { BOOKING_CTA } from "@/config/pages/helpers";
-import { BOOKING_COPY } from "@/config/booking-copy";
+import { LIVE_BOOKING_COPY } from "@/config/live-booking";
 import { BOOKING_SETTINGS } from "@/config/booking";
-export const BOOKING_SEED = { copy: BOOKING_COPY, appointmentTypes: BOOKING_SETTINGS.types, providers: BOOKING_SETTINGS.providers };
-export const HOME_SEED = { hero: HERO, principles: PRINCIPLES, services: SERVICES, booking: BOOKING, physicians: PHYSICIANS, testimonials: TESTIMONIALS, location: LOCATION, faq: FAQ, closing: CLOSING, metadata: HOME_METADATA };
+export const BOOKING_SEED = { copy: LIVE_BOOKING_COPY, appointmentTypes: BOOKING_SETTINGS.types, providers: BOOKING_SETTINGS.providers };
+export const HOME_SEED = { hero: HERO, principles: PRINCIPLES, about: ABOUT, services: SERVICES, physicians: PHYSICIANS, testimonials: TESTIMONIALS, insurance: INSURANCE, location: LOCATION, closing: CLOSING, metadata: HOME_METADATA };
 export const SITE_SEED = { navigation: SITE_NAVIGATION, footer: SITE_FOOTER, practice: PRACTICE, catalog: CATALOG_COPY, closing: BOOKING_CTA, legal: LEGAL_COPY };
 export const PAGE_SEEDS = {
   "/about": { content: ABOUT_PAGE }, "/services": { content: SERVICES_PAGE },

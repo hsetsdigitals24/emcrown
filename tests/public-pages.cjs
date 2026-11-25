@@ -60,6 +60,48 @@ async function checkRoutes() {
     assert.ok(validateValues(definition.path, definition.initial), `Invalid CMS seed: ${definition.path}`);
     assert.deepEqual(storedValues(definition.path, definition.initial), definition.initial);
   }
+  const { RETIRED_STARTER_COPY } = require('../src/features/cms/legacy-copy.ts');
+  for (const change of RETIRED_STARTER_COPY) {
+    const definition = CMS_DEFINITIONS.find(entry => entry.path === change.path);
+    if (!definition.fields.some(field => field.key === change.key)) {
+      assert.equal(storedValues(change.path, { ...definition.initial, [change.key]: change.before })[change.key], undefined);
+      continue;
+    }
+    const previous = { ...definition.initial, [change.key]: change.before };
+    assert.equal(storedValues(change.path, previous)[change.key], definition.initial[change.key]);
+    const editedValue = definition.fields.find(field => field.key === change.key).link ? '/contact?topic=visit' : 'Staff-authored copy';
+    previous[change.key] = editedValue;
+    assert.equal(storedValues(change.path, previous)[change.key], editedValue);
+  }
+  const { BOOKING_SEED, HOME_SEED } = require('../src/config/cms/content.ts');
+  const BookingUnavailable = require('../src/features/booking/BookingUnavailable.tsx').default;
+  const unavailable = renderToStaticMarkup(React.createElement(BookingUnavailable, { content: BOOKING_SEED, site: require('../src/config/cms/content.ts').SITE_SEED }));
+  assert.doesNotMatch(unavailable, /<form|demo|sample times/i);
+  assert.match(unavailable, /href="tel:/);
+  const HomeContent = require('../src/features/cms/HomeContent.tsx').default;
+  const record = { id: 'fixture', fullName: 'Published fixture', title: '', credentials: '', specialties: 'Published specialty', slug: 'published-fixture', photo: '', bookingAvailable: false };
+  const rendered = renderToStaticMarkup(React.createElement(HomeContent, { content: HOME_SEED, records: [record] }));
+  assert.match(rendered, /Published fixture/);
+  assert.match(rendered, /href="\/physicians\/published-fixture"/);
+  const cmsHome = CMS_DEFINITIONS.find(entry => entry.path === '/');
+  const cmsHomeValues = { ...cmsHome.initial, 'about.buttonLabel': 'CMS about action', 'insurance.buttonLabel': 'CMS insurance action', 'physicians.labels.profile': 'CMS profile action' };
+  const cmsHomeHtml = renderToStaticMarkup(React.createElement(HomeContent, { content: applyContent(HOME_SEED, cmsHomeValues), records: [record] }));
+  for (const label of ['CMS about action', 'CMS insurance action', 'CMS profile action']) assert.ok(cmsHomeHtml.includes(label));
+  assert.doesNotMatch(cmsHomeHtml, /stock imagery|not emcrown staff|demonstration|website demo/i);
+  const { Window } = await import('happy-dom');
+  const cmsWindow = new Window();
+  cmsWindow.document.body.innerHTML = cmsHomeHtml;
+  const { fieldAtElement } = require('../src/features/cms/preview-selection.ts');
+  for (const [selector, key] of [
+    ['#about h2', 'about.headline'],
+    ['#insurance a span', 'insurance.buttonLabel'],
+    ['.reference-service:nth-child(3) a span', 'services.items.2.link.label'],
+    ['#about .reference-values li:first-child span[data-cms-field]', 'about.items.0.title'],
+    ['.editorial-physician-actions a span', 'physicians.labels.profile'],
+  ]) assert.equal(fieldAtElement(cmsWindow.document.querySelector(selector), cmsHome, cmsHomeValues), key);
+  await cmsWindow.happyDOM.close();
+  const stale = { ...HOME_SEED, physicians: { ...HOME_SEED.physicians, physicians: [{ id: 'stale', name: 'STALE IDENTITY' }] } };
+  assert.doesNotMatch(renderToStaticMarkup(React.createElement(HomeContent, { content: stale, records: [] })), /STALE IDENTITY/);
   const about = CMS_DEFINITIONS.find(entry => entry.path === '/about');
   const edited = { ...about.initial, 'content.hero.body': 'Staff-edited introduction', 'content.sections.0.body': 'Staff-edited paragraph' };
   assert.ok(validateValues('/about', edited));
@@ -82,7 +124,7 @@ async function checkRoutes() {
       assert.equal((html.match(/<iframe/g) ?? []).length, 1);
       assert.match(html, /src="https:\/\/www.google.com\/maps\?/);
     } else assert.doesNotMatch(html, /<iframe/);
-    if (path==='contact') { assert.match(html,/<fieldset disabled=""/); assert.doesNotMatch(html,/href="mailto:/); }
+    if (path==='contact') { assert.doesNotMatch(html,/<form/); assert.match(html,/href="tel:/); assert.doesNotMatch(html,/href="mailto:/); }
   }
   for (const [family, entries] of [['services',SERVICE_ENTRIES],['physicians',PHYSICIAN_ENTRIES],['resources',ARTICLE_ENTRIES]]) {
     const route = require(`../src/app/(public)/${family}/[slug]/page.tsx`);

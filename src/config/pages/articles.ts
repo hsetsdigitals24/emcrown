@@ -1,6 +1,6 @@
 // Shared patient-resource drafts: practical guidance, source links and honest review status.
 import type { ArticleEntry } from "@/types/public";
-import { mockPage, mockSection } from "@/config/pages/helpers";
+import { mockPage, mockSection, pageImage } from "@/config/pages/helpers";
 const articles = [
   {
     title: "Make the most of your first appointment", category: "Preparing for a visit",
@@ -35,7 +35,8 @@ const articles = [
 ];
 export const ARTICLE_ENTRIES: ArticleEntry[] = articles.map((article, index) => {
   const slug = `article-${index + 1}`;
-  return { ...mockPage(`/resources/${slug}`, article.title, article.title, "", article.summary),
+  const page = mockPage(`/resources/${slug}`, article.title, article.title, "", article.summary);
+  return { ...page, hero: { ...page.hero, image: pageImage(`/media/visit-guide-${index + 3}.webp`) },
     slug, category: article.category, author: "", reviewDate: "", publishedDate: "",
     labels: { author: "Written by", reviewDate: "Medically reviewed", publishedDate: "Published", category: "Category" },
     sections: article.sections.map(([headline, body], section) => ({

@@ -1,4 +1,4 @@
-// Shared contracts for editable frontend content; no CMS integration.
+// Shared contracts: public site text and CMS slots used on the server and in previews.
 export type ContentStatus = "draft" | "published";
 export type ContentLink = { label: string; href: string };
 export type SectionContent = {
@@ -8,6 +8,7 @@ export type SectionContent = {
   eyebrow: string;
   headline: string;
   highlightedPhrase: string;
+  image?: { src: string; alt: string };
   subheading: string;
   body: string;
   buttonLabel: string;
@@ -18,6 +19,9 @@ export type NavigationItem = ContentLink & {
 };
 export type NavigationContent = {
   brand: ContentLink;
+  tagline?: string;
+  home?: ContentLink;
+  viewAllLabel?: string;
   label: string;
   menuLabel: string;
   skipLabel: string;
@@ -30,6 +34,7 @@ export type FooterContent = {
   practiceName: string;
   description: string;
   navigationLabel: string;
+  legalNavigationLabel?: string;
   links: ContentLink[];
   legalLinks: ContentLink[];
   address: string;

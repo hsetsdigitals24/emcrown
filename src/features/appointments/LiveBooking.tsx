@@ -11,6 +11,7 @@ import { z } from "zod";
 import type { AvailabilitySlot, PublicPhysician } from "@/types/clinical";
 import type { BookingDetails, BookingErrors, BookingStep } from "@/types/booking";
 import { CLINICAL_COPY as c, CLINICAL_POLICY } from "@/config/clinical";
+import type { BookingCopy } from "@/config/booking-copy";
 import { BOOKING_REVIEW_COPY, LIVE_BOOKING_COPY } from "@/config/live-booking";
 import { BOOKING_SETTINGS } from "@/config/booking";
 import type { PracticeLocation } from "@/types/public";
@@ -21,7 +22,7 @@ import ContactFields from "@/features/booking/ContactFields";
 import BookingChallenge from "@/features/appointments/BookingChallenge";
 import { clinicalRequest } from "@/features/clinical/client";
 import { availabilitySchema } from "@/features/clinical/contracts";
-export default function LiveBooking({ providers, initialSlots, location, siteKey, smsEnabled, nonce, reviewMode = false, initialPhysicianId, selectionUnavailable = false }: { location: PracticeLocation; providers: PublicPhysician[]; initialSlots: AvailabilitySlot[]; siteKey: string; smsEnabled: boolean; reviewMode?: boolean; nonce?: string; initialPhysicianId?: string; selectionUnavailable?: boolean }) {
+export default function LiveBooking({ providers, initialSlots, location, siteKey, smsEnabled, nonce, reviewMode = false, initialPhysicianId, selectionUnavailable = false, copy = LIVE_BOOKING_COPY }: { copy?: BookingCopy; location: PracticeLocation; providers: PublicPhysician[]; initialSlots: AvailabilitySlot[]; siteKey: string; smsEnabled: boolean; reviewMode?: boolean; nonce?: string; initialPhysicianId?: string; selectionUnavailable?: boolean }) {
   const [slots, setSlots] = useState(initialSlots); const [step, setStep] = useState<BookingStep>(0); const [typeId, setTypeId] = useState("");
   const [physicianId, setPhysicianId] = useState(providers.some(provider => provider.id === initialPhysicianId) ? initialPhysicianId! : ""); const locationId = location.id;
   const [slotIndex, setSlotIndex] = useState(""); const [details, setDetails] = useState<BookingDetails>(emptyDetails); const [errors, setErrors] = useState<BookingErrors>({});
@@ -44,7 +45,7 @@ export default function LiveBooking({ providers, initialSlots, location, siteKey
     setMessage("");
     if (step < 3) { if ((step === 0 && !typeId) || (step === 2 && !selected)) { setMessage(c.select); return; } setStep((step + 1) as BookingStep); return; }
     const invalid = validateDetails(details, BOOKING_SETTINGS, new Date().toISOString()); setErrors(invalid);
-    if (Object.keys(invalid).length || !consent || !selected) { setMessage(LIVE_BOOKING_COPY.errorSummary); return; }
+    if (Object.keys(invalid).length || !consent || !selected) { setMessage(copy.errorSummary); return; }
     if (!review) { setReview(true); return; }
     if (!token || busy) return;
     setBusy(true); idempotency.current ??= crypto.randomUUID();
@@ -55,22 +56,22 @@ export default function LiveBooking({ providers, initialSlots, location, siteKey
       else { setMessage(c.submitFailed); setChallenge(value => value + 1); await refresh(); }
     } finally { setBusy(false); }
   }
-  const headingCopy = reviewMode ? { ...LIVE_BOOKING_COPY, completionTitle: BOOKING_REVIEW_COPY.complete, completionHighlight: "", completionBody: BOOKING_REVIEW_COPY.completeBody } : LIVE_BOOKING_COPY;
+  const headingCopy = reviewMode ? { ...copy, completionTitle: BOOKING_REVIEW_COPY.complete, completionHighlight: "", completionBody: BOOKING_REVIEW_COPY.completeBody } : copy;
   const phase = done ? "complete" : review ? "review" : "editing";
   function goBack(nextStep: BookingStep) { setMessage(""); setReview(false); setStep(nextStep); }
   return <div className="booking-form-card">
-    <BookingProgress step={step} copy={LIVE_BOOKING_COPY} disabled={busy} complete={done} onBack={goBack} />
+    <BookingProgress step={step} copy={copy} disabled={busy} complete={done} onBack={goBack} />
     <BookingHeading state={{ step, phase }} copy={headingCopy} />
     {selectionUnavailable && <p role="status" className="booking-error-summary">{c.unavailablePhysician}</p>}
     {!done && <form onSubmit={event => { event.preventDefault(); void submit(); }} autoComplete="off" noValidate aria-labelledby="booking-step-heading" aria-busy={busy}>
       <fieldset disabled={busy} className="booking-fieldset">
         {message && <p role="alert" className="booking-error-summary">{message}</p>}
         <div key={`${step}-${phase}`} className="booking-step-content">
-          {step === 0 && <ChoiceGroup name="appointmentType" legend={LIVE_BOOKING_COPY.steps[0].label}
-            options={BOOKING_SETTINGS.types.filter(type => slots.some(slot => slot.typeId === type.id))} value={typeId}
+          {step === 0 && <ChoiceGroup name="appointmentType" legend={copy.steps[0].label}
+            options={BOOKING_SETTINGS.types.filter(type => slots.some(slot => slot.typeId === type.id)).map(({ id, label }) => ({ id, label }))} value={typeId}
             onChange={value => { setTypeId(value); setSlotIndex(""); }} />}
           {step === 1 && <div className="space-y-6"><ChoiceGroup name="physician" legend={c.provider}
-            options={[{ id: "", label: LIVE_BOOKING_COPY.firstAvailable, description: LIVE_BOOKING_COPY.firstAvailableDescription },
+            options={[{ id: "", label: copy.firstAvailable, description: copy.firstAvailableDescription },
               ...providers.map(provider => ({ id: provider.id, label: physicianName(provider), description: provider.specialties }))]}
             value={physicianId} onChange={value => { setPhysicianId(value); setSlotIndex(""); }} />
             <dl className="booking-summary"><div><dt>{c.location}</dt><dd>{location.label}<br />{location.address}</dd></div></dl>
@@ -78,7 +79,7 @@ export default function LiveBooking({ providers, initialSlots, location, siteKey
           {step === 2 && <div className="space-y-6"><LiveDateTimePicker slots={eligible} providers={providers} value={slotIndex} onChange={setSlotIndex} today={today} />
             <Button onClick={() => void refresh()}>{c.refresh}</Button></div>}
           {step === 3 && (!review ? <div className="space-y-6">
-            <ContactFields details={details} errors={errors} settings={BOOKING_SETTINGS} copy={LIVE_BOOKING_COPY} today={today} smsEnabled={smsEnabled} onChange={setDetails} />
+            <ContactFields details={details} errors={errors} settings={BOOKING_SETTINGS} copy={copy} today={today} smsEnabled={smsEnabled} onChange={setDetails} />
             <label className="booking-consent"><input type="checkbox" required checked={consent} onChange={event => setConsent(event.target.checked)} /><span>{c.privacyConsent} <a className="underline" href="/privacy">{c.privacyLink}</a></span></label>
           </div> : <div className="space-y-6"><dl className="booking-summary">
             {[[c.type, BOOKING_SETTINGS.types.find(type => type.id === typeId)?.label],
@@ -91,10 +92,10 @@ export default function LiveBooking({ providers, initialSlots, location, siteKey
         </div>
         {((step === 0 && !slots.length) || (step === 2 && !eligible.length)) && <p role="status" className="booking-error-summary">{c.noTimes}</p>}
         <div className="booking-actions">
-          {step > 0 && <Button onClick={() => { setMessage(""); if (review) setReview(false); else goBack((step - 1) as BookingStep); }}>{review ? LIVE_BOOKING_COPY.edit : LIVE_BOOKING_COPY.back}</Button>}
-          {review && <Button onClick={() => goBack(0)}>{LIVE_BOOKING_COPY.editAppointment}</Button>}
-          <Button type="submit" purpose={review ? "booking" : "primary"} disabled={busy || (review && !token)}>
-            {busy ? c.working : review ? LIVE_BOOKING_COPY.confirm : step === 3 ? LIVE_BOOKING_COPY.review : LIVE_BOOKING_COPY.next}
+          {step > 0 && <Button onClick={() => { setMessage(""); if (review) setReview(false); else goBack((step - 1) as BookingStep); }}>{review ? copy.edit : copy.back}</Button>}
+          {review && <Button onClick={() => goBack(0)}>{copy.editAppointment}</Button>}
+          <Button type="submit" purpose={review ? "booking" : "primary"} disabled={busy || (step === 0 && !typeId) || (step === 2 && !selected) || (review && !token)}>
+            {busy ? c.working : review ? copy.confirm : step === 3 ? copy.review : copy.next}
           </Button>
         </div>
       </fieldset>

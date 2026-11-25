@@ -20,7 +20,7 @@ export default function ServiceGuide({ entry, closing = BOOKING_CTA }: { entry: 
         <Heading as="h1" display highlightedPhrase={entry.hero.highlightedPhrase}>{entry.hero.headline}</Heading>
         <BodyText>{entry.hero.body}</BodyText>
         <a className="guide-anchor" href="#guide-checklist">{copy.checklist} <span aria-hidden="true">↓</span></a>
-      </div></Reveal><figure className="guide-hero-photo"><Image unoptimized loading="eager" src={entry.image} alt="" fill sizes="(min-width: 1024px) 560px, 100vw" /><figcaption>{copy.imageLabel}</figcaption></figure></div>
+      </div></Reveal><figure className="guide-hero-photo"><Image unoptimized loading="eager" src={entry.image} alt="" fill sizes="(min-width: 1024px) 560px, 100vw" /></figure></div>
     </Container></header>
     <Container><div className="guide-body-layout">
       <aside className="guide-sidebar"><GuideNavigation label={copy.onPage} links={[

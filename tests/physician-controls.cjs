@@ -23,6 +23,10 @@ const fixture = { id:"00000000-0000-4000-8000-000000000001", version:1, publishe
 for (const active of [true, false]) {
   const markup = renderToStaticMarkup(React.createElement(PublicPhysicianDetail, {record:{...fixture, bookingAvailable:active}}));
   assert.match(markup, /Fictional biography/);
+  assert.equal((markup.match(/<h1[ >]/g) || []).length, 1);
+  assert.doesNotMatch(markup, /id="physician-(credentials|specialties|languages)"/);
+  assert.doesNotMatch(markup, /class="profile-portrait"/);
+  assert.match(markup, /id="physician-visit"/);
   if (active) assert.match(markup, /href="\/book\?physician=fictional-physician"/);
   else {
     assert.doesNotMatch(markup, /href="\/book\?physician=/);
@@ -37,6 +41,19 @@ for (const active of [true, false]) {
     assert.match(settings, /<summary>Profile settings<\/summary>/);
   }
 }
+const { SITE_SEED } = require("../src/config/cms/content.ts");
+const profile = renderToStaticMarkup(React.createElement(PublicPhysicianDetail, {
+  record: {...fixture, bookingAvailable:true, credentials:"[TEST CREDENTIAL]", languages:"[TEST LANGUAGE]", photo:"/test-portrait.jpg"},
+  site: {...SITE_SEED, footer:{...SITE_SEED.footer, practiceName:"[CMS PRACTICE]"},
+    practice:{...SITE_SEED.practice, phone:{label:"[CMS PHONE]", href:"tel:5550100"}}},
+}));
+assert.match(profile, /class="profile-portrait"/);
+assert.match(profile, /id="physician-credentials" open=""/);
+assert.match(profile, /\[TEST CREDENTIAL\]/);
+assert.match(profile, /\[TEST LANGUAGE\]/);
+assert.match(profile, /\[CMS PRACTICE\]/);
+assert.match(profile, /href="tel:5550100"/);
+assert.doesNotMatch(profile, /id="physician-specialties"/);
 const unchanged = renderToStaticMarkup(React.createElement(Form, {physician:fixture, onSaved:async()=>{}, onBack:()=>{}}));
 assert.doesNotMatch(unchanged, /<button[^>]+type="submit"/);
 assert.match(unchanged, /No unsaved changes/);

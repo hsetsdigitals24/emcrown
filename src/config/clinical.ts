@@ -7,6 +7,9 @@ export const CLINICAL_POLICY = {
 };
 export const CLINICAL_COPY = {
   selectedPhysician: "Selected physician", changePhysicianHelp: "You can change your physician in the Physician step.", unavailablePhysician: "That physician is no longer available. Please choose another physician.",
+  profileHeading: "Physician profile", profileVisit: "Plan your visit",
+  profileVisitHelp: "Confirm your appointment details and location with the practice before travelling.",
+  profileContact: "Questions about your visit?", profileContactLink: "Contact the practice",
   profileAbout: "About", profileExplore: "Explore this profile", allPhysicians: "View all physicians",
   physicians: "Physicians", appointments: "Appointments", schedules: "Schedules & availability",
   photoPlaceholder: "[PHOTO PLACEHOLDER: physician portrait]",

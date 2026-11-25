@@ -5,5 +5,5 @@ import Button from "@/components/ui/Button";
 import type { ContentLink } from "@/types/content";
 export default function NavigationBookingAction({ link }: { link: ContentLink }) {
   const pathname = usePathname();
-  return <Button purpose={pathname === "/book" ? "primary" : "booking"} href={link.href}>{link.label}</Button>;
+  return <Button bookingAction purpose={pathname === "/book" ? "primary" : "booking"} href={link.href}>{link.label}</Button>;
 }

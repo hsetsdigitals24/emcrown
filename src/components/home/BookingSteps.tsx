@@ -1,16 +1,17 @@
-// Server component: informational booking steps, with no booking backend or form.
+// Server component: three editable visit steps in normal document flow.
 import Container from "@/components/layout/Container";
 import BlockHeading from "@/components/home/BlockHeading";
+import Reveal from "@/components/motion/Reveal";
 import Button from "@/components/ui/Button";
-import Image from "next/image";
-import BookingCardsMotion from "@/components/motion/BookingCardsMotion";
 import type { BookingStepsContent } from "@/types/home";
 export default function BookingSteps({ content }: { content: BookingStepsContent }) {
-  return <section id={content.id} aria-labelledby={`${content.id}-heading`} className="home-section booking-section" data-mock={content.isMock}>
-    <div className="booking-background" aria-hidden="true">{content.background.images.map((image, index) => <div key={image} className={`booking-background-photo booking-background-photo-${index % 2}`}><Image src={image} alt="" fill unoptimized={image.startsWith("/media/cms/")} sizes="(min-width: 768px) 70vw, 100vw" /></div>)}<div className="booking-background-blend" /></div>
-    <Container><div className="booking-layout"><div className="booking-intro"><BlockHeading content={content} /><Button href={content.buttonLink}>{content.buttonLabel}</Button></div>
-      <BookingCardsMotion>{content.items.map((item, index) => <li className="booking-entry" key={item.id} data-cms-id={item.id}><div className="booking-step">
-        <span className="step-number">{String(index + 1).padStart(2, "0")}</span><div><h3 className="font-heading text-3xl font-light text-primary">{item.title}</h3><p>{item.description}</p></div>
-      </div></li>)}</BookingCardsMotion></div><p className="booking-stock-label">{content.background.label}</p></Container>
+  return <section id={content.id} aria-labelledby={`${content.id}-heading`} className="home-section editorial-steps">
+    <Container><BlockHeading content={content} centered />
+      <Reveal><ol className="editorial-step-grid">{content.items.map((item, index) => <li key={item.id} data-cms-id={item.id}>
+        <span className="editorial-step-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
+        <h3 className="font-heading">{item.title}</h3><p>{item.description}</p>
+      </li>)}</ol></Reveal>
+      {content.buttonLabel && <div className="editorial-section-action"><Button href={content.buttonLink}>{content.buttonLabel}</Button></div>}
+    </Container>
   </section>;
 }

@@ -31,7 +31,7 @@ export function InformationContent({ path, values, site, context }: { path: stri
   const contact = applyContent(PAGE_SEEDS["/contact"], values);
   const faq = applyContent(PAGE_SEEDS["/faq"], values);
   return <PageFrame content={content} closing={site.closing} enhancedMotion={path === "/services"}>
-    {catalog.length > 0 && <div className="home-section"><Container>
+    {catalog.length > 0 && <div id="page-catalog" className="home-section"><Container>
       {path === "/resources" && <nav aria-label={site.catalog.categories} className="resource-categories">{catalog.map(entry => <a key={entry.slug} className="recovery-link" href={`#${entry.slug}`}>{entry.category}</a>)}</nav>}
       <CatalogGrid entries={catalog} actionLabel={actionLabel}
       images={path === "/physicians" || path === "/resources"} portraits={path === "/physicians"} serviceMotion={path === "/services"} /></Container></div>}
@@ -40,12 +40,12 @@ export function InformationContent({ path, values, site, context }: { path: stri
     {path === "/insurance" && <InsurancePlans settings={applyContent(PAGE_SEEDS["/insurance"], values).insurance} />}
     {path === "/faq" && <div className="home-section"><Container><StructuredData enabled={canIndexPublicContent(content)} data={{ "@context": "https://schema.org", "@type": "FAQPage",
       mainEntity: faq.groups.flatMap(group => group.items.map(item => ({ "@type": "Question", name: item.question, acceptedAnswer: { "@type": "Answer", text: item.answer } }))) }} /><FaqGroups groups={faq.groups} /></Container></div>}
-    {path === "/contact" && <div className="home-section"><Container><div className="contact-links">
+    {path === "/contact" && <div id="contact-details" className="home-section"><Container><div className="contact-links">
       <div><h2>{contact.copy.phone}</h2><a href={site.practice.phone.href}>{site.practice.phone.label}</a></div>
       <div><h2>{contact.copy.email}</h2>{site.practice.email ? <a href={`mailto:${site.practice.email}`}>{site.practice.email}</a> : <p>{contact.copy.emailPending}</p>}</div>
       <div><h2>{contact.copy.fax}</h2><p>{site.practice.fax}</p></div>
-    </div><PracticeLocations practice={site.practice} copy={contact.copy} /><ContactForm copy={contact.copy} /></Container></div>}
-    {LEGAL_ENTRIES.some(entry => entry.path === path) && <Container><p className="entry-details">{site.legal.updated}: {site.legal.updateValue}</p>
+    </div><PracticeLocations practice={site.practice} copy={contact.copy} /><ContactForm copy={contact.copy} phone={site.practice.phone} /></Container></div>}
+    {LEGAL_ENTRIES.some(entry => entry.path === path) && <Container>{site.legal.updated && site.legal.updateValue && <p className="entry-details">{site.legal.updated}: {site.legal.updateValue}</p>}
       {path === "/privacy" && <a className="recovery-link" href="/notice-of-privacy-practices">{site.legal.notice}</a>}</Container>}
   </PageFrame>;
 }

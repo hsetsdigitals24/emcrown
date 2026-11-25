@@ -1,5 +1,7 @@
 // Shared editable interface copy: all demo, consent, validation and result text lives here.
 export const BOOKING_COPY = {
+  unavailableTitle: "Let’s arrange your visit", unavailableBody: "Online appointment requests are currently unavailable. Please call the practice to discuss a time and physician that suit your needs.",
+  contactLabel: "Contact & directions",
   title: "Book appointment", headline: "Your next step.", highlightedPhrase: "At your pace.",
   introduction: "Take a look at how appointment selection works. This is a demonstration with sample times; call the practice to arrange a real visit.",
   demoTitle: "Demo booking only", demoNotice: "No appointment will be created. Use fictional contact details. Nothing is sent, saved or shared, and no emails or SMS messages are delivered.",

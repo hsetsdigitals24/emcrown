@@ -8,7 +8,7 @@ import { SERVICE_ENTRIES, PHYSICIAN_ENTRIES, ARTICLE_ENTRIES, LEGAL_ENTRIES } fr
 export default async function PublishedPage({ path }: { path: string }) {
   const definition = findDefinition(path);
   if (!definition) notFound();
-  const related = path === "/services" ? SERVICE_ENTRIES : path === "/physicians" ? PHYSICIAN_ENTRIES : path === "/resources" ? ARTICLE_ENTRIES : path === "/legal" ? LEGAL_ENTRIES : [];
+  const related = path === "/" ? [{ path: "/insurance" }] : path === "/services" ? SERVICE_ENTRIES : path === "/physicians" ? PHYSICIAN_ENTRIES : path === "/resources" ? ARTICLE_ENTRIES : path === "/legal" ? LEGAL_ENTRIES : [];
   const [values, siteValues, ...context] = await Promise.all([
     publishedContent(path, definition.initial), publishedContent("/_site", findDefinition("/_site")!.initial),
     ...related.map(async entry => {

@@ -4,5 +4,5 @@ import Button from "@/components/ui/Button";
 import NavigationBookingAction from "@/components/layout/NavigationBookingAction";
 import type { ContentLink } from "@/types/content";
 export default function NavigationBookingLink({ link }: { link: ContentLink }) {
-  return <Suspense fallback={<Button purpose="primary" href={link.href}>{link.label}</Button>}><NavigationBookingAction link={link} /></Suspense>;
+  return <Suspense fallback={<Button bookingAction purpose="primary" href={link.href}>{link.label}</Button>}><NavigationBookingAction link={link} /></Suspense>;
 }
